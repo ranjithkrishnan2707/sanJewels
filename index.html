@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAN JEWELS | Royal Emeralds & Bespoke Fine Jewelry</title>
+  <meta name="description" content="Discover SAN JEWELS - World-renowned luxury jewelers specializing in rare Colombian emeralds, certified solitaire diamonds, and bespoke handcrafted gold masterpieces.">
+  
+  <!-- Favicon & Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <span><i class="fa-solid fa-crown"></i> Complimentary Insured Worldwide Delivery on Orders Over $2,500</span>
+    <span class="desktop-only">•</span>
+    <span class="desktop-only"><i class="fa-solid fa-gem"></i> Private Atelier & Concierge Appointments Available</span>
+  </div>
+
+  <!-- Main Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-container">
+      <!-- Brand Logo -->
+      <a href="#" class="brand-logo">
+        <span class="logo-title text-gold-gradient">SAN JEWELS</span>
+        <span class="logo-subtitle">GENEVA • JAIPUR • NEW YORK</span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <ul class="nav-links">
+        <li><a href="#hero" class="nav-link">Home</a></li>
+        <li><a href="#collections" class="nav-link">Collections</a></li>
+        <li><a href="#atelier" class="nav-link">Bespoke Atelier</a></li>
+        <li><a href="#heritage" class="nav-link">Heritage</a></li>
+        <li><a href="#concierge" class="nav-link">VIP Concierge</a></li>
+      </ul>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <button class="icon-btn" id="searchBtn" title="Search Collection">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <button class="icon-btn" id="bookModalBtn" title="Book Consultation">
+          <i class="fa-regular fa-calendar-check"></i>
+        </button>
+        <button class="icon-btn" id="cartToggleBtn" title="Shopping Bag">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="cart-badge" id="cartCount">0</span>
+        </button>
+        <button class="mobile-toggle" id="mobileMenuBtn">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="container">
+      <div class="hero-grid">
+        <!-- Hero Text -->
+        <div class="hero-content">
+          <div class="hero-tag">
+            <i class="fa-solid fa-sparkles"></i> 2026 Haute Joaillerie Collection
+          </div>
+          <h1>The Majesty of <br><span class="text-gold-gradient">Royal Emeralds</span></h1>
+          <p>Hand-selected Colombian emeralds framed in luminous 18K yellow gold and micro-pave diamonds. Handcrafted by master artisans for connoisseurs of timeless elegance.</p>
+          
+          <div class="hero-ctas">
+            <a href="#collections" class="btn btn-gold">
+              <span>Explore Collection</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button class="btn btn-outline-gold" id="heroBookBtn">
+              <i class="fa-solid fa-calendar"></i> Book Consultation
+            </button>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <h3>100%</h3>
+              <p>Certified Natural</p>
+            </div>
+            <div class="stat-item">
+              <h3>18K - 24K</h3>
+              <p>Ethical Solid Gold</p>
+            </div>
+            <div class="stat-item">
+              <h3>50+ Yrs</h3>
+              <p>Master Heritage</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Visual Image Frame -->
+        <div class="hero-visual">
+          <div class="hero-image-frame">
+            <div class="hero-image-inner">
+              <img src="images/emerald_necklace.jpg" alt="SAN Jewels Royal Emerald Statement Necklace" id="heroImage">
+            </div>
+            <div class="hero-badge-floating">
+              <div class="icon"><i class="fa-solid fa-award"></i></div>
+              <div>
+                <p>Colombian Royal Emerald</p>
+                <p>24.8 Carat • GIA Certified</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Curated Collection Showcase -->
+  <section class="section-padding" id="collections">
+    <div class="container">
+      <div class="section-title">
+        <span class="subtitle">Haute Joaillerie</span>
+        <h2>Curated Masterpieces</h2>
+        <p>Immerse yourself in our signature emerald and gold jewelry collection, designed to captivate and endure through generations.</p>
+        <div class="gold-divider"></div>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="filter-tabs">
+        <button class="filter-btn active" data-filter="all">All Masterpieces</button>
+        <button class="filter-btn" data-filter="emerald">Emerald Couture</button>
+        <button class="filter-btn" data-filter="rings">Royal Rings</button>
+        <button class="filter-btn" data-filter="earrings">High Earrings</button>
+        <button class="filter-btn" data-filter="heritage">Gold Heritage</button>
+      </div>
+
+      <!-- Product Showcase Grid -->
+      <div class="product-grid" id="productGrid">
+        <!-- Products populated dynamically via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Bespoke Atelier Ring Configurator -->
+  <section class="section-padding atelier-section" id="atelier">
+    <div class="container">
+      <div class="section-title">
+        <span class="subtitle">Custom Craftsmanship</span>
+        <h2>The Bespoke Atelier</h2>
+        <p>Design your unique emerald solitaire ring. Select your gemstone cut, band metal, carat weight, and personal laser engraving.</p>
+        <div class="gold-divider"></div>
+      </div>
+
+      <div class="configurator-card">
+        <!-- Interactive Preview -->
+        <div class="configurator-preview">
+          <div class="preview-stage" id="ringStage">
+            <img src="images/emerald_ring.jpg" alt="Bespoke Emerald Ring Preview" id="ringPreviewImg">
+          </div>
+          <div class="hero-tag" style="margin-top: 0;">
+            <i class="fa-solid fa-microchip"></i> Real-time Atelier Configurator
+          </div>
+        </div>
+
+        <!-- Customizer Options -->
+        <div class="configurator-controls">
+          <h3>Build Your Emerald Ring</h3>
+          
+          <!-- Metal Selection -->
+          <div class="control-group">
+            <label><i class="fa-solid fa-ring"></i> Precious Metal Band</label>
+            <div class="option-pills" id="metalOptions">
+              <button class="pill-opt active" data-metal="18K Yellow Gold" data-factor="1.0">18K Yellow Gold</button>
+              <button class="pill-opt" data-metal="Platinum 950" data-factor="1.18">Platinum 950</button>
+              <button class="pill-opt" data-metal="18K Rose Gold" data-factor="1.02">18K Rose Gold</button>
+            </div>
+          </div>
+
+          <!-- Gem Cut Selection -->
+          <div class="control-group">
+            <label><i class="fa-solid fa-gem"></i> Gemstone Cut</label>
+            <div class="option-pills" id="cutOptions">
+              <button class="pill-opt active" data-cut="Emerald Cut" data-multiplier="1.0">Emerald Cut</button>
+              <button class="pill-opt" data-cut="Royal Cushion" data-multiplier="1.1">Royal Cushion</button>
+              <button class="pill-opt" data-cut="Oval Brilliant" data-multiplier="1.05">Oval Brilliant</button>
+              <button class="pill-opt" data-cut="Pear Drop" data-multiplier="1.08">Pear Drop</button>
+            </div>
+          </div>
+
+          <!-- Carat Weight Slider -->
+          <div class="control-group">
+            <label><i class="fa-solid fa-weight-hanging"></i> Emerald Carat Weight</label>
+            <div class="carat-slider-wrapper">
+              <input type="range" class="carat-slider" id="caratSlider" min="1.0" max="5.0" step="0.1" value="2.5">
+              <span class="carat-val" id="caratVal">2.5 ct</span>
+            </div>
+          </div>
+
+          <!-- Custom Engraving Input -->
+          <div class="control-group">
+            <label><i class="fa-solid fa-pen-nib"></i> Personal Laser Engraving (Optional)</label>
+            <input type="text" class="custom-engraving-input" id="engravingInput" placeholder="e.g. Forever & Always • S&A" maxlength="25">
+          </div>
+
+          <!-- Price & Order Button -->
+          <div class="config-summary">
+            <div>
+              <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); letter-spacing: 0.15em;">Estimated Price</span>
+              <div class="total-estimated-price" id="configPrice">$8,750</div>
+            </div>
+            <button class="btn btn-gold" id="addBespokeBtn">
+              <i class="fa-solid fa-bag-shopping"></i> Add Bespoke Piece
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Heritage & Trust Section -->
+  <section class="section-padding" id="heritage">
+    <div class="container">
+      <div class="section-title">
+        <span class="subtitle">Guaranteed Authenticity</span>
+        <h2>The SAN Standard</h2>
+        <p>Our commitment to ethical sourcing, certified gemological excellence, and lifelong patronage.</p>
+        <div class="gold-divider"></div>
+      </div>
+
+      <div class="heritage-grid">
+        <!-- Card 1 -->
+        <div class="heritage-card">
+          <div class="icon-box">
+            <i class="fa-solid fa-certificate"></i>
+          </div>
+          <h3>GIA & IGI Certified</h3>
+          <p>Every single gemstone exceeding 0.5 carats arrives with full gemological certification detailing origin, clarity, and laser registration.</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="heritage-card">
+          <div class="icon-box">
+            <i class="fa-solid fa-hands-holding-circle"></i>
+          </div>
+          <h3>Ethical Sourcing</h3>
+          <p>We work directly with certified Colombian & Zambian mines adhering to strict Kimberley Process standards and sustainable eco-mining practices.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="heritage-card">
+          <div class="icon-box">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <h3>Lifetime Warranty</h3>
+          <p>Enjoy complimentary annual gemstone prong inspection, ultrasonic steam cleaning, and solid gold restoration services at any SAN salon worldwide.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Celebrity & Royalty Testimonials -->
+  <section class="section-padding" style="background: rgba(4, 24, 17, 0.5);">
+    <div class="container">
+      <div class="section-title">
+        <span class="subtitle">Patron Stories</span>
+        <h2>Elegance Celebrated</h2>
+        <div class="gold-divider"></div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-stars">
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+        </div>
+        <p class="testimonial-quote">"The deep emerald color of SAN Jewels' Colombian stones is unmatched anywhere in Geneva. The gold setting accentuates every facet with radiant regal light."</p>
+        <p class="testimonial-author">— Victoria Rothschild, High Jewelry Collector</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick View Product Modal -->
+  <div class="modal-overlay" id="quickViewModal">
+    <div class="modal-container">
+      <button class="modal-close-btn" id="closeQuickView"><i class="fa-solid fa-xmark"></i></button>
+      <div class="quick-view-grid">
+        <img src="" alt="Product Detail" class="quick-view-img" id="modalImg">
+        <div class="quick-view-details">
+          <span class="product-category" id="modalCategory">EMERALD COUTURE</span>
+          <h2 id="modalTitle">Royal Emerald Choker</h2>
+          <div class="price" id="modalPrice">$12,500</div>
+          <p class="product-spec" id="modalDesc">Detailed description of the high jewelry piece featuring brilliant cut diamonds and emerald centerpiece.</p>
+          
+          <div style="margin-top: auto; padding-top: 20px;">
+            <button class="btn btn-gold" id="modalAddCartBtn" style="width: 100%;">
+              <i class="fa-solid fa-bag-shopping"></i> Add to Shopping Bag
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIP Concierge Appointment Modal -->
+  <div class="modal-overlay" id="appointmentModal">
+    <div class="modal-container" style="max-width: 600px;">
+      <button class="modal-close-btn" id="closeAppointment"><i class="fa-solid fa-xmark"></i></button>
+      <div class="booking-form">
+        <div class="section-title" style="margin-bottom: 30px;">
+          <span class="subtitle">Private Consultation</span>
+          <h2>Book Your Salon Visit</h2>
+          <p>Schedule a private viewing with our Master Gemologist in Geneva, New York, or via Virtual Private Concierge.</p>
+        </div>
+
+        <form id="bookingForm">
+          <div class="form-group">
+            <label><i class="fa-regular fa-user"></i> Full Name</label>
+            <input type="text" class="form-control" placeholder="e.g. Lady Evelyn Sinclair" required>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-regular fa-envelope"></i> Email Address</label>
+            <input type="email" class="form-control" placeholder="e.g. evelyn@sovereign.com" required>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-location-dot"></i> Preferred Salon / Format</label>
+            <select class="form-control" required>
+              <option value="geneva">Geneva Flagship Salon (Rue du Rhône)</option>
+              <option value="ny">New York Boutique (Fifth Avenue)</option>
+              <option value="jaipur">Jaipur Heritage Palace Salon</option>
+              <option value="virtual">Virtual Live Video Consultation</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-regular fa-calendar-days"></i> Preferred Date & Time</label>
+            <input type="datetime-local" class="form-control" required>
+          </div>
+
+          <button type="submit" class="btn btn-gold" style="width: 100%; margin-top: 10px;">
+            <i class="fa-solid fa-paper-plane"></i> Confirm Consultation Request
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-Over Shopping Cart Drawer -->
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3><i class="fa-solid fa-bag-shopping" style="color: var(--gold-primary);"></i> Your Shopping Bag</h3>
+      <button class="icon-btn" id="closeCartBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="cart-body" id="cartBody">
+      <!-- Cart Items populated via JS -->
+    </div>
+
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>Subtotal</span>
+        <span class="text-gold-gradient" id="cartSubtotal">$0</span>
+      </div>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 16px; text-align: center;">
+        <i class="fa-solid fa-truck-fast"></i> Complimentary Insured Delivery & Signature Gift Packaging Included.
+      </p>
+      <button class="btn btn-gold" id="checkoutBtn" style="width: 100%;">
+        Proceed to Secure Checkout <i class="fa-solid fa-shield"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-notification" id="toast">
+    <i class="fa-solid fa-circle-check" style="color: var(--gold-primary); font-size: 1.3rem;"></i>
+    <span id="toastMsg">Item added to your shopping bag.</span>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a href="#" class="brand-logo" style="align-items: flex-start; margin-bottom: 16px;">
+            <span class="logo-title text-gold-gradient">SAN JEWELS</span>
+            <span class="logo-subtitle">HAUTE JOAILLERIE</span>
+          </a>
+          <p style="font-size: 0.9rem; line-height: 1.6;">SAN JEWELS is the pinnacle of luxury emerald craftsmanship, creating investment-grade high jewelry pieces steeped in royal heritage.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul class="footer-links">
+            <li><a href="#collections">Emerald Couture</a></li>
+            <li><a href="#atelier">Bespoke Configurator</a></li>
+            <li><a href="#heritage">Certified Solitaires</a></li>
+            <li><a href="#heritage">Heritage Gold</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Client Services</h4>
+          <ul class="footer-links">
+            <li><a href="#" id="footerBookBtn">Book Consultation</a></li>
+            <li><a href="#">Gemstone Care Guide</a></li>
+            <li><a href="#">Insured Delivery</a></li>
+            <li><a href="#">Authenticity Guarantee</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Private Newsletter</h4>
+          <p style="font-size: 0.85rem; margin-bottom: 14px;">Receive exclusive invitations to private vault releases and vintage gemstone drops.</p>
+          <form class="newsletter-box" id="newsletterForm">
+            <input type="email" placeholder="Enter your email" required>
+            <button type="submit" class="btn btn-gold" style="width: 100%; padding: 10px;">Subscribe</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 SAN JEWELS Haute Joaillerie. All rights reserved. Emerald & Gold Design System.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript Engine -->
+  <script src="main.js"></script>
+</body>
+</html>
