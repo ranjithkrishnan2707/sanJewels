@@ -15,22 +15,23 @@ const ADMIN_CREDS = { username: 'admin', password: 'admin123' };
 const seedProducts = (typeof window !== 'undefined' && window.SAMPLE_PRODUCTS) ? window.SAMPLE_PRODUCTS : [];
 let adminProducts = JSON.parse(localStorage.getItem('san_admin_products')) || seedProducts;
 
-// Ensure full 50 products are loaded even if old 6-item version was saved in localStorage
-if (adminProducts.length < 50 && seedProducts.length >= 50) {
+// Ensure full 50 products and updated 3-digit prices are loaded
+const hasOutdatedAdminPrices = adminProducts && adminProducts.some(p => p.price > 999);
+if ((adminProducts.length < 50 && seedProducts.length >= 50) || hasOutdatedAdminPrices) {
   adminProducts = seedProducts;
   localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
 }
 
 // Orders
 let adminOrders = JSON.parse(localStorage.getItem('san_admin_orders')) || [
-  { id: '#SAN-2026-001', customer: 'Lady Victoria Rothschild', product: 'The Sovereign Royal Emerald Necklace', amount: 24500, location: 'Geneva, CH', date: '2026-09-25', status: 'delivered' },
-  { id: '#SAN-2026-002', customer: 'Prince Karim Al-Rashid', product: 'Royal Cushion Emerald Solitaire', amount: 11800, location: 'Dubai, UAE', date: '2026-09-24', status: 'shipped' },
-  { id: '#SAN-2026-003', customer: 'Ms. Evelyn Hargrove', product: 'Empress Emerald Cut Halo Ring', amount: 8750, location: 'New York, US', date: '2026-09-24', status: 'processing' },
-  { id: '#SAN-2026-004', customer: 'Mrs. Aisha Okonkwo', product: 'Crown Teardrop Emerald Earrings', amount: 6400, location: 'London, UK', date: '2026-09-23', status: 'processing' },
-  { id: '#SAN-2026-005', customer: 'Maharani Sushila Rao', product: 'Verdant Palace Emerald Bracelet', amount: 14200, location: 'Jaipur, IN', date: '2026-09-22', status: 'delivered' },
-  { id: '#SAN-2026-006', customer: 'Dr. Camille Fontaine', product: 'Duchess Emerald Chandelier Earrings', amount: 7900, location: 'Paris, FR', date: '2026-09-21', status: 'cancelled' },
-  { id: '#SAN-2026-007', customer: 'Lady Helena Weston', product: 'The Sovereign Royal Emerald Necklace', amount: 24500, location: 'Edinburgh, UK', date: '2026-09-20', status: 'shipped' },
-  { id: '#SAN-2026-008', customer: 'Ms. Sofia Andreessen', product: 'Empress Emerald Cut Halo Ring', amount: 8750, location: 'Stockholm, SE', date: '2026-09-19', status: 'delivered' },
+  { id: '#SAN-2026-001', customer: 'Lady Victoria Rothschild', product: 'The Sovereign Royal Emerald Necklace', amount: 700, location: 'Geneva, CH', date: '2026-09-25', status: 'delivered' },
+  { id: '#SAN-2026-002', customer: 'Prince Karim Al-Rashid', product: 'Royal Cushion Emerald Solitaire', amount: 470, location: 'Dubai, UAE', date: '2026-09-24', status: 'shipped' },
+  { id: '#SAN-2026-003', customer: 'Ms. Evelyn Hargrove', product: 'Empress Emerald Cut Halo Ring', amount: 485, location: 'New York, US', date: '2026-09-24', status: 'processing' },
+  { id: '#SAN-2026-004', customer: 'Mrs. Aisha Okonkwo', product: 'Crown Teardrop Emerald Earrings', amount: 355, location: 'London, UK', date: '2026-09-23', status: 'processing' },
+  { id: '#SAN-2026-005', customer: 'Maharani Sushila Rao', product: 'Verdant Palace Emerald Bracelet', amount: 570, location: 'Jaipur, IN', date: '2026-09-22', status: 'delivered' },
+  { id: '#SAN-2026-006', customer: 'Dr. Camille Fontaine', product: 'Duchess Emerald Chandelier Earrings', amount: 440, location: 'Paris, FR', date: '2026-09-21', status: 'cancelled' },
+  { id: '#SAN-2026-007', customer: 'Lady Helena Weston', product: 'The Sovereign Royal Emerald Necklace', amount: 700, location: 'Edinburgh, UK', date: '2026-09-20', status: 'shipped' },
+  { id: '#SAN-2026-008', customer: 'Ms. Sofia Andreessen', product: 'Empress Emerald Cut Halo Ring', amount: 485, location: 'Stockholm, SE', date: '2026-09-19', status: 'delivered' },
 ];
 
 // Appointments

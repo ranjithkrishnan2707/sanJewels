@@ -3,9 +3,23 @@
    ========================================================================== */
 
 // 1. Curated Product Data (50 Products across 5 variants: emerald, rings, earrings, bracelets, heritage)
-const PRODUCTS = (typeof window !== 'undefined' && window.SAMPLE_PRODUCTS && window.SAMPLE_PRODUCTS.length >= 50)
-  ? (JSON.parse(localStorage.getItem('san_admin_products')) || window.SAMPLE_PRODUCTS)
-  : (JSON.parse(localStorage.getItem('san_admin_products')) || []);
+let storedAdminProducts = null;
+try {
+  storedAdminProducts = JSON.parse(localStorage.getItem('san_admin_products'));
+} catch (e) {
+  storedAdminProducts = null;
+}
+
+const seedProducts = (typeof window !== 'undefined' && window.SAMPLE_PRODUCTS) ? window.SAMPLE_PRODUCTS : [];
+const hasOutdatedPrices = storedAdminProducts && storedAdminProducts.some(p => p.price > 999);
+let PRODUCTS = (storedAdminProducts && storedAdminProducts.length >= 50 && !hasOutdatedPrices)
+  ? storedAdminProducts
+  : seedProducts;
+
+// Sync back to localStorage so store and admin stay consistent
+if (typeof localStorage !== 'undefined' && (!storedAdminProducts || storedAdminProducts.length < 50 || hasOutdatedPrices)) {
+  localStorage.setItem('san_admin_products', JSON.stringify(PRODUCTS));
+}
 
 // State Management
 let shoppingCart = JSON.parse(localStorage.getItem('san_cart')) || [];
@@ -357,7 +371,7 @@ function initBespokeConfigurator() {
 }
 
 function calculateBespokePrice() {
-  const basePricePerCarat = 3200;
+  const basePricePerCarat = 210;
   const calculated = Math.round(
     bespokeState.carat * basePricePerCarat * bespokeState.metalFactor * bespokeState.cutMultiplier
   );
