@@ -170,6 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('click', (e) => {
     if (e.target === quickViewModal) quickViewModal.classList.remove('active');
     if (e.target === appointmentModal) appointmentModal.classList.remove('active');
+    const vipModal = document.getElementById('vipWelcomeModal');
+    if (e.target === vipModal) {
+      vipModal.classList.remove('active');
+      localStorage.setItem('san_greeting_seen', 'true');
+    }
   });
 
   // Booking Form Submission
@@ -438,3 +443,111 @@ function showToast(message) {
     toast.classList.remove('active');
   }, 3500);
 }
+
+/* ==========================================================================
+   VIP Concierge Onboarding (New User Welcome Experience)
+   ========================================================================== */
+
+function initVipOnboarding() {
+  const vipModal = document.getElementById('vipWelcomeModal');
+  const vipForm = document.getElementById('vipWelcomeForm');
+  const closeBtn = document.getElementById('closeVipWelcome');
+  const skipBtn = document.getElementById('vipSkipBtn');
+  const vipProfileBtn = document.getElementById('vipProfileBtn');
+  const vipStatusDot = document.getElementById('vipStatusDot');
+  const vipNameInput = document.getElementById('vipName');
+  const vipPhoneInput = document.getElementById('vipPhone');
+  const vipPhoneCode = document.getElementById('vipPhoneCode');
+
+  // Check if visitor has already been greeted or entered credentials
+  const existingUser = JSON.parse(localStorage.getItem('san_current_user'));
+  const hasSeenGreeting = localStorage.getItem('san_greeting_seen');
+
+  if (existingUser && existingUser.name) {
+    if (vipStatusDot) vipStatusDot.classList.add('active');
+  }
+
+  // If first time user (neither greeted nor registered), present the invitation
+  if (!existingUser && !hasSeenGreeting && vipModal) {
+    setTimeout(() => {
+      vipModal.classList.add('active');
+    }, 1800); // 1.8s delay after luxurious initial hero load
+  }
+
+  // Close / Dismiss functions
+  const dismissModal = () => {
+    if (vipModal) vipModal.classList.remove('active');
+    localStorage.setItem('san_greeting_seen', 'true');
+  };
+
+  if (closeBtn) closeBtn.addEventListener('click', dismissModal);
+  if (skipBtn) skipBtn.addEventListener('click', dismissModal);
+
+  // Allow clicking on profile button to view/update profile
+  if (vipProfileBtn) {
+    vipProfileBtn.addEventListener('click', () => {
+      const user = JSON.parse(localStorage.getItem('san_current_user'));
+      if (user) {
+        showToast(`Welcome back, ${user.name}! WhatsApp: ${user.whatsapp}`);
+      } else if (vipModal) {
+        vipModal.classList.add('active');
+      }
+    });
+  }
+
+  // Submission handler
+  if (vipForm) {
+    vipForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name = vipNameInput.value.trim();
+      const code = vipPhoneCode ? vipPhoneCode.value : '+91';
+      const rawPhone = vipPhoneInput.value.trim();
+      const fullWhatsapp = `${code} ${rawPhone}`;
+
+      if (!name || !rawPhone) return;
+
+      const newUser = {
+        name: name,
+        whatsapp: fullWhatsapp,
+        joinedAt: new Date().toISOString(),
+        status: 'vip'
+      };
+
+      // 1. Save in storefront localStorage
+      localStorage.setItem('san_current_user', JSON.stringify(newUser));
+      localStorage.setItem('san_greeting_seen', 'true');
+
+      // 2. Also register into Admin Customers database so it appears in Admin Portal
+      try {
+        const adminCustomers = JSON.parse(localStorage.getItem('san_admin_customers')) || [];
+        const exists = adminCustomers.find(c => c.whatsapp === fullWhatsapp || c.name.toLowerCase() === name.toLowerCase());
+        if (!exists) {
+          adminCustomers.unshift({
+            name: name,
+            email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@patron.sanjewels.com`,
+            whatsapp: fullWhatsapp,
+            location: code === '+91' ? 'Jaipur, IN' : (code === '+1' ? 'New York, US' : (code === '+41' ? 'Geneva, CH' : 'London, UK')),
+            orders: 0,
+            spent: 0,
+            since: new Date().toISOString().slice(0, 7),
+            status: 'vip'
+          });
+          localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers));
+        }
+      } catch (err) {
+        console.error('Customer sync error:', err);
+      }
+
+      // 3. Update UI
+      if (vipStatusDot) vipStatusDot.classList.add('active');
+      vipModal.classList.remove('active');
+
+      // 4. Luxurious personalized toast
+      showToast(`Welcome to Haute Joaillerie Privé, ${name}. Your concierge privileges are activated!`);
+    });
+  }
+}
+
+// Call onboarding initialization
+initVipOnboarding();

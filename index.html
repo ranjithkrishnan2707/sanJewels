@@ -47,6 +47,10 @@
         <button class="icon-btn" id="bookModalBtn" title="Book Consultation">
           <i class="fa-regular fa-calendar-check"></i>
         </button>
+        <button class="icon-btn" id="vipProfileBtn" title="VIP Concierge Profile">
+          <i class="fa-solid fa-crown" id="vipNavIcon"></i>
+          <span class="vip-status-indicator" id="vipStatusDot"></span>
+        </button>
         <button class="icon-btn" id="cartToggleBtn" title="Shopping Bag">
           <i class="fa-solid fa-bag-shopping"></i>
           <span class="cart-badge" id="cartCount">0</span>
@@ -344,6 +348,84 @@
             <i class="fa-solid fa-paper-plane"></i> Confirm Consultation Request
           </button>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIP Concierge Welcome Modal (New Visitor Greeting) -->
+  <div class="modal-overlay vip-welcome-overlay" id="vipWelcomeModal">
+    <div class="modal-container vip-welcome-card">
+      <button class="modal-close-btn" id="closeVipWelcome" title="Explore quietly"><i class="fa-solid fa-xmark"></i></button>
+      
+      <div class="vip-welcome-inner">
+        <!-- Visual side banner -->
+        <div class="vip-welcome-banner">
+          <div class="vip-badge-tag"><i class="fa-solid fa-crown"></i> Haute Joaillerie Privé</div>
+          <div class="vip-crest">
+            <span class="crest-icon">✦</span>
+            <h3>SAN JEWELS</h3>
+            <p>GENEVA • JAIPUR • NEW YORK</p>
+          </div>
+          <div class="vip-perks">
+            <div class="vip-perk-item">
+              <i class="fa-solid fa-gem"></i>
+              <span>Complimentary Private Concierge & Vault Preview</span>
+            </div>
+            <div class="vip-perk-item">
+              <i class="fa-brands fa-whatsapp"></i>
+              <span>Direct WhatsApp Access to Master Gemologist</span>
+            </div>
+            <div class="vip-perk-item">
+              <i class="fa-solid fa-gift"></i>
+              <span>$500 Private Acquisition Welcome Credit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form side -->
+        <div class="vip-welcome-content">
+          <div class="vip-welcome-header">
+            <span class="vip-kicker">Complimentary Privileges</span>
+            <h2>Welcome to San Jewels</h2>
+            <div class="gold-divider" style="margin: 12px 0 16px 0;"></div>
+            <p>Allow us to extend our personal concierge service. Please introduce yourself to receive curated private vault releases and direct WhatsApp updates.</p>
+          </div>
+
+          <form id="vipWelcomeForm" class="vip-welcome-form">
+            <div class="vip-input-group">
+              <label for="vipName"><i class="fa-regular fa-user"></i> Your Title & Full Name</label>
+              <div class="vip-input-wrap">
+                <input type="text" id="vipName" placeholder="e.g. Lady Eleanor or Michael Vance" required autocomplete="name">
+                <span class="vip-input-sparkle"><i class="fa-solid fa-sparkles"></i></span>
+              </div>
+            </div>
+
+            <div class="vip-input-group">
+              <label for="vipPhone"><i class="fa-brands fa-whatsapp"></i> WhatsApp Concierge Number</label>
+              <div class="vip-phone-wrapper">
+                <select id="vipPhoneCode" class="vip-country-code" title="Country Code">
+                  <option value="+91">🇮🇳 +91 (IN)</option>
+                  <option value="+1">🇺🇸 +1 (US)</option>
+                  <option value="+44">🇬🇧 +44 (UK)</option>
+                  <option value="+971">🇦🇪 +971 (UAE)</option>
+                  <option value="+41">🇨🇭 +41 (CH)</option>
+                  <option value="+33">🇫🇷 +33 (FR)</option>
+                  <option value="+65">🇸🇬 +65 (SG)</option>
+                </select>
+                <input type="tel" id="vipPhone" placeholder="Mobile / WhatsApp number" required pattern="[0-9]{7,15}" autocomplete="tel">
+              </div>
+              <small class="vip-field-hint"><i class="fa-solid fa-lock"></i> Exclusively for order tracking & bespoke private viewings. Zero spam guarantee.</small>
+            </div>
+
+            <div class="vip-form-actions">
+              <button type="submit" class="btn btn-gold vip-submit-btn">
+                <span>Unlock VIP Privileges</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+              <button type="button" class="vip-skip-btn" id="vipSkipBtn">I will browse as a guest first</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>

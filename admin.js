@@ -43,14 +43,28 @@ const adminAppointments = [
 ];
 
 // Customers
-const adminCustomers = [
-  { name: 'Lady Victoria Rothschild', email: 'v.rothschild@noble.ch', location: 'Geneva, CH', orders: 4, spent: 68900, since: '2024-03', status: 'vip' },
-  { name: 'Prince Karim Al-Rashid', email: 'karim@rashid-palace.ae', location: 'Dubai, UAE', orders: 3, spent: 45300, since: '2024-06', status: 'vip' },
-  { name: 'Ms. Evelyn Hargrove', email: 'evelyn@sinclair.com', location: 'New York, US', orders: 2, spent: 17500, since: '2025-01', status: 'active' },
-  { name: 'Mrs. Aisha Okonkwo', email: 'a.okonkwo@royalgroup.uk', location: 'London, UK', orders: 1, spent: 6400, since: '2025-08', status: 'active' },
-  { name: 'Maharani Sushila Rao', email: 'sushila@raopalace.in', location: 'Jaipur, IN', orders: 5, spent: 89200, since: '2023-11', status: 'vip' },
-  { name: 'Dr. Camille Fontaine', email: 'c.fontaine@fontaine.fr', location: 'Paris, FR', orders: 1, spent: 0, since: '2026-07', status: 'inactive' },
+const defaultAdminCustomers = [
+  { name: 'Lady Victoria Rothschild', email: 'v.rothschild@noble.ch', whatsapp: '+41 79 123 4567', location: 'Geneva, CH', orders: 4, spent: 68900, since: '2024-03', status: 'vip' },
+  { name: 'Prince Karim Al-Rashid', email: 'karim@rashid-palace.ae', whatsapp: '+971 50 987 6543', location: 'Dubai, UAE', orders: 3, spent: 45300, since: '2024-06', status: 'vip' },
+  { name: 'Ms. Evelyn Hargrove', email: 'evelyn@sinclair.com', whatsapp: '+1 212 555 0192', location: 'New York, US', orders: 2, spent: 17500, since: '2025-01', status: 'active' },
+  { name: 'Mrs. Aisha Okonkwo', email: 'a.okonkwo@royalgroup.uk', whatsapp: '+44 7700 900123', location: 'London, UK', orders: 1, spent: 6400, since: '2025-08', status: 'active' },
+  { name: 'Maharani Sushila Rao', email: 'sushila@raopalace.in', whatsapp: '+91 98290 12345', location: 'Jaipur, IN', orders: 5, spent: 89200, since: '2023-11', status: 'vip' },
+  { name: 'Dr. Camille Fontaine', email: 'c.fontaine@fontaine.fr', whatsapp: '+33 6 12 34 56 78', location: 'Paris, FR', orders: 1, spent: 0, since: '2026-07', status: 'inactive' },
 ];
+
+let adminCustomers = JSON.parse(localStorage.getItem('san_admin_customers')) || defaultAdminCustomers;
+
+// Auto-fill WhatsApp numbers for existing mock records if previously stored without it
+adminCustomers = adminCustomers.map(c => {
+  if (!c.whatsapp) {
+    const match = defaultAdminCustomers.find(d => d.name === c.name || d.email === c.email);
+    if (match && match.whatsapp) {
+      c.whatsapp = match.whatsapp;
+    }
+  }
+  return c;
+});
+localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers));
 
 // Newsletter Subscribers
 let newsletterSubs = JSON.parse(localStorage.getItem('san_newsletter_subs')) || [
@@ -744,9 +758,21 @@ function renderMonthlyBars() {
 // ============================================================
 function renderCustomersTable() {
   const tbody = document.getElementById('customersTableBody');
-  tbody.innerHTML = adminCustomers.map(c => `
+  // Re-read from localStorage in case a new visitor just joined on storefront
+  adminCustomers = JSON.parse(localStorage.getItem('san_admin_customers')) || adminCustomers;
+  tbody.innerHTML = adminCustomers.map(c => {
+    const cleanPhone = (c.whatsapp || '').replace(/[^0-9]/g, '');
+    const waLink = cleanPhone ? `https://wa.me/${cleanPhone}` : '#';
+    return `
     <tr>
       <td><strong>${c.name}</strong></td>
+      <td>
+        ${c.whatsapp ? `
+          <a href="${waLink}" target="_blank" class="wa-link-btn" title="Open WhatsApp Chat with ${c.name}">
+            <i class="fa-brands fa-whatsapp"></i> ${c.whatsapp}
+          </a>
+        ` : `<span style="color:var(--ad-text-muted);">--</span>`}
+      </td>
       <td style="font-size:0.85rem; color:var(--ad-text-muted);">${c.email}</td>
       <td>${c.location}</td>
       <td style="text-align:center;">${c.orders}</td>
@@ -754,7 +780,7 @@ function renderCustomersTable() {
       <td>${c.since}</td>
       <td>${customerBadge(c.status)}</td>
     </tr>
-  `).join('');
+  `}).join('');
 }
 
 function customerBadge(status) {

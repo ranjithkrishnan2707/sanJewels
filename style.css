@@ -1308,3 +1308,374 @@ footer {
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   VIP CONCIERGE WELCOME MODAL & NEW USER ONBOARDING
+   ========================================================================== */
+
+.vip-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 10, 7, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s ease;
+  padding: 20px;
+}
+
+.vip-welcome-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.vip-welcome-card {
+  max-width: 860px;
+  width: 100%;
+  padding: 0;
+  background: linear-gradient(135deg, rgba(6, 26, 18, 0.98) 0%, rgba(3, 15, 10, 0.99) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 16px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85), 0 0 50px rgba(212, 175, 55, 0.2);
+  overflow: hidden;
+  position: relative;
+  transform: scale(0.92) translateY(20px);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vip-welcome-overlay.active .vip-welcome-card {
+  transform: scale(1) translateY(0);
+}
+
+.vip-welcome-inner {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  min-height: 480px;
+}
+
+/* Visual Left Banner */
+.vip-welcome-banner {
+  background: linear-gradient(180deg, rgba(8, 38, 26, 0.95) 0%, rgba(4, 18, 12, 0.98) 100%),
+              radial-gradient(circle at 50% 20%, rgba(212, 175, 55, 0.25) 0%, transparent 60%);
+  border-right: 1px solid rgba(212, 175, 55, 0.25);
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.vip-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: var(--gold-bright);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.vip-crest {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.crest-icon {
+  font-size: 2.2rem;
+  color: var(--gold-primary);
+  display: block;
+  margin-bottom: 8px;
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+  animation: crestPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes crestPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 10px #f9e295); }
+}
+
+.vip-crest h3 {
+  font-family: var(--font-serif);
+  letter-spacing: 0.22em;
+  font-size: 1.5rem;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+
+.vip-crest p {
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  color: var(--text-muted);
+}
+
+.vip-perks {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.vip-perk-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(3, 17, 11, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #e5ece8;
+}
+
+.vip-perk-item i {
+  color: var(--gold-primary);
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.vip-perk-item i.fa-whatsapp {
+  color: #25D366;
+}
+
+/* Right Content & Form */
+.vip-welcome-content {
+  padding: 42px 38px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.vip-kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold-primary);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.vip-welcome-header h2 {
+  font-size: 1.9rem;
+  color: #fff;
+  font-family: var(--font-serif);
+  line-height: 1.2;
+}
+
+.vip-welcome-header p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin-bottom: 22px;
+}
+
+.vip-welcome-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vip-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.vip-input-group label {
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vip-input-group label i.fa-whatsapp {
+  color: #25D366;
+  font-size: 0.95rem;
+}
+
+.vip-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.vip-input-wrap input {
+  width: 100%;
+  padding: 13px 40px 13px 16px;
+  background: rgba(3, 19, 13, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.vip-input-wrap input:focus {
+  outline: none;
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+  background: rgba(3, 22, 15, 0.95);
+}
+
+.vip-input-sparkle {
+  position: absolute;
+  right: 14px;
+  color: var(--gold-primary);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Phone input with country code */
+.vip-phone-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.vip-country-code {
+  width: 135px;
+  background: rgba(3, 19, 13, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 8px;
+  color: #e5ece8;
+  padding: 12px 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.vip-country-code:focus {
+  outline: none;
+  border-color: var(--gold-primary);
+}
+
+.vip-country-code option {
+  background: #041811;
+  color: #fff;
+}
+
+.vip-phone-wrapper input {
+  flex: 1;
+  padding: 13px 16px;
+  background: rgba(3, 19, 13, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.vip-phone-wrapper input:focus {
+  outline: none;
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+  background: rgba(3, 22, 15, 0.95);
+}
+
+.vip-field-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.vip-form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.vip-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  font-size: 0.92rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #e4be5c 0%, #d4af37 50%, #aa820a 100%);
+  color: #03140e;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+  transition: all 0.3s ease;
+}
+
+.vip-submit-btn:hover {
+  box-shadow: 0 8px 28px rgba(212, 175, 55, 0.55);
+  transform: translateY(-1px);
+}
+
+.vip-skip-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-align: center;
+  cursor: pointer;
+  padding: 6px;
+  letter-spacing: 0.08em;
+  transition: color 0.2s ease;
+}
+
+.vip-skip-btn:hover {
+  color: var(--gold-bright);
+  text-decoration: underline;
+}
+
+/* Nav Status Dot for VIP */
+.vip-status-indicator {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #25D366;
+  box-shadow: 0 0 8px #25D366;
+  display: none;
+}
+
+.vip-status-indicator.active {
+  display: block;
+}
+
+/* Responsive Welcome Card */
+@media (max-width: 768px) {
+  .vip-welcome-inner {
+    grid-template-columns: 1fr;
+  }
+  .vip-welcome-banner {
+    display: none;
+  }
+  .vip-welcome-content {
+    padding: 30px 22px;
+  }
+  .vip-welcome-header h2 {
+    font-size: 1.6rem;
+  }
+}

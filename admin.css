@@ -578,6 +578,33 @@ h1,h2,h3,h4,h5 { font-family: 'Cormorant Garamond', serif; font-weight: 600; let
 .tbl-btn:hover { background: rgba(212,175,55,0.1); color: var(--ad-gold); }
 .tbl-btn.danger:hover { background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.3); }
 
+/* WhatsApp Column Link Badge in Admin Table */
+.wa-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  background: rgba(37, 211, 102, 0.12);
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  color: #25d366;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.wa-link-btn:hover {
+  background: rgba(37, 211, 102, 0.22);
+  border-color: #25d366;
+  box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);
+  transform: translateY(-1px);
+}
+.wa-link-btn i {
+  font-size: 0.95rem;
+}
+
 /* ==========================================================================
    ORDERS PAGE
    ========================================================================== */
