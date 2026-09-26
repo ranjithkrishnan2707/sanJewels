@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SAN JEWELS - Luxury Emerald & Gold Design System
+   RS Jewels - Luxury Emerald & Gold Design System
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
@@ -11,7 +11,7 @@
   --bg-card: rgba(8, 36, 27, 0.75);
   --bg-card-hover: rgba(14, 53, 40, 0.9);
   --bg-glass: rgba(5, 26, 19, 0.85);
-  
+
   --emerald-primary: #0d523d;
   --emerald-light: #167a5c;
   --emerald-glow: #10a87a;
@@ -46,7 +46,9 @@
 }
 
 /* Base Reset & Globals */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -64,7 +66,7 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   position: relative;
-  background-image: 
+  background-image:
     radial-gradient(circle at 15% 20%, rgba(13, 82, 61, 0.25) 0%, transparent 40%),
     radial-gradient(circle at 85% 75%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
     radial-gradient(circle at 50% 50%, rgba(4, 28, 21, 0.8) 0%, #03140e 100%);
@@ -75,13 +77,16 @@ body {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-main);
 }
+
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom, #d4af37, #7a5c0d);
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #f7e7ce;
 }
@@ -98,7 +103,12 @@ body {
   font-family: var(--font-serif);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-serif);
   font-weight: 500;
   letter-spacing: 0.03em;
@@ -154,6 +164,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 20px auto 0;
   position: relative;
 }
+
 .gold-divider::before {
   content: '✦';
   position: absolute;
@@ -527,7 +538,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .hero-badge-floating .icon {
@@ -570,7 +581,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: var(--tr-smooth);
 }
 
-.filter-btn:hover, .filter-btn.active {
+.filter-btn:hover,
+.filter-btn.active {
   background: var(--gold-gradient);
   color: #03140e;
   border-color: transparent;
@@ -820,7 +832,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: var(--tr-fast);
 }
 
-.pill-opt:hover, .pill-opt.active {
+.pill-opt:hover,
+.pill-opt.active {
   background: var(--gold-gradient);
   color: #03140e;
   border-color: transparent;
@@ -1004,7 +1017,7 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.8), var(--shadow-gold);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), var(--shadow-gold);
   transform: scale(0.95);
   transition: transform 0.3s ease;
 }
@@ -1114,7 +1127,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
-  box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
 }
 
 .cart-drawer.active {
@@ -1194,7 +1207,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #fff;
   padding: 16px 24px;
   border-radius: 8px;
-  box-shadow: var(--shadow-gold), 0 10px 30px rgba(0,0,0,0.6);
+  box-shadow: var(--shadow-gold), 0 10px 30px rgba(0, 0, 0, 0.6);
   z-index: 3000;
   transform: translateY(100px);
   opacity: 0;
@@ -1280,30 +1293,42 @@ footer {
 
 /* Responsive Breakpoints */
 @media (max-width: 992px) {
-  .hero-grid, .configurator-card, .quick-view-grid {
+
+  .hero-grid,
+  .configurator-card,
+  .quick-view-grid {
     grid-template-columns: 1fr;
   }
-  .heritage-grid, .footer-grid {
+
+  .heritage-grid,
+  .footer-grid {
     grid-template-columns: 1fr 1fr;
   }
+
   .nav-links {
     display: none;
   }
+
   .mobile-toggle {
     display: block;
   }
 }
 
 @media (max-width: 576px) {
-  .heritage-grid, .footer-grid {
+
+  .heritage-grid,
+  .footer-grid {
     grid-template-columns: 1fr;
   }
+
   .hero h1 {
     font-size: 2.5rem;
   }
+
   .hero-ctas {
     flex-direction: column;
   }
+
   .btn {
     width: 100%;
   }
@@ -1361,7 +1386,7 @@ footer {
 /* Visual Left Banner */
 .vip-welcome-banner {
   background: linear-gradient(180deg, rgba(8, 38, 26, 0.95) 0%, rgba(4, 18, 12, 0.98) 100%),
-              radial-gradient(circle at 50% 20%, rgba(212, 175, 55, 0.25) 0%, transparent 60%);
+    radial-gradient(circle at 50% 20%, rgba(212, 175, 55, 0.25) 0%, transparent 60%);
   border-right: 1px solid rgba(212, 175, 55, 0.25);
   padding: 40px 30px;
   display: flex;
@@ -1401,8 +1426,16 @@ footer {
 }
 
 @keyframes crestPulse {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 10px #f9e295); }
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1.15);
+    opacity: 1;
+    filter: drop-shadow(0 0 10px #f9e295);
+  }
 }
 
 .vip-crest h3 {
@@ -1669,12 +1702,15 @@ footer {
   .vip-welcome-inner {
     grid-template-columns: 1fr;
   }
+
   .vip-welcome-banner {
     display: none;
   }
+
   .vip-welcome-content {
     padding: 30px 22px;
   }
+
   .vip-welcome-header h2 {
     font-size: 1.6rem;
   }

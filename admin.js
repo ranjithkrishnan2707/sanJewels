@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SAN JEWELS - Admin Dashboard Engine
+   RS Jewels - Admin Dashboard Engine
    ========================================================================== */
 
 // ============================================================
@@ -11,15 +11,15 @@ const ADMIN_CREDS = { username: 'admin', password: 'admin123' };
 // MOCK DATA
 // ============================================================
 
-// Products (seeded from storefront — managed here)
-let adminProducts = JSON.parse(localStorage.getItem('san_admin_products')) || [
-  { id: 'prod-1', name: 'The Sovereign Royal Emerald Necklace', category: 'emerald', categoryName: 'EMERALD COUTURE', price: 24500, image: 'images/emerald_necklace.jpg', tag: 'Royal Heritage', spec: '24.8 ct Colombian Emerald & 18K Solid Gold', description: 'An extraordinary haute joaillerie masterpiece featuring a rare pear-cut Colombian emerald surrounded by concentric tiers of brilliant round diamonds and hand-burnished 18K gold.' },
-  { id: 'prod-2', name: 'Empress Emerald Cut Halo Ring', category: 'rings', categoryName: 'ROYAL RINGS', price: 8750, image: 'images/emerald_ring.jpg', tag: 'Bespoke Cut', spec: '3.2 ct Emerald Cut • 18K Yellow Gold', description: 'A striking emerald-cut solitaire stone cradled in a delicate diamond halo, set on a solid 18K yellow gold band with polished mirror finish.' },
-  { id: 'prod-3', name: 'Crown Teardrop Emerald Earrings', category: 'earrings', categoryName: 'HIGH EARRINGS', price: 6400, image: 'images/emerald_earrings.jpg', tag: 'Signature Piece', spec: '4.5 ct Emerald Drops with Gold Leaf Clusters', description: 'Lavish chandelier dangle earrings featuring pear-shaped deep green emerald gemstones suspended from hand-sculpted gold leaf diamond clusters.' },
-  { id: 'prod-4', name: 'Verdant Palace Emerald Bracelet', category: 'heritage', categoryName: 'GOLD HERITAGE', price: 14200, image: 'images/emerald_necklace.jpg', tag: '24K Artisan Gold', spec: '12.0 ct Oval Emeralds • 24K Carved Gold', description: 'Hand-carved solid gold cuff bracelet inlaid with alternating oval Zambian emeralds and micro-pave white diamond stars.' },
-  { id: 'prod-5', name: 'Royal Cushion Emerald Solitaire', category: 'rings', categoryName: 'ROYAL RINGS', price: 11800, image: 'images/emerald_ring.jpg', tag: 'Single Origin', spec: '4.0 ct Cushion Emerald • Platinum 950', description: 'Sustainably mined Muzo emerald showcasing vivid green hue and high clarity, set in handcrafted Platinum 950 with hidden diamond bezel.' },
-  { id: 'prod-6', name: 'Duchess Emerald Chandelier Earrings', category: 'earrings', categoryName: 'HIGH EARRINGS', price: 7900, image: 'images/emerald_earrings.jpg', tag: 'Haute Joaillerie', spec: '5.2 ct Colombian Emeralds • 18K Gold', description: 'Statement drop earrings created for red carpet galas, catching ambient light with every step with radiant golden reflections.' }
-];
+// Products (50 items across 5 variants: Emerald Couture, Royal Rings, High Earrings, Bracelets & Cuffs, Gold Heritage)
+const seedProducts = (typeof window !== 'undefined' && window.SAMPLE_PRODUCTS) ? window.SAMPLE_PRODUCTS : [];
+let adminProducts = JSON.parse(localStorage.getItem('san_admin_products')) || seedProducts;
+
+// Ensure full 50 products are loaded even if old 6-item version was saved in localStorage
+if (adminProducts.length < 50 && seedProducts.length >= 50) {
+  adminProducts = seedProducts;
+  localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
+}
 
 // Orders
 let adminOrders = JSON.parse(localStorage.getItem('san_admin_orders')) || [
@@ -112,10 +112,11 @@ const monthlyRevenue = [
 
 // Category breakdown
 const categoryData = [
-  { label: 'Emerald Couture', pct: 38, color: '#10a87a' },
-  { label: 'Royal Rings', pct: 29, color: '#d4af37' },
+  { label: 'Emerald Couture', pct: 30, color: '#10a87a' },
+  { label: 'Royal Rings', pct: 25, color: '#d4af37' },
   { label: 'High Earrings', pct: 20, color: '#8b5cf6' },
-  { label: 'Gold Heritage', pct: 13, color: '#f59e0b' },
+  { label: 'Bracelets & Cuffs', pct: 15, color: '#06b6d4' },
+  { label: 'Gold Heritage', pct: 10, color: '#f59e0b' },
 ];
 
 // Regional data
@@ -142,30 +143,30 @@ let chartPeriod = 'weekly';
 // DOM
 // ============================================================
 const loginOverlay = document.getElementById('loginOverlay');
-const loginForm    = document.getElementById('loginForm');
-const loginUser    = document.getElementById('loginUser');
-const loginPass    = document.getElementById('loginPass');
-const loginError   = document.getElementById('loginError');
-const pwToggle     = document.getElementById('pwToggle');
-const sidebar      = document.getElementById('sidebar');
-const mainWrapper  = document.getElementById('mainWrapper');
+const loginForm = document.getElementById('loginForm');
+const loginUser = document.getElementById('loginUser');
+const loginPass = document.getElementById('loginPass');
+const loginError = document.getElementById('loginError');
+const pwToggle = document.getElementById('pwToggle');
+const sidebar = document.getElementById('sidebar');
+const mainWrapper = document.getElementById('mainWrapper');
 const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
-const mobileSidebarBtn   = document.getElementById('mobileSidebarBtn');
-const breadcrumb   = document.getElementById('breadcrumb');
-const adminToast   = document.getElementById('adminToast');
-const adminToastMsg= document.getElementById('adminToastMsg');
+const mobileSidebarBtn = document.getElementById('mobileSidebarBtn');
+const breadcrumb = document.getElementById('breadcrumb');
+const adminToast = document.getElementById('adminToast');
+const adminToastMsg = document.getElementById('adminToastMsg');
 
 // Product modal
-const productModal    = document.getElementById('productModal');
+const productModal = document.getElementById('productModal');
 const productModalTitle = document.getElementById('productModalTitle');
-const productForm     = document.getElementById('productForm');
+const productForm = document.getElementById('productForm');
 const closeProductModal = document.getElementById('closeProductModal');
 const cancelProductModal = document.getElementById('cancelProductModal');
 
 // Confirm modal
-const confirmModal   = document.getElementById('confirmModal');
+const confirmModal = document.getElementById('confirmModal');
 const confirmMessage = document.getElementById('confirmMessage');
-const confirmOkBtn   = document.getElementById('confirmOkBtn');
+const confirmOkBtn = document.getElementById('confirmOkBtn');
 const confirmCancelBtn = document.getElementById('confirmCancelBtn');
 const closeConfirmModal = document.getElementById('closeConfirmModal');
 
@@ -424,7 +425,7 @@ function renderRevenueChart() {
     const pct = maxVal > 0 ? (d.value / maxVal) * 160 : 0;
     return `
       <div class="chart-bar-group">
-        <div class="chart-bar-value">$${(d.value/1000).toFixed(0)}k</div>
+        <div class="chart-bar-value">$${(d.value / 1000).toFixed(0)}k</div>
         <div class="chart-bar-fill" style="height: ${pct}px;" title="${d.label}: $${d.value.toLocaleString()}"></div>
         <div class="chart-bar-label">${d.label}</div>
       </div>
@@ -474,7 +475,7 @@ function renderRecentOrders() {
 // ============================================================
 function renderProductsTable() {
   const tbody = document.getElementById('productsTableBody');
-  const catMap = { emerald: 'EMERALD COUTURE', rings: 'ROYAL RINGS', earrings: 'HIGH EARRINGS', heritage: 'GOLD HERITAGE' };
+  const catMap = { emerald: 'EMERALD COUTURE', rings: 'ROYAL RINGS', earrings: 'HIGH EARRINGS', bracelets: 'BRACELETS & CUFFS', heritage: 'GOLD HERITAGE' };
 
   const filtered = adminProducts.filter(p => {
     const matchesCat = productFilterCat === 'all' || p.category === productFilterCat;
@@ -543,7 +544,7 @@ function closeProductModalFn() {
 
 function saveProduct(e) {
   e.preventDefault();
-  const catMap = { emerald: 'EMERALD COUTURE', rings: 'ROYAL RINGS', earrings: 'HIGH EARRINGS', heritage: 'GOLD HERITAGE' };
+  const catMap = { emerald: 'EMERALD COUTURE', rings: 'ROYAL RINGS', earrings: 'HIGH EARRINGS', bracelets: 'BRACELETS & CUFFS', heritage: 'GOLD HERITAGE' };
   const cat = document.getElementById('pCategory').value;
   const updated = {
     id: editingProductId || `prod-${Date.now()}`,
@@ -597,7 +598,7 @@ function renderOrdersTable() {
       <tr>
         <td><code style="color:var(--ad-gold); font-size:0.82rem;">${o.id}</code></td>
         <td>${o.customer}</td>
-        <td style="max-width:180px; font-size:0.85rem;">${o.product.slice(0,30)}${o.product.length>30?'…':''}</td>
+        <td style="max-width:180px; font-size:0.85rem;">${o.product.slice(0, 30)}${o.product.length > 30 ? '…' : ''}</td>
         <td><strong>$${o.amount.toLocaleString()}</strong></td>
         <td>${o.location}</td>
         <td>${o.date}</td>
@@ -745,8 +746,8 @@ function renderMonthlyBars() {
     const isHighlight = i === currentMonth - 1;
     return `
       <div class="monthly-bar">
-        <div class="monthly-bar-val">${m.value > 0 ? `$${(m.value/1000).toFixed(0)}k` : ''}</div>
-        <div class="monthly-bar-fill${isHighlight?' highlight':''}" style="height:${h}px;"></div>
+        <div class="monthly-bar-val">${m.value > 0 ? `$${(m.value / 1000).toFixed(0)}k` : ''}</div>
+        <div class="monthly-bar-fill${isHighlight ? ' highlight' : ''}" style="height:${h}px;"></div>
         <div class="monthly-bar-label">${m.label}</div>
       </div>
     `;

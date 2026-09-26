@@ -1,76 +1,11 @@
 /* ==========================================================================
-   SAN JEWELS - Main Interactive Engine
+   RS Jewels - Main Interactive Engine
    ========================================================================== */
 
-// 1. Curated Product Data
-const PRODUCTS = [
-  {
-    id: 'prod-1',
-    name: 'The Sovereign Royal Emerald Necklace',
-    category: 'emerald',
-    categoryName: 'EMERALD COUTURE',
-    price: 24500,
-    image: 'images/emerald_necklace.jpg',
-    tag: 'Royal Heritage',
-    spec: '24.8 ct Colombian Emerald & 18K Solid Gold',
-    description: 'An extraordinary haute joaillerie masterpiece featuring a rare pear-cut Colombian emerald surrounded by concentric tiers of brilliant round diamonds and hand-burnished 18K gold.'
-  },
-  {
-    id: 'prod-2',
-    name: 'Empress Emerald Cut Halo Ring',
-    category: 'rings',
-    categoryName: 'ROYAL RINGS',
-    price: 8750,
-    image: 'images/emerald_ring.jpg',
-    tag: 'Bespoke Cut',
-    spec: '3.2 ct Emerald Cut • 18K Yellow Gold',
-    description: 'A striking emerald-cut solitaire stone cradled in a delicate diamond halo, set on a solid 18K yellow gold band with polished mirror finish.'
-  },
-  {
-    id: 'prod-3',
-    name: 'Crown Teardrop Emerald Earrings',
-    category: 'earrings',
-    categoryName: 'HIGH EARRINGS',
-    price: 6400,
-    image: 'images/emerald_earrings.jpg',
-    tag: 'Signature Piece',
-    spec: '4.5 ct Emerald Drops with Gold Leaf Clusters',
-    description: 'Lavish chandelier dangle earrings featuring pear-shaped deep green emerald gemstones suspended from hand-sculpted gold leaf diamond clusters.'
-  },
-  {
-    id: 'prod-4',
-    name: 'Verdant Palace Emerald Bracelet',
-    category: 'heritage',
-    categoryName: 'GOLD HERITAGE',
-    price: 14200,
-    image: 'images/emerald_necklace.jpg',
-    tag: '24K Artisan Gold',
-    spec: '12.0 ct Oval Emeralds • 24K Carved Gold',
-    description: 'Hand-carved solid gold cuff bracelet inlaid with alternating oval Zambian emeralds and micro-pave white diamond stars.'
-  },
-  {
-    id: 'prod-5',
-    name: 'Royal Cushion Emerald Solitaire',
-    category: 'rings',
-    categoryName: 'ROYAL RINGS',
-    price: 11800,
-    image: 'images/emerald_ring.jpg',
-    tag: 'Single Origin',
-    spec: '4.0 ct Cushion Emerald • Platinum 950',
-    description: 'Sustainably mined Muzo emerald showcasing vivid green hue and high clarity, set in handcrafted Platinum 950 with hidden diamond bezel.'
-  },
-  {
-    id: 'prod-6',
-    name: 'Duchess Emerald Chandelier Earrings',
-    category: 'earrings',
-    categoryName: 'HIGH EARRINGS',
-    price: 7900,
-    image: 'images/emerald_earrings.jpg',
-    tag: 'Haute Joaillerie',
-    spec: '5.2 ct Colombian Emeralds • 18K Gold',
-    description: 'Statement drop earrings created for red carpet galas, catching ambient light with every step with radiant golden reflections.'
-  }
-];
+// 1. Curated Product Data (50 Products across 5 variants: emerald, rings, earrings, bracelets, heritage)
+const PRODUCTS = (typeof window !== 'undefined' && window.SAMPLE_PRODUCTS && window.SAMPLE_PRODUCTS.length >= 50)
+  ? (JSON.parse(localStorage.getItem('san_admin_products')) || window.SAMPLE_PRODUCTS)
+  : (JSON.parse(localStorage.getItem('san_admin_products')) || []);
 
 // State Management
 let shoppingCart = JSON.parse(localStorage.getItem('san_cart')) || [];
@@ -192,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (newsletterForm) {
     newsletterForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      showToast('Thank you for subscribing to SAN Jewels Private Vault.');
+      showToast('Thank you for subscribing to RS Jewels Private Vault.');
       newsletterForm.reset();
     });
   }
@@ -215,8 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
    ========================================================================== */
 
 function renderProducts() {
-  const filtered = activeFilter === 'all' 
-    ? PRODUCTS 
+  const filtered = activeFilter === 'all'
+    ? PRODUCTS
     : PRODUCTS.filter(p => p.category === activeFilter);
 
   productGrid.innerHTML = filtered.map(item => `
@@ -410,7 +345,7 @@ function initBespokeConfigurator() {
         image: 'images/emerald_ring.jpg',
         quantity: 1
       };
-      
+
       shoppingCart.push(bespokeItem);
       saveAndUpdateCart();
       cartDrawer.classList.add('active');
@@ -525,7 +460,7 @@ function initVipOnboarding() {
         if (!exists) {
           adminCustomers.unshift({
             name: name,
-            email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@patron.sanjewels.com`,
+            email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@patron.RS Jewels.com`,
             whatsapp: fullWhatsapp,
             location: code === '+91' ? 'Jaipur, IN' : (code === '+1' ? 'New York, US' : (code === '+41' ? 'Geneva, CH' : 'London, UK')),
             orders: 0,

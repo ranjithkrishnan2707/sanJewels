@@ -1,7 +1,7 @@
 {
-  "name": "sanjewels",
+  "name": "RS Jewels",
   "version": "1.0.0",
-  "description": "San Jewels Website",
+  "description": "RS Jewels Website",
   "scripts": {
     "dev": "serve .",
     "start": "serve ."

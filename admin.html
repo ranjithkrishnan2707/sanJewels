@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAN JEWELS | Admin Dashboard</title>
-  <meta name="description" content="SAN JEWELS Admin Control Panel - Manage products, orders, appointments and analytics.">
+  <title>RS Jewels | Admin Dashboard</title>
+  <meta name="description"
+    content="RS Jewels Admin Control Panel - Manage products, orders, appointments and analytics.">
   <link rel="stylesheet" href="admin.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
 
   <!-- Login Screen Overlay -->
@@ -15,7 +18,7 @@
     <div class="login-glow"></div>
     <div class="login-card">
       <div class="login-logo">
-        <span class="logo-title">SAN JEWELS</span>
+        <span class="logo-title">RS Jewels</span>
         <span class="logo-subtitle">ADMIN CONSOLE</span>
       </div>
       <div class="login-icon-wrap">
@@ -48,7 +51,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
-        <span class="logo-title">SAN JEWELS</span>
+        <span class="logo-title">RS Jewels</span>
         <span class="logo-subtitle">ADMIN CONSOLE</span>
       </div>
       <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse Sidebar">
@@ -60,43 +63,43 @@
       <div class="nav-section-label">Main</div>
       <ul>
         <li><a href="#" class="nav-item active" data-page="dashboard" id="navDashboard">
-          <i class="fa-solid fa-gauge-high"></i> <span>Dashboard</span>
-        </a></li>
+            <i class="fa-solid fa-gauge-high"></i> <span>Dashboard</span>
+          </a></li>
         <li><a href="#" class="nav-item" data-page="products" id="navProducts">
-          <i class="fa-solid fa-gem"></i> <span>Products</span>
-        </a></li>
+            <i class="fa-solid fa-gem"></i> <span>Products</span>
+          </a></li>
         <li><a href="#" class="nav-item" data-page="orders" id="navOrders">
-          <i class="fa-solid fa-bag-shopping"></i> <span>Orders</span>
-          <span class="nav-badge">5</span>
-        </a></li>
+            <i class="fa-solid fa-bag-shopping"></i> <span>Orders</span>
+            <span class="nav-badge">5</span>
+          </a></li>
         <li><a href="#" class="nav-item" data-page="appointments" id="navAppointments">
-          <i class="fa-regular fa-calendar-check"></i> <span>Appointments</span>
-          <span class="nav-badge accent">3</span>
-        </a></li>
+            <i class="fa-regular fa-calendar-check"></i> <span>Appointments</span>
+            <span class="nav-badge accent">3</span>
+          </a></li>
       </ul>
       <div class="nav-section-label">Content</div>
       <ul>
         <li><a href="#" class="nav-item" data-page="analytics" id="navAnalytics">
-          <i class="fa-solid fa-chart-line"></i> <span>Analytics</span>
-        </a></li>
+            <i class="fa-solid fa-chart-line"></i> <span>Analytics</span>
+          </a></li>
         <li><a href="#" class="nav-item" data-page="customers" id="navCustomers">
-          <i class="fa-solid fa-users"></i> <span>Customers</span>
-        </a></li>
+            <i class="fa-solid fa-users"></i> <span>Customers</span>
+          </a></li>
         <li><a href="#" class="nav-item" data-page="newsletter" id="navNewsletter">
-          <i class="fa-solid fa-envelope-open-text"></i> <span>Newsletter</span>
-        </a></li>
+            <i class="fa-solid fa-envelope-open-text"></i> <span>Newsletter</span>
+          </a></li>
       </ul>
       <div class="nav-section-label">System</div>
       <ul>
         <li><a href="#" class="nav-item" data-page="settings" id="navSettings">
-          <i class="fa-solid fa-sliders"></i> <span>Settings</span>
-        </a></li>
+            <i class="fa-solid fa-sliders"></i> <span>Settings</span>
+          </a></li>
         <li><a href="index.html" class="nav-item" target="_blank">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>View Store</span>
-        </a></li>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>View Store</span>
+          </a></li>
         <li><a href="#" class="nav-item logout-item" id="logoutBtn">
-          <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
-        </a></li>
+            <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+          </a></li>
       </ul>
     </nav>
 
@@ -246,6 +249,7 @@
             <option value="emerald">Emerald Couture</option>
             <option value="rings">Royal Rings</option>
             <option value="earrings">High Earrings</option>
+            <option value="bracelets">Bracelets & Cuffs</option>
             <option value="heritage">Gold Heritage</option>
           </select>
         </div>
@@ -344,21 +348,29 @@
 
     <!-- ANALYTICS PAGE -->
     <div class="page" id="pageAnalytics">
-      <div class="page-header"><h1>Analytics & Insights</h1></div>
+      <div class="page-header">
+        <h1>Analytics & Insights</h1>
+      </div>
       <div class="analytics-grid">
         <div class="card analytics-card">
-          <div class="card-header"><h3><i class="fa-solid fa-chart-pie"></i> Sales by Category</h3></div>
+          <div class="card-header">
+            <h3><i class="fa-solid fa-chart-pie"></i> Sales by Category</h3>
+          </div>
           <div class="donut-chart-wrap">
             <svg id="donutSvg" viewBox="0 0 200 200" width="200" height="200"></svg>
             <div class="donut-legend" id="donutLegend"></div>
           </div>
         </div>
         <div class="card analytics-card">
-          <div class="card-header"><h3><i class="fa-solid fa-earth-americas"></i> Sales by Region</h3></div>
+          <div class="card-header">
+            <h3><i class="fa-solid fa-earth-americas"></i> Sales by Region</h3>
+          </div>
           <div class="region-bars" id="regionBars"></div>
         </div>
         <div class="card analytics-full-card">
-          <div class="card-header"><h3><i class="fa-solid fa-chart-bar"></i> Monthly Revenue Breakdown</h3></div>
+          <div class="card-header">
+            <h3><i class="fa-solid fa-chart-bar"></i> Monthly Revenue Breakdown</h3>
+          </div>
           <div class="bar-chart-area" id="barChartArea"></div>
         </div>
       </div>
@@ -366,7 +378,9 @@
 
     <!-- CUSTOMERS PAGE -->
     <div class="page" id="pageCustomers">
-      <div class="page-header"><h1>Customer Management</h1></div>
+      <div class="page-header">
+        <h1>Customer Management</h1>
+      </div>
       <div class="card">
         <div class="table-wrapper">
           <table class="data-table">
@@ -399,15 +413,21 @@
       <div class="newsletter-stats-row">
         <div class="card newsletter-stat">
           <i class="fa-solid fa-users" style="font-size:2rem; color:var(--ad-gold);"></i>
-          <div><span id="nlTotalCount" class="stat-value">0</span><p>Total Subscribers</p></div>
+          <div><span id="nlTotalCount" class="stat-value">0</span>
+            <p>Total Subscribers</p>
+          </div>
         </div>
         <div class="card newsletter-stat">
           <i class="fa-solid fa-envelope-circle-check" style="font-size:2rem; color:var(--ad-gold);"></i>
-          <div><span class="stat-value">--</span><p>Last Campaign Sent</p></div>
+          <div><span class="stat-value">--</span>
+            <p>Last Campaign Sent</p>
+          </div>
         </div>
         <div class="card newsletter-stat">
           <i class="fa-solid fa-chart-simple" style="font-size:2rem; color:var(--ad-gold);"></i>
-          <div><span class="stat-value">68%</span><p>Open Rate</p></div>
+          <div><span class="stat-value">68%</span>
+            <p>Open Rate</p>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -430,18 +450,22 @@
 
     <!-- SETTINGS PAGE -->
     <div class="page" id="pageSettings">
-      <div class="page-header"><h1>Store Settings</h1></div>
+      <div class="page-header">
+        <h1>Store Settings</h1>
+      </div>
       <div class="settings-grid">
         <div class="card settings-card">
-          <div class="card-header"><h3><i class="fa-solid fa-store"></i> Store Information</h3></div>
+          <div class="card-header">
+            <h3><i class="fa-solid fa-store"></i> Store Information</h3>
+          </div>
           <form class="settings-form" id="storeSettingsForm">
             <div class="form-row">
               <label>Store Name</label>
-              <input type="text" class="admin-input" value="SAN JEWELS Haute Joaillerie">
+              <input type="text" class="admin-input" value="RS Jewels Haute Joaillerie">
             </div>
             <div class="form-row">
               <label>Support Email</label>
-              <input type="email" class="admin-input" value="concierge@sanjewels.com">
+              <input type="email" class="admin-input" value="concierge@RS Jewels.com">
             </div>
             <div class="form-row">
               <label>Free Shipping Threshold ($)</label>
@@ -449,7 +473,8 @@
             </div>
             <div class="form-row">
               <label>Announcement Bar Text</label>
-              <input type="text" class="admin-input" value="Complimentary Insured Worldwide Delivery on Orders Over $2,500">
+              <input type="text" class="admin-input"
+                value="Complimentary Insured Worldwide Delivery on Orders Over $2,500">
             </div>
             <button type="submit" class="btn-primary" style="margin-top: 8px;">
               <i class="fa-solid fa-floppy-disk"></i> Save Changes
@@ -458,7 +483,9 @@
         </div>
 
         <div class="card settings-card">
-          <div class="card-header"><h3><i class="fa-solid fa-lock"></i> Admin Security</h3></div>
+          <div class="card-header">
+            <h3><i class="fa-solid fa-lock"></i> Admin Security</h3>
+          </div>
           <form class="settings-form" id="securityForm">
             <div class="form-row">
               <label>Current Password</label>
@@ -479,7 +506,9 @@
         </div>
 
         <div class="card settings-card">
-          <div class="card-header"><h3><i class="fa-solid fa-palette"></i> Theme & Display</h3></div>
+          <div class="card-header">
+            <h3><i class="fa-solid fa-palette"></i> Theme & Display</h3>
+          </div>
           <div class="settings-form">
             <div class="form-row toggle-row">
               <label>Show Announcement Bar</label>
@@ -501,11 +530,16 @@
         </div>
 
         <div class="card settings-card">
-          <div class="card-header"><h3><i class="fa-solid fa-database"></i> Data Management</h3></div>
+          <div class="card-header">
+            <h3><i class="fa-solid fa-database"></i> Data Management</h3>
+          </div>
           <div class="settings-form">
-            <p style="color: var(--ad-text-muted); font-size: 0.9rem; margin-bottom: 18px;">Manage localStorage and application data.</p>
-            <button class="btn-secondary" id="clearCartDataBtn"><i class="fa-solid fa-broom"></i> Clear All Cart Data</button>
-            <button class="btn-danger" id="resetDataBtn" style="margin-top: 10px;"><i class="fa-solid fa-trash"></i> Reset Store Data</button>
+            <p style="color: var(--ad-text-muted); font-size: 0.9rem; margin-bottom: 18px;">Manage localStorage and
+              application data.</p>
+            <button class="btn-secondary" id="clearCartDataBtn"><i class="fa-solid fa-broom"></i> Clear All Cart
+              Data</button>
+            <button class="btn-danger" id="resetDataBtn" style="margin-top: 10px;"><i class="fa-solid fa-trash"></i>
+              Reset Store Data</button>
           </div>
         </div>
       </div>
@@ -524,7 +558,8 @@
         <div class="modal-form-grid">
           <div class="form-row">
             <label>Product Name *</label>
-            <input type="text" class="admin-input" id="pName" placeholder="e.g. The Sovereign Royal Emerald Necklace" required>
+            <input type="text" class="admin-input" id="pName" placeholder="e.g. The Sovereign Royal Emerald Necklace"
+              required>
           </div>
           <div class="form-row">
             <label>Category *</label>
@@ -532,6 +567,7 @@
               <option value="emerald">Emerald Couture</option>
               <option value="rings">Royal Rings</option>
               <option value="earrings">High Earrings</option>
+              <option value="bracelets">Bracelets & Cuffs</option>
               <option value="heritage">Gold Heritage</option>
             </select>
           </div>
@@ -545,11 +581,13 @@
           </div>
           <div class="form-row modal-full-row">
             <label>Specification</label>
-            <input type="text" class="admin-input" id="pSpec" placeholder="e.g. 24.8 ct Colombian Emerald & 18K Solid Gold">
+            <input type="text" class="admin-input" id="pSpec"
+              placeholder="e.g. 24.8 ct Colombian Emerald & 18K Solid Gold">
           </div>
           <div class="form-row modal-full-row">
             <label>Description *</label>
-            <textarea class="admin-input" id="pDesc" rows="4" placeholder="Detailed product description..." required></textarea>
+            <textarea class="admin-input" id="pDesc" rows="4" placeholder="Detailed product description..."
+              required></textarea>
           </div>
           <div class="form-row modal-full-row">
             <label>Image Path</label>
@@ -586,6 +624,8 @@
     </div>
   </div>
 
+  <script src="products_data.js"></script>
   <script src="admin.js"></script>
 </body>
+
 </html>
