@@ -7,6 +7,7 @@ const express    = require('express');
 const mongoose   = require('mongoose');
 const cors       = require('cors');
 const path       = require('path');
+const QRCode     = require('qrcode');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -224,7 +225,26 @@ app.delete('/api/newsletter/:email', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+/* ---------- QR CODE GENERATION ---------- */
+app.get('/api/qr', async (req, res) => {
+  try {
+    const targetUrl = req.query.url || `http://localhost:${PORT}/review.html`;
+    const qrDataUrl = await QRCode.toDataURL(targetUrl, {
+      errorCorrectionLevel: 'H',
+      type: 'image/png',
+      width: 400,
+      margin: 2,
+      color: {
+        dark: '#03140e',
+        light: '#f5e6aa'
+      }
+    });
+    res.json({ success: true, qr: qrDataUrl, url: targetUrl });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`🚀 RS Aura Jewel Server running at http://localhost:${PORT}`);
+  console.log(`📱 Review page: http://localhost:${PORT}/review.html`);
 });
