@@ -38,7 +38,6 @@
       <ul class="nav-links">
         <li><a href="#hero" class="nav-link">Home</a></li>
         <li><a href="#collections" class="nav-link">Collections</a></li>
-        <li><a href="#atelier" class="nav-link">Bespoke Atelier</a></li>
         <li><a href="#heritage" class="nav-link">Heritage</a></li>
         <li><a href="#concierge" class="nav-link">VIP Concierge</a></li>
         <li><a href="review.html" class="nav-link" style="color: var(--gold-bright);"><i class="fa-solid fa-camera" style="margin-right: 4px;"></i> Review &amp; Selfie</a></li>
@@ -48,9 +47,6 @@
       <div class="nav-actions">
         <button class="icon-btn" id="searchBtn" title="Search Collection">
           <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-        <button class="icon-btn" id="bookModalBtn" title="Book Consultation">
-          <i class="fa-regular fa-calendar-check"></i>
         </button>
         <button class="icon-btn" id="vipProfileBtn" title="VIP Concierge Profile">
           <i class="fa-solid fa-crown" id="vipNavIcon"></i>
@@ -85,9 +81,6 @@
             <a href="#collections" class="btn btn-gold">
               <span>Explore Collection</span> <i class="fa-solid fa-arrow-right"></i>
             </a>
-            <button class="btn btn-outline-gold" id="heroBookBtn">
-              <i class="fa-solid fa-calendar"></i> Book Consultation
-            </button>
           </div>
 
           <div class="hero-stats">
@@ -154,85 +147,7 @@
     </div>
   </section>
 
-  <!-- Bespoke Atelier Ring Configurator -->
-  <section class="section-padding atelier-section" id="atelier">
-    <div class="container">
-      <div class="section-title">
-        <span class="subtitle">Custom Craftsmanship</span>
-        <h2>The Bespoke Atelier</h2>
-        <p>Design your unique emerald solitaire ring. Select your gemstone cut, band metal, carat weight, and personal
-          laser engraving.</p>
-        <div class="gold-divider"></div>
-      </div>
 
-      <div class="configurator-card">
-        <!-- Interactive Preview -->
-        <div class="configurator-preview">
-          <div class="preview-stage" id="ringStage">
-            <img src="images/emerald_ring.jpg" alt="Bespoke Emerald Ring Preview" id="ringPreviewImg">
-          </div>
-          <div class="hero-tag" style="margin-top: 0;">
-            <i class="fa-solid fa-microchip"></i> Real-time Atelier Configurator
-          </div>
-        </div>
-
-        <!-- Customizer Options -->
-        <div class="configurator-controls">
-          <h3>Build Your Emerald Ring</h3>
-
-          <!-- Metal Selection -->
-          <div class="control-group">
-            <label><i class="fa-solid fa-ring"></i> Precious Metal Band</label>
-            <div class="option-pills" id="metalOptions">
-              <button class="pill-opt active" data-metal="18K Yellow Gold" data-factor="1.0">18K Yellow Gold</button>
-              <button class="pill-opt" data-metal="Platinum 950" data-factor="1.18">Platinum 950</button>
-              <button class="pill-opt" data-metal="18K Rose Gold" data-factor="1.02">18K Rose Gold</button>
-            </div>
-          </div>
-
-          <!-- Gem Cut Selection -->
-          <div class="control-group">
-            <label><i class="fa-solid fa-gem"></i> Gemstone Cut</label>
-            <div class="option-pills" id="cutOptions">
-              <button class="pill-opt active" data-cut="Emerald Cut" data-multiplier="1.0">Emerald Cut</button>
-              <button class="pill-opt" data-cut="Royal Cushion" data-multiplier="1.1">Royal Cushion</button>
-              <button class="pill-opt" data-cut="Oval Brilliant" data-multiplier="1.05">Oval Brilliant</button>
-              <button class="pill-opt" data-cut="Pear Drop" data-multiplier="1.08">Pear Drop</button>
-            </div>
-          </div>
-
-          <!-- Carat Weight Slider -->
-          <div class="control-group">
-            <label><i class="fa-solid fa-weight-hanging"></i> Emerald Carat Weight</label>
-            <div class="carat-slider-wrapper">
-              <input type="range" class="carat-slider" id="caratSlider" min="1.0" max="5.0" step="0.1" value="2.5">
-              <span class="carat-val" id="caratVal">2.5 ct</span>
-            </div>
-          </div>
-
-          <!-- Custom Engraving Input -->
-          <div class="control-group">
-            <label><i class="fa-solid fa-pen-nib"></i> Personal Laser Engraving (Optional)</label>
-            <input type="text" class="custom-engraving-input" id="engravingInput"
-              placeholder="e.g. Forever & Always • S&A" maxlength="25">
-          </div>
-
-          <!-- Price & Order Button -->
-          <div class="config-summary">
-            <div>
-              <span
-                style="font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); letter-spacing: 0.15em;">Estimated
-                Price</span>
-              <div class="total-estimated-price" id="configPrice">₹850</div>
-            </div>
-            <button class="btn btn-gold" id="addBespokeBtn">
-              <i class="fa-solid fa-bag-shopping"></i> Add Bespoke Piece
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- Heritage & Trust Section -->
   <section class="section-padding" id="heritage">
@@ -326,51 +241,7 @@
     </div>
   </div>
 
-  <!-- VIP Concierge Appointment Modal -->
-  <div class="modal-overlay" id="appointmentModal">
-    <div class="modal-container" style="max-width: 600px;">
-      <button class="modal-close-btn" id="closeAppointment"><i class="fa-solid fa-xmark"></i></button>
-      <div class="booking-form">
-        <div class="section-title" style="margin-bottom: 30px;">
-          <span class="subtitle">Private Consultation</span>
-          <h2>Book Your Salon Visit</h2>
-          <p>Schedule a private viewing with our Master Gemologist in Geneva, New York, or via Virtual Private
-            Concierge.</p>
-        </div>
 
-        <form id="bookingForm">
-          <div class="form-group">
-            <label><i class="fa-regular fa-user"></i> Full Name</label>
-            <input type="text" class="form-control" placeholder="e.g. Lady Evelyn Sinclair" required>
-          </div>
-
-          <div class="form-group">
-            <label><i class="fa-regular fa-envelope"></i> Email Address</label>
-            <input type="email" class="form-control" placeholder="e.g. evelyn@sovereign.com" required>
-          </div>
-
-          <div class="form-group">
-            <label><i class="fa-solid fa-location-dot"></i> Preferred Salon / Format</label>
-            <select class="form-control" required>
-              <option value="geneva">Geneva Flagship Salon (Rue du Rhône)</option>
-              <option value="ny">New York Boutique (Fifth Avenue)</option>
-              <option value="jaipur">Jaipur Heritage Palace Salon</option>
-              <option value="virtual">Virtual Live Video Consultation</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label><i class="fa-regular fa-calendar-days"></i> Preferred Date & Time</label>
-            <input type="datetime-local" class="form-control" required>
-          </div>
-
-          <button type="submit" class="btn btn-gold" style="width: 100%; margin-top: 10px;">
-            <i class="fa-solid fa-paper-plane"></i> Confirm Consultation Request
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
 
   <!-- VIP Concierge Welcome Modal (New Visitor Greeting) -->
   <div class="modal-overlay vip-welcome-overlay" id="vipWelcomeModal">
@@ -504,7 +375,6 @@
           <h4>Explore</h4>
           <ul class="footer-links">
             <li><a href="#collections">Emerald Couture</a></li>
-            <li><a href="#atelier">Bespoke Configurator</a></li>
             <li><a href="#heritage">Certified Solitaires</a></li>
             <li><a href="#heritage">Heritage Gold</a></li>
           </ul>
@@ -514,7 +384,6 @@
           <h4>Client Services</h4>
           <ul class="footer-links">
             <li><a href="review.html"><i class="fa-solid fa-camera"></i> Share Your Review &amp; Selfie</a></li>
-            <li><a href="#" id="footerBookBtn">Book Consultation</a></li>
             <li><a href="#">Gemstone Care Guide</a></li>
             <li><a href="#">Insured Delivery</a></li>
             <li><a href="#">Authenticity Guarantee</a></li>

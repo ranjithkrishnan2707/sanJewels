@@ -68,13 +68,7 @@ const modalDesc = document.getElementById('modalDesc');
 const modalAddCartBtn = document.getElementById('modalAddCartBtn');
 let currentModalProduct = null;
 
-// Appointment Modal Elements
-const appointmentModal = document.getElementById('appointmentModal');
-const bookModalBtn = document.getElementById('bookModalBtn');
-const heroBookBtn = document.getElementById('heroBookBtn');
-const footerBookBtn = document.getElementById('footerBookBtn');
-const closeAppointment = document.getElementById('closeAppointment');
-const bookingForm = document.getElementById('bookingForm');
+
 
 // Bespoke Controls
 const caratSlider = document.getElementById('caratSlider');
@@ -163,32 +157,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Quick View Modal Close
   closeQuickView.addEventListener('click', () => quickViewModal.classList.remove('active'));
 
-  // Appointment Modal Triggers & Close
-  [bookModalBtn, heroBookBtn, footerBookBtn].forEach(btn => {
-    if (btn) btn.addEventListener('click', () => appointmentModal.classList.add('active'));
-  });
-  closeAppointment.addEventListener('click', () => appointmentModal.classList.remove('active'));
-
   // Close modals on backdrop click
   window.addEventListener('click', (e) => {
     if (e.target === quickViewModal) quickViewModal.classList.remove('active');
-    if (e.target === appointmentModal) appointmentModal.classList.remove('active');
     const vipModal = document.getElementById('vipWelcomeModal');
     if (e.target === vipModal) {
       vipModal.classList.remove('active');
       localStorage.setItem('san_greeting_seen', 'true');
     }
   });
-
-  // Booking Form Submission
-  if (bookingForm) {
-    bookingForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      appointmentModal.classList.remove('active');
-      showToast('Concierge Appointment Request Received! Our Salon Ambassador will contact you shortly.');
-      bookingForm.reset();
-    });
-  }
 
   // Newsletter Form Submission
   const newsletterForm = document.getElementById('newsletterForm');
@@ -208,12 +185,79 @@ document.addEventListener('DOMContentLoaded', () => {
   // Checkout Button Trigger
   const checkoutBtn = document.getElementById('checkoutBtn');
   if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', () => {
+    checkoutBtn.addEventListener('click', async () => {
       if (shoppingCart.length === 0) {
         showToast('Your shopping bag is currently empty.');
         return;
       }
-      showToast('Redirecting to SSL Encrypted Insured Checkout...');
+
+      // Disable button to prevent double-clicks
+      checkoutBtn.disabled = true;
+      checkoutBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+      try {
+        // Gather user info from VIP profile (if set)
+        const currentUser = JSON.parse(localStorage.getItem('san_current_user')) || {};
+
+        // Build order ID
+        const orderId = 'RSA-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
+
+        // Compute totals
+        const subtotal = shoppingCart.reduce((s, i) => s + i.price * i.quantity, 0);
+        const today    = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+        const estDate  = new Date();
+        estDate.setDate(estDate.getDate() + 5);
+        const estDelivery = estDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+        // Build order object for sessionStorage → confirmation page
+        const orderData = {
+          id:               orderId,
+          customer:         currentUser.name || 'Valued Customer',
+          whatsapp:         currentUser.whatsapp || '',
+          location:         currentUser.location || 'India',
+          items:            shoppingCart.map(i => ({
+            name:     i.name,
+            price:    i.price,
+            qty:      i.quantity,
+            category: i.category || ''
+          })),
+          amount:           subtotal,
+          date:             today,
+          estimatedDelivery: estDelivery,
+          paymentMethod:    'Paid Online',
+          status:           'processing'
+        };
+
+        // Persist to sessionStorage so confirmation page can read it
+        sessionStorage.setItem('rsaura_last_order', JSON.stringify(orderData));
+
+        // Save order to MongoDB (non-blocking — don't hold up navigation)
+        const dbPayload = {
+          id:       orderId,
+          customer: orderData.customer,
+          product:  shoppingCart.map(i => `${i.name} x${i.quantity}`).join(', '),
+          amount:   subtotal,
+          location: orderData.location,
+          date:     new Date().toISOString().split('T')[0],
+          status:   'processing'
+        };
+        API.createOrder(dbPayload).catch(err => console.warn('Order DB sync error:', err.message));
+
+        // Clear cart
+        shoppingCart = [];
+        localStorage.removeItem('san_cart');
+        updateCartUI();
+        cartDrawer.classList.remove('active');
+
+        // Navigate to confirmation page
+        window.location.href = 'order-confirmation.html';
+
+      } catch (err) {
+        console.error('Checkout error:', err);
+        showToast('Something went wrong. Please try again.');
+        checkoutBtn.disabled = false;
+        checkoutBtn.innerHTML = 'Proceed to Secure Checkout <i class="fa-solid fa-shield"></i>';
+      }
     });
   }
 });
