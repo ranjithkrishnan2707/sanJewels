@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Confirmed — RS Aura Anti-Tarnish</title>
-  <meta name="description" content="Your RS Aura Anti-Tarnish luxury jewelry order has been confirmed. Thank you for choosing us.">
+  <meta name="description"
+    content="Your RS Aura Anti-Tarnish luxury jewelry order has been confirmed. Thank you for choosing us.">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -148,11 +149,15 @@
     }
 
     @keyframes ringFill {
-      to { stroke-dashoffset: 0; }
+      to {
+        stroke-dashoffset: 0;
+      }
     }
 
     @keyframes checkDraw {
-      to { stroke-dashoffset: 0; }
+      to {
+        stroke-dashoffset: 0;
+      }
     }
 
     .oc-ring-glow {
@@ -164,8 +169,17 @@
     }
 
     @keyframes glowPulse {
-      0%, 100% { transform: scale(1); opacity: 0.6; }
-      50%       { transform: scale(1.15); opacity: 1; }
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.6;
+      }
+
+      50% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
     }
 
     .oc-hero-label {
@@ -204,8 +218,15 @@
     }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .oc-order-id-banner {
@@ -282,7 +303,9 @@
     }
 
     @media (max-width: 640px) {
-      .oc-grid { grid-template-columns: 1fr; }
+      .oc-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .oc-card {
@@ -306,13 +329,28 @@
       grid-column: 1 / -1;
     }
 
-    .oc-card:nth-child(1) { animation-delay: 2.1s; }
-    .oc-card:nth-child(2) { animation-delay: 2.25s; }
-    .oc-card:nth-child(3) { animation-delay: 2.4s; }
+    .oc-card:nth-child(1) {
+      animation-delay: 2.1s;
+    }
+
+    .oc-card:nth-child(2) {
+      animation-delay: 2.25s;
+    }
+
+    .oc-card:nth-child(3) {
+      animation-delay: 2.4s;
+    }
 
     @keyframes cardEntrance {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .oc-card-header {
@@ -422,9 +460,18 @@
       font-size: 0.88rem;
     }
 
-    .oc-price-row .label { color: var(--text-muted); }
-    .oc-price-row .value { color: var(--text-main); font-weight: 500; }
-    .oc-price-row.free .value { color: #4ade80; }
+    .oc-price-row .label {
+      color: var(--text-muted);
+    }
+
+    .oc-price-row .value {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .oc-price-row.free .value {
+      color: #4ade80;
+    }
 
     .oc-price-divider {
       height: 1px;
@@ -500,7 +547,9 @@
       padding-left: 20px;
     }
 
-    .oc-tl-step:last-child { margin-bottom: 0; }
+    .oc-tl-step:last-child {
+      margin-bottom: 0;
+    }
 
     .oc-tl-dot {
       position: absolute;
@@ -538,8 +587,15 @@
     }
 
     @keyframes dotPulse {
-      0%, 100% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.4); }
-      50%       { box-shadow: 0 0 22px rgba(212, 175, 55, 0.75); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 22px rgba(212, 175, 55, 0.75);
+      }
     }
 
     .oc-tl-label {
@@ -549,7 +605,9 @@
       margin-bottom: 2px;
     }
 
-    .oc-tl-label.pending-txt { color: var(--text-dim); }
+    .oc-tl-label.pending-txt {
+      color: var(--text-dim);
+    }
 
     .oc-tl-time {
       font-size: 0.72rem;
@@ -580,7 +638,9 @@
       font-weight: 600;
     }
 
-    .oc-support-strip a:hover { text-decoration: underline; }
+    .oc-support-strip a:hover {
+      text-decoration: underline;
+    }
 
     .oc-cta-row {
       display: flex;
@@ -652,7 +712,11 @@
       margin-top: 14px;
     }
 
-    .oc-tip i { color: var(--emerald-glow); flex-shrink: 0; margin-top: 2px; }
+    .oc-tip i {
+      color: var(--emerald-glow);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
 
     .oc-footer {
       text-align: center;
@@ -664,7 +728,9 @@
       z-index: 1;
     }
 
-    .oc-footer span { color: var(--gold-primary); }
+    .oc-footer span {
+      color: var(--gold-primary);
+    }
 
     .oc-wa-float {
       position: fixed;
@@ -713,12 +779,33 @@
     }
 
     @media (max-width: 480px) {
-      .oc-main { padding: 28px 14px 60px; }
-      .oc-hero  { padding: 36px 14px 28px; }
-      .oc-card  { padding: 18px; }
-      .oc-order-id-banner { flex-direction: column; gap: 4px; text-align: center; }
-      .btn-gold, .btn-outline-gold { width: 100%; justify-content: center; }
-      .oc-cta-row { flex-direction: column; }
+      .oc-main {
+        padding: 28px 14px 60px;
+      }
+
+      .oc-hero {
+        padding: 36px 14px 28px;
+      }
+
+      .oc-card {
+        padding: 18px;
+      }
+
+      .oc-order-id-banner {
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+      }
+
+      .btn-gold,
+      .btn-outline-gold {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .oc-cta-row {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -752,21 +839,22 @@
         <svg viewBox="0 0 110 110">
           <defs>
             <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stop-color="#fff3bf"/>
-              <stop offset="40%"  stop-color="#d4af37"/>
-              <stop offset="100%" stop-color="#aa7c11"/>
+              <stop offset="0%" stop-color="#fff3bf" />
+              <stop offset="40%" stop-color="#d4af37" />
+              <stop offset="100%" stop-color="#aa7c11" />
             </linearGradient>
           </defs>
-          <circle class="ring-bg"   cx="55" cy="55" r="49"/>
-          <circle class="ring-fill" cx="55" cy="55" r="49"/>
-          <polyline class="check-path" points="36,55 50,70 76,40"/>
+          <circle class="ring-bg" cx="55" cy="55" r="49" />
+          <circle class="ring-fill" cx="55" cy="55" r="49" />
+          <polyline class="check-path" points="36,55 50,70 76,40" />
         </svg>
       </div>
 
       <p class="oc-hero-label"><i class="fa-solid fa-gem"></i> &nbsp; Order Confirmed</p>
       <h1 class="oc-hero-title">Your Jewel Is On Its Way!</h1>
       <p class="oc-hero-sub">
-        Thank you for your exquisite taste. We're lovingly preparing your piece and will keep you updated every step of the way.
+        Thank you for your exquisite taste. We're lovingly preparing your piece and will keep you updated every step of
+        the way.
       </p>
 
       <div class="oc-order-id-banner">
@@ -830,7 +918,7 @@
       <a href="https://wa.me/919999999999?text=Hi%2C+I+need+help+with+my+order" target="_blank">
         <i class="fa-brands fa-whatsapp"></i> WhatsApp
       </a>
-      or call <a href="tel:+919999999999">+91 99999 99999</a>
+      or call <a href="tel:+919999999999">+91 97912 49814</a>
     </div>
 
     <!-- CTAs -->
@@ -850,7 +938,8 @@
   </footer>
 
   <!-- WhatsApp floating -->
-  <a class="oc-wa-float" href="https://wa.me/919999999999?text=Hi%2C+I+need+help+with+my+order" target="_blank" title="Chat on WhatsApp">
+  <a class="oc-wa-float" href="https://wa.me/919999999999?text=Hi%2C+I+need+help+with+my+order" target="_blank"
+    title="Chat on WhatsApp">
     <i class="fa-brands fa-whatsapp"></i>
   </a>
 
@@ -861,7 +950,7 @@
       try {
         const stored = sessionStorage.getItem('rsaura_last_order');
         if (stored) return JSON.parse(stored);
-      } catch(e) {}
+      } catch (e) { }
 
       const params = new URLSearchParams(window.location.search);
       const orderId = params.get('id');
@@ -886,12 +975,12 @@
           { name: 'Gold Cascade Necklace', qty: 1, price: 2500, category: 'Necklace' },
         ],
         location: 'Mumbai, Maharashtra',
-        date: new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }),
+        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
         status: 'processing',
         paymentMethod: 'UPI',
         estimatedDelivery: (() => {
           const d = new Date(); d.setDate(d.getDate() + 5);
-          return d.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+          return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
         })()
       };
     }
@@ -910,7 +999,7 @@
 
     // Items
     const itemsList = document.getElementById('orderItemsList');
-    const icons = { Ring:'💍', Necklace:'📿', Bracelet:'⌚', Earring:'✨', default:'💎' };
+    const icons = { Ring: '💍', Necklace: '📿', Bracelet: '⌚', Earring: '✨', default: '💎' };
 
     if (order.items && order.items.length > 0) {
       order.items.forEach(item => {
@@ -968,7 +1057,7 @@
     const deliveryInfo = document.getElementById('deliveryInfo');
     const estDelivery = order.estimatedDelivery || (() => {
       const d = new Date(); d.setDate(d.getDate() + 5);
-      return d.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
     })();
 
     deliveryInfo.innerHTML = `
@@ -997,16 +1086,16 @@
     const statusMap = { processing: 1, shipped: 2, delivered: 3, cancelled: -1 };
     const currentStep = statusMap[order.status] || 1;
     const steps = [
-      { label: 'Order Confirmed',      time: 'Just now',                     icon: 'fa-circle-check' },
-      { label: 'Preparing Your Jewel', time: 'Within 24 hours',              icon: 'fa-gem' },
-      { label: 'Shipped',              time: '2 – 3 business days',          icon: 'fa-truck-fast' },
-      { label: 'Out for Delivery',     time: '4 – 5 business days',          icon: 'fa-box-open' },
-      { label: 'Delivered',            time: 'Estimated: ' + estDelivery,    icon: 'fa-house-circle-check' },
+      { label: 'Order Confirmed', time: 'Just now', icon: 'fa-circle-check' },
+      { label: 'Preparing Your Jewel', time: 'Within 24 hours', icon: 'fa-gem' },
+      { label: 'Shipped', time: '2 – 3 business days', icon: 'fa-truck-fast' },
+      { label: 'Out for Delivery', time: '4 – 5 business days', icon: 'fa-box-open' },
+      { label: 'Delivered', time: 'Estimated: ' + estDelivery, icon: 'fa-house-circle-check' },
     ];
 
     const timeline = document.getElementById('orderTimeline');
     steps.forEach((s, i) => {
-      const stepNum  = i + 1;
+      const stepNum = i + 1;
       const dotClass = stepNum < currentStep ? 'done' : stepNum === currentStep ? 'active' : 'pending';
       const lblClass = stepNum > currentStep ? 'pending-txt' : '';
       timeline.innerHTML += `
@@ -1020,10 +1109,10 @@
     // Confetti
     const confettiCanvas = document.getElementById('confetti-canvas');
     const ctx = confettiCanvas.getContext('2d');
-    confettiCanvas.width  = window.innerWidth;
+    confettiCanvas.width = window.innerWidth;
     confettiCanvas.height = window.innerHeight;
 
-    const COLORS = ['#d4af37','#f7e7ce','#fff0aa','#aa7c11','#e8c97a','#0d523d','#10a87a'];
+    const COLORS = ['#d4af37', '#f7e7ce', '#fff0aa', '#aa7c11', '#e8c97a', '#0d523d', '#10a87a'];
     const pieces = Array.from({ length: 120 }, () => ({
       x: Math.random() * confettiCanvas.width,
       y: -Math.random() * 600 - 20,
@@ -1059,7 +1148,7 @@
     setTimeout(drawConfetti, 1800);
 
     window.addEventListener('resize', () => {
-      confettiCanvas.width  = window.innerWidth;
+      confettiCanvas.width = window.innerWidth;
       confettiCanvas.height = window.innerHeight;
     });
 
@@ -1088,7 +1177,7 @@
         pctx.fillStyle = `rgba(212, 175, 55, ${p.a * 0.5})`;
         pctx.fill();
         p.x += p.dx; p.y += p.dy;
-        if (p.x < 0 || p.x > pc.width)  p.dx *= -1;
+        if (p.x < 0 || p.x > pc.width) p.dx *= -1;
         if (p.y < 0 || p.y > pc.height) p.dy *= -1;
       });
       requestAnimationFrame(drawParticles);
@@ -1097,4 +1186,5 @@
   </script>
 
 </body>
+
 </html>
