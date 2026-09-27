@@ -1,12 +1,17 @@
 {
-  "name": "RS Jewels",
+  "name": "rsauraantitarnish",
   "version": "1.0.0",
-  "description": "RS Jewels Website",
+  "description": "rsauraantitarnish Website",
+  "main": "server.js",
   "scripts": {
-    "dev": "serve .",
-    "start": "serve ."
+    "dev": "node server.js",
+    "start": "node server.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.0",
+    "mongoose": "^8.0.0",
     "serve": "^14.2.6"
   }
 }

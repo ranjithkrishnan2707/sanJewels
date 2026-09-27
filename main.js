@@ -1,8 +1,9 @@
 /* ==========================================================================
-   RS Jewels - Main Interactive Engine
+   rsauraantitarnish - Main Interactive Engine
    ========================================================================== */
 
-// 1. Curated Product Data (50 Products across 5 variants: emerald, rings, earrings, bracelets, heritage)
+// 1. Curated Product Data – loaded from MongoDB Atlas via API
+// Falls back to localStorage cache / seed data if server is unreachable.
 let storedAdminProducts = null;
 try {
   storedAdminProducts = JSON.parse(localStorage.getItem('san_admin_products'));
@@ -11,14 +12,22 @@ try {
 }
 
 const seedProducts = (typeof window !== 'undefined' && window.SAMPLE_PRODUCTS) ? window.SAMPLE_PRODUCTS : [];
-const hasOutdatedPrices = storedAdminProducts && storedAdminProducts.some(p => p.price > 999);
-let PRODUCTS = (storedAdminProducts && storedAdminProducts.length >= 50 && !hasOutdatedPrices)
+let PRODUCTS = storedAdminProducts && storedAdminProducts.length >= 50
   ? storedAdminProducts
   : seedProducts;
 
-// Sync back to localStorage so store and admin stay consistent
-if (typeof localStorage !== 'undefined' && (!storedAdminProducts || storedAdminProducts.length < 50 || hasOutdatedPrices)) {
-  localStorage.setItem('san_admin_products', JSON.stringify(PRODUCTS));
+// Async: load fresh products from DB and re-render if different
+async function loadProductsFromDB() {
+  try {
+    const products = await API.getProducts();
+    if (Array.isArray(products) && products.length > 0) {
+      PRODUCTS = products;
+      localStorage.setItem('san_admin_products', JSON.stringify(PRODUCTS));
+      renderProducts(); // refresh UI with live DB data
+    }
+  } catch (err) {
+    console.warn('Could not load products from DB, using local cache.', err.message);
+  }
 }
 
 // State Management
@@ -82,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProducts();
   updateCartUI();
   initBespokeConfigurator();
+  loadProductsFromDB(); // async: refresh products from MongoDB
 
   // Sticky Navbar Scroll Listener
   window.addEventListener('scroll', () => {
@@ -141,7 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (newsletterForm) {
     newsletterForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      showToast('Thank you for subscribing to RS Jewels Private Vault.');
+      const emailInput = newsletterForm.querySelector('input[type="email"]');
+      const email = emailInput ? emailInput.value.trim() : '';
+      if (email) {
+        API.subscribeNewsletter(email).catch(() => {});
+      }
+      showToast('Thank you for subscribing to rsauraantitarnish Private Vault.');
       newsletterForm.reset();
     });
   }
@@ -187,7 +202,7 @@ function renderProducts() {
         <h3>${item.name}</h3>
         <p class="product-spec">${item.spec}</p>
         <div class="product-bottom">
-          <div class="product-price">$${item.price.toLocaleString()}</div>
+          <div class="product-price">₹${item.price.toLocaleString()}</div>
           <button class="add-cart-btn" onclick="addToCart('${item.id}')">Add To Bag</button>
         </div>
       </div>
@@ -203,7 +218,7 @@ function openQuickView(id) {
   modalImg.src = product.image;
   modalCategory.textContent = product.categoryName;
   modalTitle.textContent = product.name;
-  modalPrice.textContent = `$${product.price.toLocaleString()}`;
+  modalPrice.textContent = `₹${product.price.toLocaleString()}`;
   modalDesc.textContent = product.description;
 
   modalAddCartBtn.onclick = () => {
@@ -269,7 +284,7 @@ function updateCartUI() {
 
   // Update total subtotal
   const subtotal = shoppingCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  cartSubtotal.textContent = `$${subtotal.toLocaleString()}`;
+  cartSubtotal.textContent = `₹${subtotal.toLocaleString()}`;
 
   // Render items
   if (shoppingCart.length === 0) {
@@ -288,7 +303,7 @@ function updateCartUI() {
       <img src="${item.image}" alt="${item.name}">
       <div class="cart-item-details">
         <h4>${item.name}</h4>
-        <div class="item-price">$${(item.price * item.quantity).toLocaleString()}</div>
+        <div class="item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
         <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
           <div style="display: flex; align-items: center; border: 1px solid rgba(212,175,55,0.3); border-radius: 4px;">
             <button onclick="updateCartQuantity('${item.id}', -1)" style="background: none; border: none; color: #fff; padding: 2px 8px; cursor: pointer;">-</button>
@@ -376,7 +391,7 @@ function calculateBespokePrice() {
     bespokeState.carat * basePricePerCarat * bespokeState.metalFactor * bespokeState.cutMultiplier
   );
   if (configPrice) {
-    configPrice.textContent = `$${calculated.toLocaleString()}`;
+    configPrice.textContent = `₹${calculated.toLocaleString()}`;
   }
   return calculated;
 }
@@ -467,26 +482,28 @@ function initVipOnboarding() {
       localStorage.setItem('san_current_user', JSON.stringify(newUser));
       localStorage.setItem('san_greeting_seen', 'true');
 
-      // 2. Also register into Admin Customers database so it appears in Admin Portal
+      // 2. Also register into MongoDB Customers collection
+      const customerPayload = {
+        name: name,
+        email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@patron.rsauraantitarnish.com`,
+        whatsapp: fullWhatsapp,
+        location: code === '+91' ? 'Jaipur, IN' : (code === '+1' ? 'New York, US' : (code === '+41' ? 'Geneva, CH' : 'London, UK')),
+        orders: 0,
+        spent: 0,
+        since: new Date().toISOString().slice(0, 7),
+        status: 'vip'
+      };
+      API.createCustomer(customerPayload).catch(err => console.warn('Customer DB sync error:', err.message));
+
+      // Also keep localStorage admin customer list in sync
       try {
         const adminCustomers = JSON.parse(localStorage.getItem('san_admin_customers')) || [];
         const exists = adminCustomers.find(c => c.whatsapp === fullWhatsapp || c.name.toLowerCase() === name.toLowerCase());
         if (!exists) {
-          adminCustomers.unshift({
-            name: name,
-            email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@patron.RS Jewels.com`,
-            whatsapp: fullWhatsapp,
-            location: code === '+91' ? 'Jaipur, IN' : (code === '+1' ? 'New York, US' : (code === '+41' ? 'Geneva, CH' : 'London, UK')),
-            orders: 0,
-            spent: 0,
-            since: new Date().toISOString().slice(0, 7),
-            status: 'vip'
-          });
+          adminCustomers.unshift(customerPayload);
           localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers));
         }
-      } catch (err) {
-        console.error('Customer sync error:', err);
-      }
+      } catch (err) { console.error('Customer local sync error:', err); }
 
       // 3. Update UI
       if (vipStatusDot) vipStatusDot.classList.add('active');

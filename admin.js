@@ -1,5 +1,5 @@
 /* ==========================================================================
-   RS Jewels - Admin Dashboard Engine
+   rsauraantitarnish - Admin Dashboard Engine
    ========================================================================== */
 
 // ============================================================
@@ -8,82 +8,37 @@
 const ADMIN_CREDS = { username: 'admin', password: 'admin123' };
 
 // ============================================================
-// MOCK DATA
+// DATA – loaded from MongoDB Atlas via REST API
+// localStorage used only as a fast fallback cache.
 // ============================================================
 
-// Products (50 items across 5 variants: Emerald Couture, Royal Rings, High Earrings, Bracelets & Cuffs, Gold Heritage)
 const seedProducts = (typeof window !== 'undefined' && window.SAMPLE_PRODUCTS) ? window.SAMPLE_PRODUCTS : [];
-let adminProducts = JSON.parse(localStorage.getItem('san_admin_products')) || seedProducts;
+let adminProducts  = JSON.parse(localStorage.getItem('san_admin_products'))  || seedProducts;
+let adminOrders    = JSON.parse(localStorage.getItem('san_admin_orders'))    || [];
+let adminCustomers = JSON.parse(localStorage.getItem('san_admin_customers')) || [];
+let adminAppointments = JSON.parse(localStorage.getItem('san_admin_appts'))  || [];
+let newsletterSubs = JSON.parse(localStorage.getItem('san_newsletter_subs')) || [];
 
-// Ensure full 50 products and updated 3-digit prices are loaded
-const hasOutdatedAdminPrices = adminProducts && adminProducts.some(p => p.price > 999);
-if ((adminProducts.length < 50 && seedProducts.length >= 50) || hasOutdatedAdminPrices) {
-  adminProducts = seedProducts;
-  localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
+// Fetch all data from DB and refresh the in-memory + cache state
+async function loadAllDataFromDB() {
+  try {
+    const [products, orders, customers, appointments, newsletter] = await Promise.all([
+      API.getProducts(),
+      API.getOrders(),
+      API.getCustomers(),
+      API.getAppointments(),
+      API.getNewsletter(),
+    ]);
+    if (Array.isArray(products)     && products.length)     { adminProducts     = products;     localStorage.setItem('san_admin_products',  JSON.stringify(adminProducts));     }
+    if (Array.isArray(orders)       && orders.length)       { adminOrders       = orders;       localStorage.setItem('san_admin_orders',    JSON.stringify(adminOrders));       }
+    if (Array.isArray(customers)    && customers.length)    { adminCustomers    = customers;    localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers));    }
+    if (Array.isArray(appointments) && appointments.length) { adminAppointments = appointments; localStorage.setItem('san_admin_appts',     JSON.stringify(adminAppointments)); }
+    if (Array.isArray(newsletter)   && newsletter.length)   { newsletterSubs    = newsletter;   localStorage.setItem('san_newsletter_subs', JSON.stringify(newsletterSubs));   }
+    console.log('✅ Admin data loaded from MongoDB Atlas.');
+  } catch (err) {
+    console.warn('⚠️ Could not load from DB, using local cache.', err.message);
+  }
 }
-
-// Orders
-let adminOrders = JSON.parse(localStorage.getItem('san_admin_orders')) || [
-  { id: '#SAN-2026-001', customer: 'Lady Victoria Rothschild', product: 'The Sovereign Royal Emerald Necklace', amount: 700, location: 'Geneva, CH', date: '2026-09-25', status: 'delivered' },
-  { id: '#SAN-2026-002', customer: 'Prince Karim Al-Rashid', product: 'Royal Cushion Emerald Solitaire', amount: 470, location: 'Dubai, UAE', date: '2026-09-24', status: 'shipped' },
-  { id: '#SAN-2026-003', customer: 'Ms. Evelyn Hargrove', product: 'Empress Emerald Cut Halo Ring', amount: 485, location: 'New York, US', date: '2026-09-24', status: 'processing' },
-  { id: '#SAN-2026-004', customer: 'Mrs. Aisha Okonkwo', product: 'Crown Teardrop Emerald Earrings', amount: 355, location: 'London, UK', date: '2026-09-23', status: 'processing' },
-  { id: '#SAN-2026-005', customer: 'Maharani Sushila Rao', product: 'Verdant Palace Emerald Bracelet', amount: 570, location: 'Jaipur, IN', date: '2026-09-22', status: 'delivered' },
-  { id: '#SAN-2026-006', customer: 'Dr. Camille Fontaine', product: 'Duchess Emerald Chandelier Earrings', amount: 440, location: 'Paris, FR', date: '2026-09-21', status: 'cancelled' },
-  { id: '#SAN-2026-007', customer: 'Lady Helena Weston', product: 'The Sovereign Royal Emerald Necklace', amount: 700, location: 'Edinburgh, UK', date: '2026-09-20', status: 'shipped' },
-  { id: '#SAN-2026-008', customer: 'Ms. Sofia Andreessen', product: 'Empress Emerald Cut Halo Ring', amount: 485, location: 'Stockholm, SE', date: '2026-09-19', status: 'delivered' },
-];
-
-// Appointments
-const adminAppointments = [
-  { client: 'Lady Helena Weston', email: 'h.weston@noble.co.uk', salon: 'Geneva Flagship Salon', datetime: '2026-10-02 14:00', status: 'confirmed' },
-  { client: 'Mr. Antoine Beaumont', email: 'a.beaumont@atelier.fr', salon: 'Virtual Live Consultation', datetime: '2026-10-03 10:30', status: 'pending' },
-  { client: 'Princess Noor Al-Hamdan', email: 'noor@alhamdan.ae', salon: 'New York Boutique', datetime: '2026-10-05 16:00', status: 'pending' },
-  { client: 'Mrs. Rajni Kapoor', email: 'rajni@kapoorhomes.in', salon: 'Jaipur Heritage Palace', datetime: '2026-10-06 11:00', status: 'confirmed' },
-  { client: 'Ms. Chiara Romano', email: 'c.romano@milanstyle.it', salon: 'Virtual Live Consultation', datetime: '2026-09-28 09:00', status: 'pending' },
-];
-
-// Customers
-const defaultAdminCustomers = [
-  { name: 'Lady Victoria Rothschild', email: 'v.rothschild@noble.ch', whatsapp: '+41 79 123 4567', location: 'Geneva, CH', orders: 4, spent: 68900, since: '2024-03', status: 'vip' },
-  { name: 'Prince Karim Al-Rashid', email: 'karim@rashid-palace.ae', whatsapp: '+971 50 987 6543', location: 'Dubai, UAE', orders: 3, spent: 45300, since: '2024-06', status: 'vip' },
-  { name: 'Ms. Evelyn Hargrove', email: 'evelyn@sinclair.com', whatsapp: '+1 212 555 0192', location: 'New York, US', orders: 2, spent: 17500, since: '2025-01', status: 'active' },
-  { name: 'Mrs. Aisha Okonkwo', email: 'a.okonkwo@royalgroup.uk', whatsapp: '+44 7700 900123', location: 'London, UK', orders: 1, spent: 6400, since: '2025-08', status: 'active' },
-  { name: 'Maharani Sushila Rao', email: 'sushila@raopalace.in', whatsapp: '+91 98290 12345', location: 'Jaipur, IN', orders: 5, spent: 89200, since: '2023-11', status: 'vip' },
-  { name: 'Dr. Camille Fontaine', email: 'c.fontaine@fontaine.fr', whatsapp: '+33 6 12 34 56 78', location: 'Paris, FR', orders: 1, spent: 0, since: '2026-07', status: 'inactive' },
-];
-
-let adminCustomers = JSON.parse(localStorage.getItem('san_admin_customers')) || defaultAdminCustomers;
-
-// Auto-fill WhatsApp numbers for existing mock records if previously stored without it
-adminCustomers = adminCustomers.map(c => {
-  if (!c.whatsapp) {
-    const match = defaultAdminCustomers.find(d => d.name === c.name || d.email === c.email);
-    if (match && match.whatsapp) {
-      c.whatsapp = match.whatsapp;
-    }
-  }
-  return c;
-});
-localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers));
-
-// Newsletter Subscribers
-let newsletterSubs = JSON.parse(localStorage.getItem('san_newsletter_subs')) || [
-  { email: 'victoria@rothschild.ch', date: '2026-08-15', status: 'active' },
-  { email: 'evelyn@sinclair.com', date: '2026-08-20', status: 'active' },
-  { email: 'noor@alhamdan.ae', date: '2026-09-01', status: 'active' },
-  { email: 'sushila@raopalace.in', date: '2026-07-11', status: 'active' },
-  { email: 'chiara@milanstyle.it', date: '2026-09-14', status: 'active' },
-  { email: 'h.weston@noble.co.uk', date: '2026-09-18', status: 'active' },
-];
-
-// Pull storefront newsletter subs
-const storefrontSubs = JSON.parse(localStorage.getItem('san_newsletter')) || [];
-storefrontSubs.forEach(email => {
-  if (!newsletterSubs.find(s => s.email === email)) {
-    newsletterSubs.push({ email, date: new Date().toISOString().split('T')[0], status: 'active' });
-  }
-});
 
 // Weekly revenue data
 const weeklyRevenue = [
@@ -398,10 +353,13 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 // DASHBOARD INIT
 // ============================================================
 function initDashboard() {
-  updateDashboardStats();
-  renderRevenueChart();
-  renderTopProducts();
-  renderRecentOrders();
+  // Load fresh data from DB then render
+  loadAllDataFromDB().then(() => {
+    updateDashboardStats();
+    renderRevenueChart();
+    renderTopProducts();
+    renderRecentOrders();
+  });
 }
 
 function updateDashboardStats() {
@@ -409,7 +367,7 @@ function updateDashboardStats() {
     .filter(o => o.status !== 'cancelled')
     .reduce((sum, o) => sum + o.amount, 0);
 
-  document.getElementById('totalRevenue').textContent = `$${totalRev.toLocaleString()}`;
+  document.getElementById('totalRevenue').textContent = `₹${totalRev.toLocaleString()}`;
   document.getElementById('totalOrders').textContent = adminOrders.length;
   document.getElementById('totalProducts').textContent = adminProducts.length;
 }
@@ -426,8 +384,8 @@ function renderRevenueChart() {
     const pct = maxVal > 0 ? (d.value / maxVal) * 160 : 0;
     return `
       <div class="chart-bar-group">
-        <div class="chart-bar-value">$${(d.value / 1000).toFixed(0)}k</div>
-        <div class="chart-bar-fill" style="height: ${pct}px;" title="${d.label}: $${d.value.toLocaleString()}"></div>
+        <div class="chart-bar-value">₹${(d.value / 1000).toFixed(0)}k</div>
+        <div class="chart-bar-fill" style="height: ${pct}px;" title="${d.label}: ₹${d.value.toLocaleString()}"></div>
         <div class="chart-bar-label">${d.label}</div>
       </div>
     `;
@@ -448,7 +406,7 @@ function renderTopProducts() {
         <div class="tp-name">${p.name}</div>
         <div class="tp-cat">${p.categoryName}</div>
       </div>
-      <div class="tp-price">$${p.price.toLocaleString()}</div>
+      <div class="tp-price">₹${p.price.toLocaleString()}</div>
     </div>
   `).join('');
 }
@@ -464,7 +422,7 @@ function renderRecentOrders() {
       <td><code style="color:var(--ad-gold); font-size:0.82rem;">${o.id}</code></td>
       <td>${o.customer}</td>
       <td>${o.product.slice(0, 32)}${o.product.length > 32 ? '…' : ''}</td>
-      <td><strong>$${o.amount.toLocaleString()}</strong></td>
+      <td><strong>₹${o.amount.toLocaleString()}</strong></td>
       <td>${o.date}</td>
       <td>${statusBadge(o.status)}</td>
     </tr>
@@ -497,7 +455,7 @@ function renderProductsTable() {
           </div>
         </td>
         <td><span class="badge badge-confirmed">${catMap[p.category] || p.category}</span></td>
-        <td><strong>$${p.price.toLocaleString()}</strong></td>
+        <td><strong>₹${p.price.toLocaleString()}</strong></td>
         <td>${p.tag || '—'}</td>
         <td style="max-width:200px; font-size:0.82rem; color:var(--ad-text-muted);">${(p.spec || '').slice(0, 45)}${(p.spec || '').length > 45 ? '…' : ''}</td>
         <td>
@@ -562,10 +520,16 @@ function saveProduct(e) {
   if (editingProductId) {
     const idx = adminProducts.findIndex(p => p.id === editingProductId);
     if (idx !== -1) adminProducts[idx] = updated;
-    showAdminToast('Product updated successfully.');
+    // Persist to DB
+    API.updateProduct(editingProductId, updated)
+      .then(() => showAdminToast('Product updated successfully.'))
+      .catch(() => showAdminToast('Product updated locally (DB sync failed).', 'fa-exclamation-triangle'));
   } else {
     adminProducts.push(updated);
-    showAdminToast('Product added to the collection.');
+    // Persist to DB
+    API.saveProduct(updated)
+      .then(() => showAdminToast('Product added to the collection.'))
+      .catch(() => showAdminToast('Product added locally (DB sync failed).', 'fa-exclamation-triangle'));
   }
 
   localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
@@ -580,6 +544,8 @@ function deleteProduct(id) {
   confirmAction(`Delete "${p ? p.name : id}"? This cannot be undone.`, () => {
     adminProducts = adminProducts.filter(x => x.id !== id);
     localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
+    // Persist deletion to DB
+    API.deleteProduct(id).catch(err => console.warn('DB delete failed:', err.message));
     renderProductsTable();
     renderTopProducts();
     updateDashboardStats();
@@ -600,7 +566,7 @@ function renderOrdersTable() {
         <td><code style="color:var(--ad-gold); font-size:0.82rem;">${o.id}</code></td>
         <td>${o.customer}</td>
         <td style="max-width:180px; font-size:0.85rem;">${o.product.slice(0, 30)}${o.product.length > 30 ? '…' : ''}</td>
-        <td><strong>$${o.amount.toLocaleString()}</strong></td>
+        <td><strong>₹${o.amount.toLocaleString()}</strong></td>
         <td>${o.location}</td>
         <td>${o.date}</td>
         <td>${statusBadge(o.status)}</td>
@@ -630,6 +596,8 @@ function cycleOrderStatus(id) {
   const idx = cycle.indexOf(o.status);
   o.status = cycle[(idx + 1) % cycle.length];
   localStorage.setItem('san_admin_orders', JSON.stringify(adminOrders));
+  // Persist to DB
+  API.updateOrder(id, { status: o.status }).catch(err => console.warn('DB order update failed:', err.message));
   renderOrdersTable();
   renderOrderStatusCounts();
   renderRecentOrders();
@@ -641,6 +609,8 @@ function cancelOrder(id) {
     const o = adminOrders.find(x => x.id === id);
     if (o) o.status = 'cancelled';
     localStorage.setItem('san_admin_orders', JSON.stringify(adminOrders));
+    // Persist to DB
+    API.updateOrder(id, { status: 'cancelled' }).catch(err => console.warn('DB cancel failed:', err.message));
     renderOrdersTable();
     renderOrderStatusCounts();
     showAdminToast(`Order ${id} cancelled.`);
@@ -649,7 +619,7 @@ function cancelOrder(id) {
 
 function exportOrdersCSV() {
   const headers = ['Order ID', 'Customer', 'Product', 'Amount', 'Location', 'Date', 'Status'];
-  const rows = adminOrders.map(o => [o.id, o.customer, o.product, `$${o.amount}`, o.location, o.date, o.status]);
+  const rows = adminOrders.map(o => [o.id, o.customer, o.product, `₹${o.amount}`, o.location, o.date, o.status]);
   const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
   downloadFile('san_jewels_orders.csv', 'text/csv', csv);
   showAdminToast('Orders exported as CSV.');
@@ -747,7 +717,7 @@ function renderMonthlyBars() {
     const isHighlight = i === currentMonth - 1;
     return `
       <div class="monthly-bar">
-        <div class="monthly-bar-val">${m.value > 0 ? `$${(m.value / 1000).toFixed(0)}k` : ''}</div>
+        <div class="monthly-bar-val">${m.value > 0 ? `₹${(m.value / 1000).toFixed(0)}k` : ''}</div>
         <div class="monthly-bar-fill${isHighlight ? ' highlight' : ''}" style="height:${h}px;"></div>
         <div class="monthly-bar-label">${m.label}</div>
       </div>
@@ -760,8 +730,14 @@ function renderMonthlyBars() {
 // ============================================================
 function renderCustomersTable() {
   const tbody = document.getElementById('customersTableBody');
-  // Re-read from localStorage in case a new visitor just joined on storefront
-  adminCustomers = JSON.parse(localStorage.getItem('san_admin_customers')) || adminCustomers;
+  // Refresh from DB, then re-render
+  API.getCustomers()
+    .then(data => { if (Array.isArray(data) && data.length) { adminCustomers = data; localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers)); } })
+    .catch(() => {})
+    .finally(() => _drawCustomersTable(tbody));
+}
+function _drawCustomersTable(tbody) {
+  if (!tbody) return;
   tbody.innerHTML = adminCustomers.map(c => {
     const cleanPhone = (c.whatsapp || '').replace(/[^0-9]/g, '');
     const waLink = cleanPhone ? `https://wa.me/${cleanPhone}` : '#';
@@ -778,7 +754,7 @@ function renderCustomersTable() {
       <td style="font-size:0.85rem; color:var(--ad-text-muted);">${c.email}</td>
       <td>${c.location}</td>
       <td style="text-align:center;">${c.orders}</td>
-      <td><strong>$${c.spent.toLocaleString()}</strong></td>
+      <td><strong>₹${c.spent.toLocaleString()}</strong></td>
       <td>${c.since}</td>
       <td>${customerBadge(c.status)}</td>
     </tr>
@@ -795,8 +771,13 @@ function customerBadge(status) {
 // ============================================================
 function renderNewsletterTable() {
   const tbody = document.getElementById('newsletterTableBody');
-  document.getElementById('nlTotalCount').textContent = newsletterSubs.length;
-  tbody.innerHTML = newsletterSubs.map((s, i) => `
+  // Refresh from DB
+  API.getNewsletter()
+    .then(data => { if (Array.isArray(data) && data.length) { newsletterSubs = data; localStorage.setItem('san_newsletter_subs', JSON.stringify(newsletterSubs)); } })
+    .catch(() => {})
+    .finally(() => {
+      document.getElementById('nlTotalCount').textContent = newsletterSubs.length;
+      tbody.innerHTML = newsletterSubs.map((s, i) => `
     <tr>
       <td style="color:var(--ad-text-dim);">${i + 1}</td>
       <td>${s.email}</td>
@@ -807,12 +788,16 @@ function renderNewsletterTable() {
       </td>
     </tr>
   `).join('');
+    });
 }
+
 
 function unsubscribeEmail(email) {
   confirmAction(`Remove "${email}" from newsletter list?`, () => {
     newsletterSubs = newsletterSubs.filter(s => s.email !== email);
     localStorage.setItem('san_newsletter_subs', JSON.stringify(newsletterSubs));
+    // Persist to DB
+    API.unsubscribeNewsletter(email).catch(err => console.warn('DB unsub failed:', err.message));
     renderNewsletterTable();
     showAdminToast(`${email} removed from newsletter.`);
   });

@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RS Jewels | Admin Dashboard</title>
+  <title>rsauraantitarnish | Admin Dashboard</title>
   <meta name="description"
-    content="RS Jewels Admin Control Panel - Manage products, orders, appointments and analytics.">
+    content="rsauraantitarnish Admin Control Panel - Manage products, orders, appointments and analytics.">
   <link rel="stylesheet" href="admin.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -18,7 +18,7 @@
     <div class="login-glow"></div>
     <div class="login-card">
       <div class="login-logo">
-        <span class="logo-title">RS Jewels</span>
+        <span class="logo-title">rsauraantitarnish</span>
         <span class="logo-subtitle">ADMIN CONSOLE</span>
       </div>
       <div class="login-icon-wrap">
@@ -51,7 +51,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
-        <span class="logo-title">RS Jewels</span>
+        <span class="logo-title">rsauraantitarnish</span>
         <span class="logo-subtitle">ADMIN CONSOLE</span>
       </div>
       <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse Sidebar">
@@ -145,11 +145,11 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-card-icon" style="background: linear-gradient(135deg, #d4af37, #aa7c11);">
-            <i class="fa-solid fa-dollar-sign"></i>
+            <i class="fa-solid fa-indian-rupee-sign"></i>
           </div>
           <div class="stat-card-info">
             <span class="stat-label">Total Revenue</span>
-            <div class="stat-value" id="totalRevenue">$0</div>
+            <div class="stat-value" id="totalRevenue">₹0</div>
             <div class="stat-change positive"><i class="fa-solid fa-arrow-trend-up"></i> +18.4% this month</div>
           </div>
         </div>
@@ -461,20 +461,20 @@
           <form class="settings-form" id="storeSettingsForm">
             <div class="form-row">
               <label>Store Name</label>
-              <input type="text" class="admin-input" value="RS Jewels Haute Joaillerie">
+              <input type="text" class="admin-input" value="rsauraantitarnish Haute Joaillerie">
             </div>
             <div class="form-row">
               <label>Support Email</label>
-              <input type="email" class="admin-input" value="concierge@RS Jewels.com">
+              <input type="email" class="admin-input" value="concierge@rsauraantitarnish.com">
             </div>
             <div class="form-row">
-              <label>Free Shipping Threshold ($)</label>
+              <label>Free Shipping Threshold (₹)</label>
               <input type="number" class="admin-input" value="2500">
             </div>
             <div class="form-row">
               <label>Announcement Bar Text</label>
               <input type="text" class="admin-input"
-                value="Complimentary Insured Worldwide Delivery on Orders Over $2,500">
+                value="Complimentary Insured Express Delivery Across India on Orders Over ₹2,500">
             </div>
             <button type="submit" class="btn-primary" style="margin-top: 8px;">
               <i class="fa-solid fa-floppy-disk"></i> Save Changes
@@ -572,8 +572,8 @@
             </select>
           </div>
           <div class="form-row">
-            <label>Price (USD) *</label>
-            <input type="number" class="admin-input" id="pPrice" placeholder="e.g. 12500" min="0" required>
+            <label>Price (₹ INR) *</label>
+            <input type="number" class="admin-input" id="pPrice" placeholder="e.g. 750" min="0" required>
           </div>
           <div class="form-row">
             <label>Product Tag</label>
@@ -625,6 +625,7 @@
   </div>
 
   <script src="products_data.js"></script>
+  <script src="api.js"></script>
   <script src="admin.js"></script>
 </body>
 
