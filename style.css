@@ -1291,8 +1291,80 @@ footer {
   font-size: 0.85rem;
 }
 
-/* Responsive Breakpoints */
+/* ==========================================================================
+   Comprehensive Mobile & Tablet Responsive Design
+   ========================================================================== */
+
+/* Laptop & Tablet Landscape (<= 1100px) */
+@media (max-width: 1100px) {
+  .nav-links {
+    gap: 20px;
+  }
+  .nav-link {
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* Tablet Portrait & Mobile (<= 992px) */
 @media (max-width: 992px) {
+  .announcement-bar .desktop-only {
+    display: none;
+  }
+  .announcement-bar {
+    font-size: 0.74rem;
+    padding: 6px 12px;
+  }
+
+  .navbar {
+    top: 28px;
+  }
+  .navbar.scrolled {
+    top: 0;
+  }
+
+  /* Mobile Slide-down Navigation Menu */
+  .nav-links {
+    position: fixed;
+    top: 68px;
+    left: 0;
+    right: 0;
+    background: rgba(3, 20, 14, 0.98);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+    flex-direction: column;
+    padding: 24px 28px;
+    gap: 18px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
+    transform: translateY(-120%);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.4s ease;
+    z-index: 999;
+  }
+
+  .nav-links.mobile-active {
+    display: flex;
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .nav-link {
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  }
+
+  .mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+  }
 
   .hero-grid,
   .configurator-card,
@@ -1300,37 +1372,215 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  .hero {
+    padding-top: 120px;
+    min-height: auto;
+    padding-bottom: 60px;
+  }
+
+  .hero-grid {
+    gap: 40px;
+  }
+
+  .hero-image-frame {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .hero-image-inner img {
+    height: 400px;
+  }
+
   .heritage-grid,
   .footer-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 30px;
   }
 
-  .nav-links {
-    display: none;
-  }
-
-  .mobile-toggle {
-    display: block;
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
   }
 }
 
-@media (max-width: 576px) {
+/* Mobile Devices (<= 768px) */
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 60px 0;
+  }
 
-  .heritage-grid,
-  .footer-grid {
-    grid-template-columns: 1fr;
+  .container {
+    padding: 0 16px;
+  }
+
+  .brand-logo .logo-title {
+    font-size: 1.35rem;
+    letter-spacing: 0.12em;
+  }
+
+  .nav-actions {
+    gap: 10px;
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
   }
 
   .hero h1 {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 8vw, 2.8rem);
+    line-height: 1.15;
+  }
+
+  .hero-tag {
+    font-size: 0.72rem;
+    padding: 4px 12px;
   }
 
   .hero-ctas {
     flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .hero-ctas .btn {
+    width: 100%;
+  }
+
+  .hero-badge-floating {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    margin-top: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .filter-tabs {
+    gap: 8px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .filter-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-btn {
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .product-info {
+    padding: 16px;
+  }
+
+  .product-info h3 {
+    font-size: 1.05rem;
+  }
+
+  .product-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .add-cart-btn {
+    width: 100%;
+  }
+
+  /* Bespoke Configurator */
+  .configurator-card {
+    padding: 24px 16px;
+  }
+
+  .preview-stage {
+    max-width: 280px;
+    height: 280px;
+  }
+
+  .configurator-controls h3 {
+    font-size: 1.6rem;
+  }
+
+  .option-pills {
+    gap: 8px;
+  }
+
+  .pill-opt {
+    padding: 6px 14px;
+    font-size: 0.78rem;
+  }
+
+  /* Cart Drawer Full-width on mobile */
+  .cart-drawer {
+    max-width: 100%;
+    width: 100%;
+    right: -100%;
+  }
+
+  /* Modal Windows */
+  .modal-content,
+  .quick-view-card {
+    width: 95%;
+    max-width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 10px;
+  }
+
+  .booking-form {
+    padding: 24px 18px;
+  }
+
+  .quick-view-details {
+    padding: 24px 18px;
+  }
+
+  .quick-view-img {
+    min-height: 240px;
+    max-height: 280px;
+  }
+}
+
+/* Small Smart Phones (<= 480px) */
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .heritage-grid,
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .hero h1 {
+    font-size: 2.1rem;
+  }
+
+  .hero-image-inner img {
+    height: 320px;
+  }
+
+  .section-title h2 {
+    font-size: 1.8rem;
   }
 
   .btn {
-    width: 100%;
+    padding: 12px 20px;
+    font-size: 0.82rem;
   }
 }
 
