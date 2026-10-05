@@ -915,10 +915,10 @@
     <div class="oc-support-strip">
       <i class="fa-solid fa-headset" style="color: var(--gold-primary);"></i>
       Need help? Contact our Concierge &mdash;
-      <a href="https://wa.me/919999999999?text=Hi%2C+I+need+help+with+my+order" target="_blank">
+      <a href="https://wa.me/919791249814?text=Hi%2C+I+need+help+with+my+order" target="_blank">
         <i class="fa-brands fa-whatsapp"></i> WhatsApp
       </a>
-      or call <a href="tel:+919999999999">+91 97912 49814</a>
+      or call <a href="tel:+919791249814">+91 97912 49814</a>
     </div>
 
     <!-- CTAs -->
@@ -934,11 +934,12 @@
   </main>
 
   <footer class="oc-footer">
-    <span>RS Aura Anti-Tarnish</span> &nbsp;·&nbsp; Crafted with love in India &nbsp;·&nbsp; <span>© 2025</span>
+    <span>RS Aura Anti-Tarnish</span> &nbsp;·&nbsp; Crafted with love in India &nbsp;·&nbsp; <span>© 2026</span>
+    &nbsp;·&nbsp; <a href="admin.html" style="color: var(--gold-light); opacity: 0.6; text-decoration: none; font-size: 0.8rem;"><i class="fa-solid fa-shield-halved"></i> Admin Portal</a>
   </footer>
 
   <!-- WhatsApp floating -->
-  <a class="oc-wa-float" href="https://wa.me/919999999999?text=Hi%2C+I+need+help+with+my+order" target="_blank"
+  <a class="oc-wa-float" href="https://wa.me/919791249814?text=Hi%2C+I+need+help+with+my+order" target="_blank"
     title="Chat on WhatsApp">
     <i class="fa-brands fa-whatsapp"></i>
   </a>
@@ -958,6 +959,8 @@
         return {
           id: orderId,
           customer: params.get('name') || 'Valued Customer',
+          phone: params.get('phone') || '',
+          email: params.get('email') || '',
           amount: params.get('amount') ? Number(params.get('amount')) : null,
           items: [],
           location: params.get('location') || 'India',
@@ -967,17 +970,23 @@
       }
 
       return {
-        id: 'RSA-2025-' + String(Math.floor(Math.random() * 90000) + 10000),
+        id: 'RSA-2026-' + String(Math.floor(Math.random() * 90000) + 10000),
         customer: 'Valued Customer',
+        phone: '+91 97912 49814',
+        email: 'client@rsaura.com',
+        address: 'Villa 14, Royal Palm Avenue',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        pincode: '400050',
         amount: 4999,
         items: [
           { name: 'Emerald Bloom Ring', qty: 1, price: 2499, category: 'Ring' },
           { name: 'Gold Cascade Necklace', qty: 1, price: 2500, category: 'Necklace' },
         ],
-        location: 'Mumbai, Maharashtra',
+        location: 'Mumbai, Maharashtra - 400050',
         date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
         status: 'processing',
-        paymentMethod: 'UPI',
+        paymentMethod: 'UPI / Instant Pay',
         estimatedDelivery: (() => {
           const d = new Date(); d.setDate(d.getDate() + 5);
           return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -1060,21 +1069,35 @@
       return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
     })();
 
+    const fullAddress = order.address
+      ? `${order.address}, ${order.city || ''}, ${order.state || ''} ${order.pincode ? '- ' + order.pincode : ''}`.replace(/,\s*,/g, ',').trim()
+      : (order.location || 'India');
+
     deliveryInfo.innerHTML = `
       <div class="oc-info-row">
         <span class="lbl">Customer</span>
         <span class="val">${order.customer}</span>
       </div>
+      ${order.phone ? `
       <div class="oc-info-row">
-        <span class="lbl">Destination</span>
-        <span class="val">${order.location || 'India'}</span>
+        <span class="lbl">Contact Phone</span>
+        <span class="val">${order.phone}</span>
+      </div>` : ''}
+      ${order.email ? `
+      <div class="oc-info-row">
+        <span class="lbl">Email</span>
+        <span class="val">${order.email}</span>
+      </div>` : ''}
+      <div class="oc-info-row">
+        <span class="lbl">Delivery Address</span>
+        <span class="val">${fullAddress}</span>
       </div>
       <div class="oc-info-row">
         <span class="lbl">Est. Delivery</span>
         <span class="val" style="color:var(--gold-primary);">${estDelivery}</span>
       </div>
       <div class="oc-info-row">
-        <span class="lbl">Payment</span>
+        <span class="lbl">Payment Method</span>
         <span class="val">${order.paymentMethod || 'Paid Online'}</span>
       </div>
       <div class="oc-info-row">

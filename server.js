@@ -17,10 +17,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));   // serve index.html, admin.html, css, js, images
 
+// ── Clean Page Routes ────────────────────────────────────────────────────────
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/order-confirmation', (req, res) => res.sendFile(path.join(__dirname, 'order-confirmation.html')));
+app.get('/review', (req, res) => res.sendFile(path.join(__dirname, 'review.html')));
+
 // ── MongoDB connection ───────────────────────────────────────────────────────
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB Atlas successfully.'))
-  .catch(err => { console.error('❌ MongoDB connection error:', err.message); process.exit(1); });
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 5000 })
+    .then(() => console.log('✅ Connected to MongoDB Atlas successfully.'))
+    .catch(err => console.warn('⚠️ MongoDB Atlas connection warning (server will continue running with offline/local fallback):', err.message));
+} else {
+  console.warn('⚠️ MONGODB_URI not provided; server running in static/local-cache mode.');
+}
 
 // ── Schemas & Models ─────────────────────────────────────────────────────────
 
@@ -34,16 +43,25 @@ const productSchema = new mongoose.Schema({
   tag:          { type: String },
   spec:         { type: String },
   description:  { type: String },
+  stock:        { type: Number, default: 10 },
 }, { timestamps: true });
 
 const orderSchema = new mongoose.Schema({
-  id:       { type: String, required: true, unique: true },
-  customer: { type: String, required: true },
-  product:  { type: String, required: true },
-  amount:   { type: Number, required: true },
-  location: { type: String },
-  date:     { type: String },
-  status:   { type: String, default: 'processing', enum: ['processing','shipped','delivered','cancelled'] },
+  id:            { type: String, required: true, unique: true },
+  customer:      { type: String, required: true },
+  phone:         { type: String },
+  email:         { type: String },
+  address:       { type: String },
+  city:          { type: String },
+  state:         { type: String },
+  pincode:       { type: String },
+  paymentMethod: { type: String, default: 'UPI / Online' },
+  items:         { type: Array, default: [] },
+  product:       { type: String, required: true },
+  amount:        { type: Number, required: true },
+  location:      { type: String },
+  date:          { type: String },
+  status:        { type: String, default: 'processing', enum: ['processing','shipped','delivered','cancelled'] },
 }, { timestamps: true });
 
 const customerSchema = new mongoose.Schema({

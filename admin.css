@@ -698,10 +698,76 @@ h5 {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 20px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
 }
+
+@media (max-width: 1400px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 540px) {
+  .stats-grid { grid-template-columns: 1fr; }
+}
+
+/* Dashboard Order Status Mini Bar */
+.dash-order-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1200px) {
+  .dash-order-row { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+  .dash-order-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+.dash-order-mini {
+  background: var(--ad-card);
+  border: 1px solid var(--ad-border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: var(--tr);
+}
+
+.dash-order-mini:hover {
+  border-color: var(--ad-gold);
+  background: var(--ad-card-hover);
+  transform: translateY(-2px);
+}
+
+.dom-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.dom-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ad-text);
+}
+
+.dom-lbl {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ad-text-muted);
+  margin-top: 3px;
+}
+
 
 .stat-card {
   background: var(--ad-card);
@@ -1772,4 +1838,24 @@ h5 {
   .topbar {
     padding: 0 16px;
   }
+}
+/* Additional responsive improvements */
+@media (max-width: 1024px) {
+  .orders-status-bar { flex-wrap: wrap; }
+  .order-status-card { min-width: 100px; flex: 1 1 120px; }
+}
+
+@media (max-width: 768px) {
+  .orders-status-bar { gap: 8px; }
+  .order-status-card { padding: 12px 14px; }
+  .status-num { font-size: 1.5rem; }
+  .page-header h1 { font-size: 1.5rem; }
+  .page-header { flex-wrap: wrap; gap: 12px; }
+}
+
+@media (max-width: 480px) {
+  .orders-status-bar { display: grid; grid-template-columns: 1fr 1fr; }
+  .dash-order-row { grid-template-columns: repeat(2, 1fr); }
+  .stat-card { padding: 16px; gap: 14px; }
+  .stat-value { font-size: 1.6rem; }
 }

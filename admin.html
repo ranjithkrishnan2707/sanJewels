@@ -134,9 +134,9 @@
           <i class="fa-solid fa-bell"></i>
           <span class="topbar-badge">7</span>
         </button>
-        <div class="topbar-store-link">
-          <span class="live-dot"></span> Live Store
-        </div>
+        <a href="index.html" class="topbar-store-link" style="text-decoration: none;" title="Go to storefront">
+          <span class="live-dot"></span> Live Store <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.72rem; margin-left: 4px;"></i>
+        </a>
       </div>
     </header>
 
@@ -150,7 +150,7 @@
           <div class="stat-card-info">
             <span class="stat-label">Total Revenue</span>
             <div class="stat-value" id="totalRevenue">₹0</div>
-            <div class="stat-change positive"><i class="fa-solid fa-arrow-trend-up"></i> +18.4% this month</div>
+            <div class="stat-change positive"><i class="fa-solid fa-arrow-trend-up"></i> All time</div>
           </div>
         </div>
         <div class="stat-card">
@@ -160,7 +160,7 @@
           <div class="stat-card-info">
             <span class="stat-label">Total Orders</span>
             <div class="stat-value" id="totalOrders">0</div>
-            <div class="stat-change positive"><i class="fa-solid fa-arrow-trend-up"></i> +9.2% this month</div>
+            <div class="stat-change positive"><i class="fa-solid fa-arrow-trend-up"></i> All time</div>
           </div>
         </div>
         <div class="stat-card">
@@ -175,20 +175,88 @@
         </div>
         <div class="stat-card">
           <div class="stat-card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-label">Total Customers</span>
+            <div class="stat-value" id="totalCustomers">0</div>
+            <div class="stat-change positive"><i class="fa-solid fa-arrow-trend-up"></i> Growing</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, #06b6d4, #0e7490);">
+            <i class="fa-solid fa-calendar-day"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-label">Today's Orders</span>
+            <div class="stat-value" id="todayOrders">0</div>
+            <div class="stat-change neutral"><i class="fa-solid fa-clock"></i> Live count</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-label">Today's Sales</span>
+            <div class="stat-value" id="todaySales">₹0</div>
+            <div class="stat-change neutral"><i class="fa-solid fa-clock"></i> Live count</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">
+            <i class="fa-solid fa-chart-bar"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-label">Monthly Sales</span>
+            <div class="stat-value" id="monthlySales">₹0</div>
+            <div class="stat-change positive"><i class="fa-solid fa-arrow-trend-up"></i> This month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
             <i class="fa-regular fa-calendar-check"></i>
           </div>
           <div class="stat-card-info">
             <span class="stat-label">Pending Appointments</span>
-            <div class="stat-value">3</div>
-            <div class="stat-change negative"><i class="fa-solid fa-arrow-trend-up"></i> +2 today</div>
+            <div class="stat-value" id="totalAppointments">0</div>
+            <div class="stat-change negative"><i class="fa-solid fa-clock"></i> Awaiting action</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Order Status + Stock Mini Cards -->
+      <div class="dash-order-row">
+        <div class="dash-order-mini" onclick="navigateTo('orders'); document.querySelector('[data-filter-status=processing]').click();">
+          <span class="dom-icon" style="color:#f59e0b;"><i class="fa-solid fa-spinner"></i></span>
+          <div><div class="dom-val" id="dashProcessing">0</div><div class="dom-lbl">Processing</div></div>
+        </div>
+        <div class="dash-order-mini" onclick="navigateTo('orders'); document.querySelector('[data-filter-status=shipped]').click();">
+          <span class="dom-icon" style="color:#3b82f6;"><i class="fa-solid fa-truck"></i></span>
+          <div><div class="dom-val" id="dashShipped">0</div><div class="dom-lbl">Shipped</div></div>
+        </div>
+        <div class="dash-order-mini" onclick="navigateTo('orders'); document.querySelector('[data-filter-status=delivered]').click();">
+          <span class="dom-icon" style="color:#10b981;"><i class="fa-solid fa-circle-check"></i></span>
+          <div><div class="dom-val" id="dashDelivered">0</div><div class="dom-lbl">Delivered</div></div>
+        </div>
+        <div class="dash-order-mini" onclick="navigateTo('orders'); document.querySelector('[data-filter-status=cancelled]').click();">
+          <span class="dom-icon" style="color:#ef4444;"><i class="fa-solid fa-ban"></i></span>
+          <div><div class="dom-val" id="dashCancelled">0</div><div class="dom-lbl">Cancelled</div></div>
+        </div>
+        <div class="dash-order-mini" onclick="navigateTo('products')">
+          <span class="dom-icon" style="color:#f59e0b;"><i class="fa-solid fa-triangle-exclamation"></i></span>
+          <div><div class="dom-val" id="dashLowStock">0</div><div class="dom-lbl">Low Stock</div></div>
+        </div>
+        <div class="dash-order-mini" onclick="navigateTo('products')">
+          <span class="dom-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-xmark"></i></span>
+          <div><div class="dom-val" id="dashOutStock">0</div><div class="dom-lbl">Out of Stock</div></div>
         </div>
       </div>
 
       <div class="dashboard-row">
         <div class="card chart-card">
           <div class="card-header">
-            <h3><i class="fa-solid fa-chart-area"></i> Revenue Overview</h3>
+            <h3><i class="fa-solid fa-chart-area"></i> Sales Overview</h3>
             <div class="period-toggle">
               <button class="period-btn active" data-period="weekly">Weekly</button>
               <button class="period-btn" data-period="monthly">Monthly</button>
@@ -262,6 +330,7 @@
                 <th>Price</th>
                 <th>Tag</th>
                 <th>Specification</th>
+                <th>Stock</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -302,6 +371,12 @@
         </div>
       </div>
       <div class="card">
+        <div class="table-toolbar">
+          <div class="table-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search by order ID, customer, product..." id="orderSearch">
+          </div>
+        </div>
         <div class="table-wrapper">
           <table class="data-table">
             <thead>
@@ -576,6 +651,10 @@
             <input type="number" class="admin-input" id="pPrice" placeholder="e.g. 750" min="0" required>
           </div>
           <div class="form-row">
+            <label>Stock Quantity</label>
+            <input type="number" class="admin-input" id="pStock" placeholder="e.g. 10" min="0" value="10">
+          </div>
+          <div class="form-row">
             <label>Product Tag</label>
             <input type="text" class="admin-input" id="pTag" placeholder="e.g. Royal Heritage">
           </div>
@@ -620,6 +699,22 @@
       <div class="modal-actions">
         <button class="btn-secondary" id="confirmCancelBtn">Cancel</button>
         <button class="btn-danger" id="confirmOkBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER DETAIL MODAL -->
+  <div class="admin-modal-overlay" id="orderDetailModal">
+    <div class="admin-modal" style="max-width: 640px;">
+      <div class="admin-modal-header">
+        <h3 id="orderModalTitle"><i class="fa-solid fa-receipt" style="color: var(--ad-gold);"></i> Order Details</h3>
+        <button class="modal-x-btn" id="closeOrderDetailModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="orderModalContent" style="padding: 16px 0;">
+        <!-- Filled by JS -->
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="dismissOrderDetailModal">Close</button>
       </div>
     </div>
   </div>

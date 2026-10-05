@@ -89,6 +89,7 @@ const regionData = [
 // ============================================================
 let currentPage = 'dashboard';
 let activeOrderFilter = 'all';
+let orderSearchTerm = '';
 let productFilterCat = 'all';
 let productSearchTerm = '';
 let confirmCallback = null;
@@ -198,6 +199,26 @@ document.addEventListener('DOMContentLoaded', () => {
     closeConfirmFn();
   });
 
+  // Order Detail modal controls
+  const orderDetailModal = document.getElementById('orderDetailModal');
+  const closeOrderDetailModal = document.getElementById('closeOrderDetailModal');
+  const dismissOrderDetailModal = document.getElementById('dismissOrderDetailModal');
+  if (closeOrderDetailModal) {
+    closeOrderDetailModal.addEventListener('click', () => {
+      if (orderDetailModal) orderDetailModal.classList.remove('active');
+    });
+  }
+  if (dismissOrderDetailModal) {
+    dismissOrderDetailModal.addEventListener('click', () => {
+      if (orderDetailModal) orderDetailModal.classList.remove('active');
+    });
+  }
+  if (orderDetailModal) {
+    orderDetailModal.addEventListener('click', (e) => {
+      if (e.target === orderDetailModal) orderDetailModal.classList.remove('active');
+    });
+  }
+
   // Product search & filter
   document.getElementById('productSearch').addEventListener('input', (e) => {
     productSearchTerm = e.target.value.toLowerCase();
@@ -217,6 +238,15 @@ document.addEventListener('DOMContentLoaded', () => {
       renderOrdersTable();
     });
   });
+
+  // Order search
+  const orderSearchEl = document.getElementById('orderSearch');
+  if (orderSearchEl) {
+    orderSearchEl.addEventListener('input', (e) => {
+      orderSearchTerm = e.target.value.toLowerCase().trim();
+      renderOrdersTable();
+    });
+  }
 
   // Period toggle
   document.querySelectorAll('.period-btn').forEach(btn => {
@@ -363,13 +393,55 @@ function initDashboard() {
 }
 
 function updateDashboardStats() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  // Revenue (non-cancelled)
   const totalRev = adminOrders
     .filter(o => o.status !== 'cancelled')
-    .reduce((sum, o) => sum + o.amount, 0);
+    .reduce((sum, o) => sum + Number(o.amount || 0), 0);
 
-  document.getElementById('totalRevenue').textContent = `₹${totalRev.toLocaleString()}`;
-  document.getElementById('totalOrders').textContent = adminOrders.length;
-  document.getElementById('totalProducts').textContent = adminProducts.length;
+  // Today
+  const todayOrders = adminOrders.filter(o => (o.date || '').startsWith(todayStr));
+  const todaySales = todayOrders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + Number(o.amount || 0), 0);
+
+  // Monthly
+  const monthlyOrders = adminOrders.filter(o => {
+    const d = new Date(o.date || '');
+    return !isNaN(d) && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+  const monthlySales = monthlyOrders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + Number(o.amount || 0), 0);
+
+  // Order statuses
+  const processing = adminOrders.filter(o => o.status === 'processing').length;
+  const shipped = adminOrders.filter(o => o.status === 'shipped').length;
+  const delivered = adminOrders.filter(o => o.status === 'delivered').length;
+  const cancelled = adminOrders.filter(o => o.status === 'cancelled').length;
+
+  // Stock (using stock field if available, otherwise flag products with low/no stock)
+  const lowStock = adminProducts.filter(p => p.stock > 0 && p.stock <= 5).length;
+  const outStock = adminProducts.filter(p => p.stock === 0).length;
+
+  // Pending appointments
+  const pendingAppts = adminAppointments.filter(a => a.status === 'pending').length;
+
+  // Set DOM
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('totalRevenue', `₹${totalRev.toLocaleString('en-IN')}`);
+  set('totalOrders', adminOrders.length);
+  set('totalProducts', adminProducts.length);
+  set('totalCustomers', adminCustomers.length);
+  set('todayOrders', todayOrders.length);
+  set('todaySales', `₹${todaySales.toLocaleString('en-IN')}`);
+  set('monthlySales', `₹${monthlySales.toLocaleString('en-IN')}`);
+  set('totalAppointments', pendingAppts);
+  set('dashProcessing', processing);
+  set('dashShipped', shipped);
+  set('dashDelivered', delivered);
+  set('dashCancelled', cancelled);
+  set('dashLowStock', lowStock);
+  set('dashOutStock', outStock);
 }
 
 // ============================================================
@@ -442,8 +514,15 @@ function renderProductsTable() {
     return matchesCat && matchesSearch;
   });
 
-  tbody.innerHTML = filtered.length === 0 ? `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--ad-text-muted);">No products found.</td></tr>` :
-    filtered.map(p => `
+  tbody.innerHTML = filtered.length === 0 ? `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--ad-text-muted);">No products found.</td></tr>` :
+    filtered.map(p => {
+      const stock = p.stock !== undefined ? p.stock : null;
+      let stockBadge = '';
+      if (stock === null) stockBadge = `<span class="badge" style="background:rgba(255,255,255,0.05);color:var(--ad-text-muted);">—</span>`;
+      else if (stock === 0) stockBadge = `<span class="badge badge-cancelled"><i class="fa-solid fa-circle-xmark"></i> Out of Stock</span>`;
+      else if (stock <= 5) stockBadge = `<span class="badge badge-processing"><i class="fa-solid fa-triangle-exclamation"></i> Low (${stock})</span>`;
+      else stockBadge = `<span class="badge badge-delivered"><i class="fa-solid fa-circle-check"></i> ${stock}</span>`;
+      return `
       <tr>
         <td>
           <div class="td-product">
@@ -458,6 +537,7 @@ function renderProductsTable() {
         <td><strong>₹${p.price.toLocaleString()}</strong></td>
         <td>${p.tag || '—'}</td>
         <td style="max-width:200px; font-size:0.82rem; color:var(--ad-text-muted);">${(p.spec || '').slice(0, 45)}${(p.spec || '').length > 45 ? '…' : ''}</td>
+        <td>${stockBadge}</td>
         <td>
           <div class="table-actions">
             <button class="tbl-btn" title="Edit" onclick="editProduct('${p.id}')"><i class="fa-solid fa-pen"></i></button>
@@ -465,7 +545,7 @@ function renderProductsTable() {
           </div>
         </td>
       </tr>
-    `).join('');
+    `}).join('');
 }
 
 // ============================================================
@@ -487,6 +567,7 @@ function editProduct(id) {
   document.getElementById('pName').value = p.name;
   document.getElementById('pCategory').value = p.category;
   document.getElementById('pPrice').value = p.price;
+  document.getElementById('pStock').value = p.stock !== undefined ? p.stock : 10;
   document.getElementById('pTag').value = p.tag || '';
   document.getElementById('pSpec').value = p.spec || '';
   document.getElementById('pDesc').value = p.description || '';
@@ -511,6 +592,7 @@ function saveProduct(e) {
     category: cat,
     categoryName: catMap[cat] || cat.toUpperCase(),
     price: parseInt(document.getElementById('pPrice').value),
+    stock: parseInt(document.getElementById('pStock').value) || 0,
     tag: document.getElementById('pTag').value.trim(),
     spec: document.getElementById('pSpec').value.trim(),
     description: document.getElementById('pDesc').value.trim(),
@@ -558,20 +640,28 @@ function deleteProduct(id) {
 // ============================================================
 function renderOrdersTable() {
   const tbody = document.getElementById('ordersTableBody');
-  const filtered = activeOrderFilter === 'all' ? adminOrders : adminOrders.filter(o => o.status === activeOrderFilter);
-
+  let filtered = activeOrderFilter === 'all' ? adminOrders : adminOrders.filter(o => o.status === activeOrderFilter);
+  if (orderSearchTerm) {
+    filtered = filtered.filter(o =>
+      (o.id || '').toLowerCase().includes(orderSearchTerm) ||
+      (o.customer || '').toLowerCase().includes(orderSearchTerm) ||
+      (o.product || '').toLowerCase().includes(orderSearchTerm) ||
+      (o.location || '').toLowerCase().includes(orderSearchTerm)
+    );
+  }
   tbody.innerHTML = filtered.length === 0 ? `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--ad-text-muted);">No orders found.</td></tr>` :
     filtered.map(o => `
       <tr>
         <td><code style="color:var(--ad-gold); font-size:0.82rem;">${o.id}</code></td>
         <td>${o.customer}</td>
         <td style="max-width:180px; font-size:0.85rem;">${o.product.slice(0, 30)}${o.product.length > 30 ? '…' : ''}</td>
-        <td><strong>₹${o.amount.toLocaleString()}</strong></td>
+        <td><strong>₹${Number(o.amount).toLocaleString()}</strong></td>
         <td>${o.location}</td>
         <td>${o.date}</td>
         <td>${statusBadge(o.status)}</td>
         <td>
           <div class="table-actions">
+            <button class="tbl-btn" title="View Order & Delivery Details" onclick="viewOrderDetails('${o.id}')"><i class="fa-solid fa-eye"></i></button>
             <button class="tbl-btn" title="Change Status" onclick="cycleOrderStatus('${o.id}')"><i class="fa-solid fa-rotate"></i></button>
             <button class="tbl-btn danger" title="Cancel Order" onclick="cancelOrder('${o.id}')"><i class="fa-solid fa-ban"></i></button>
           </div>
@@ -617,6 +707,68 @@ function cancelOrder(id) {
   });
 }
 
+window.viewOrderDetails = function(id) {
+  const o = adminOrders.find(x => x.id === id);
+  if (!o) return;
+
+  const modal = document.getElementById('orderDetailModal');
+  const title = document.getElementById('orderModalTitle');
+  const content = document.getElementById('orderModalContent');
+
+  if (title) title.innerHTML = `<i class="fa-solid fa-receipt" style="color: var(--ad-gold);"></i> Acquisition Reference: ${o.id}`;
+
+  const fullAddr = o.address ? `${o.address}, ${o.city || ''}, ${o.state || ''} ${o.pincode ? '- ' + o.pincode : ''}`.replace(/,\s*,/g, ',').trim() : (o.location || 'India');
+
+  let itemsHtml = '';
+  if (o.items && Array.isArray(o.items) && o.items.length > 0) {
+    itemsHtml = o.items.map(i => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:0.86rem;">
+        <span><strong>${i.name}</strong> <span style="color:var(--ad-text-muted);">x${i.qty || 1}</span></span>
+        <span style="color:var(--ad-gold); font-weight:600;">₹${Number((i.price || 0) * (i.qty || 1)).toLocaleString('en-IN')}</span>
+      </div>
+    `).join('');
+  } else {
+    itemsHtml = `<div style="padding:8px 0; color:var(--ad-text-muted); font-size:0.88rem;">${o.product || 'Fine Jewelry Collection'}</div>`;
+  }
+
+  if (content) {
+    content.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(212,175,55,0.2);">
+        <div>
+          <span style="font-size:0.78rem; color:var(--ad-text-muted); display:block; margin-bottom:4px;">STATUS</span>
+          <div>${statusBadge(o.status)}</div>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-size:0.78rem; color:var(--ad-text-muted); display:block; margin-bottom:4px;">ORDER DATE</span>
+          <div style="font-weight:600; color:#fff;">${o.date || '—'}</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(212,175,55,0.2); border-radius:8px; padding:14px; margin-bottom:16px;">
+        <h4 style="font-size:0.82rem; color:var(--ad-gold); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;"><i class="fa-solid fa-truck"></i> Customer & Insured Delivery Details</h4>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.85rem;">
+          <div><span style="color:var(--ad-text-muted); font-size:0.78rem; display:block;">Recipient Name</span> <strong style="color:#fff;">${o.customer}</strong></div>
+          <div><span style="color:var(--ad-text-muted); font-size:0.78rem; display:block;">Phone / WhatsApp</span> <span style="color:#fff;">${o.phone || '—'}</span></div>
+          <div><span style="color:var(--ad-text-muted); font-size:0.78rem; display:block;">Email</span> <span style="color:#fff;">${o.email || '—'}</span></div>
+          <div><span style="color:var(--ad-text-muted); font-size:0.78rem; display:block;">Payment Method</span> <span style="color:#fff;">${o.paymentMethod || 'Paid Online'}</span></div>
+          <div style="grid-column: 1 / -1; margin-top:4px;"><span style="color:var(--ad-text-muted); font-size:0.78rem; display:block;">Delivery Address</span> <span style="color:#fff; line-height:1.4;">${fullAddr}</span></div>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(212,175,55,0.2); border-radius:8px; padding:14px;">
+        <h4 style="font-size:0.82rem; color:var(--ad-gold); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;"><i class="fa-solid fa-gem"></i> Purchased Items</h4>
+        ${itemsHtml}
+        <div style="display:flex; justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid rgba(212,175,55,0.25); font-weight:700; font-size:1.05rem;">
+          <span>Total Order Value</span>
+          <span style="color:var(--ad-gold);">₹${Number(o.amount || 0).toLocaleString('en-IN')}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (modal) modal.classList.add('active');
+};
+
 function exportOrdersCSV() {
   const headers = ['Order ID', 'Customer', 'Product', 'Amount', 'Location', 'Date', 'Status'];
   const rows = adminOrders.map(o => [o.id, o.customer, o.product, `₹${o.amount}`, o.location, o.date, o.status]);
@@ -630,22 +782,49 @@ function exportOrdersCSV() {
 // ============================================================
 function renderAppointmentsTable() {
   const tbody = document.getElementById('appointmentsTableBody');
+  if (!adminAppointments.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--ad-text-muted);">No appointments found.</td></tr>`;
+    return;
+  }
   tbody.innerHTML = adminAppointments.map(a => `
     <tr>
       <td><strong>${a.client}</strong></td>
-      <td style="font-size:0.85rem; color:var(--ad-text-muted);">${a.email}</td>
-      <td>${a.salon}</td>
-      <td>${a.datetime}</td>
+      <td style="font-size:0.85rem; color:var(--ad-text-muted);">${a.email || '—'}</td>
+      <td>${a.salon || '—'}</td>
+      <td>${a.datetime || '—'}</td>
       <td>${statusBadge(a.status)}</td>
       <td>
         <div class="table-actions">
-          <button class="tbl-btn" title="Confirm"><i class="fa-solid fa-check"></i></button>
-          <button class="tbl-btn danger" title="Cancel"><i class="fa-solid fa-xmark"></i></button>
+          <button class="tbl-btn" title="Confirm Appointment" onclick="confirmAppointment('${a._id || a.id || ''}')"><i class="fa-solid fa-check"></i></button>
+          <button class="tbl-btn danger" title="Cancel Appointment" onclick="cancelAppointment('${a._id || a.id || ''}')"><i class="fa-solid fa-xmark"></i></button>
         </div>
       </td>
     </tr>
   `).join('');
 }
+
+window.confirmAppointment = function(id) {
+  const a = adminAppointments.find(x => (x._id || x.id) === id);
+  if (!a || a.status === 'confirmed') return;
+  a.status = 'confirmed';
+  localStorage.setItem('san_admin_appts', JSON.stringify(adminAppointments));
+  API.updateAppointment(id, { status: 'confirmed' }).catch(err => console.warn('DB appt update failed:', err.message));
+  renderAppointmentsTable();
+  updateDashboardStats();
+  showAdminToast('Appointment confirmed.');
+};
+
+window.cancelAppointment = function(id) {
+  confirmAction('Cancel this appointment?', () => {
+    const a = adminAppointments.find(x => (x._id || x.id) === id);
+    if (a) a.status = 'cancelled';
+    localStorage.setItem('san_admin_appts', JSON.stringify(adminAppointments));
+    API.updateAppointment(id, { status: 'cancelled' }).catch(err => console.warn('DB appt cancel failed:', err.message));
+    renderAppointmentsTable();
+    updateDashboardStats();
+    showAdminToast('Appointment cancelled.');
+  });
+};
 
 // ============================================================
 // ANALYTICS

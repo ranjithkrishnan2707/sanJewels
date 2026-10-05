@@ -39,8 +39,8 @@
         <li><a href="#hero" class="nav-link">Home</a></li>
         <li><a href="#collections" class="nav-link">Collections</a></li>
         <li><a href="#heritage" class="nav-link">Heritage</a></li>
-        <li><a href="#concierge" class="nav-link">VIP Concierge</a></li>
         <li><a href="review.html" class="nav-link" style="color: var(--gold-bright);"><i class="fa-solid fa-camera" style="margin-right: 4px;"></i> Review &amp; Selfie</a></li>
+        <li><a href="admin.html" class="nav-link" title="Admin Portal" style="opacity: 0.9;"><i class="fa-solid fa-shield-halved" style="margin-right: 4px;"></i> Admin</a></li>
       </ul>
 
       <!-- Nav Actions -->
@@ -351,6 +351,223 @@
     </div>
   </div>
 
+  <!-- Secure Checkout Modal (Delivery Address & Contact Details) -->
+  <div class="modal-overlay checkout-modal-overlay" id="checkoutModal">
+    <div class="modal-container checkout-modal-container">
+      <button class="modal-close-btn" id="closeCheckoutModal" title="Close"><i class="fa-solid fa-xmark"></i></button>
+
+      <div class="checkout-modal-header">
+        <div class="checkout-brand-badge">
+          <i class="fa-solid fa-shield-halved"></i> 256-Bit Encrypted Secure Checkout
+        </div>
+        <h2>Complete Your Acquisition</h2>
+        <p>Please provide your delivery address and contact information for fully insured dispatch.</p>
+      </div>
+
+      <div class="checkout-modal-body">
+        <!-- Form Side -->
+        <form id="checkoutForm" class="checkout-form">
+          <!-- Section 1: Contact Details -->
+          <div class="checkout-section">
+            <h4 class="checkout-section-title">
+              <i class="fa-regular fa-user"></i> 1. Contact Information
+            </h4>
+            <div class="checkout-form-grid">
+              <div class="checkout-field full-width">
+                <label for="checkoutName">Full Name *</label>
+                <div class="checkout-input-wrap">
+                  <input type="text" id="checkoutName" placeholder="e.g. Maharani Gayatri Devi" required autocomplete="name">
+                  <span class="checkout-field-icon"><i class="fa-solid fa-signature"></i></span>
+                </div>
+              </div>
+
+              <div class="checkout-field">
+                <label for="checkoutPhone">Phone / WhatsApp Number *</label>
+                <div class="checkout-phone-wrap">
+                  <select id="checkoutPhoneCode" class="checkout-country-code" title="Country code">
+                    <option value="+91">🇮🇳 +91</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+65">🇸🇬 +65</option>
+                  </select>
+                  <input type="tel" id="checkoutPhone" placeholder="10-digit mobile" required pattern="[0-9]{10}" maxlength="10" autocomplete="tel">
+                </div>
+              </div>
+
+              <div class="checkout-field">
+                <label for="checkoutEmail">Email Address (for tax invoice) *</label>
+                <div class="checkout-input-wrap">
+                  <input type="email" id="checkoutEmail" placeholder="client@rsaura.com" required autocomplete="email">
+                  <span class="checkout-field-icon"><i class="fa-regular fa-envelope"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Delivery Address -->
+          <div class="checkout-section">
+            <h4 class="checkout-section-title">
+              <i class="fa-solid fa-location-dot"></i> 2. Insured Delivery Address
+            </h4>
+            <div class="checkout-form-grid">
+              <div class="checkout-field full-width">
+                <label for="checkoutAddress">Street Address / Villa / Apartment / Landmark *</label>
+                <div class="checkout-input-wrap">
+                  <input type="text" id="checkoutAddress" placeholder="Flat/House No., Building Name, Street & Landmark" required autocomplete="street-address">
+                  <span class="checkout-field-icon"><i class="fa-solid fa-house"></i></span>
+                </div>
+              </div>
+
+              <div class="checkout-field">
+                <label for="checkoutCity">City / Town *</label>
+                <div class="checkout-input-wrap">
+                  <input type="text" id="checkoutCity" placeholder="e.g. Mumbai, Bangalore, Delhi" required autocomplete="address-level2">
+                  <span class="checkout-field-icon"><i class="fa-solid fa-city"></i></span>
+                </div>
+              </div>
+
+              <div class="checkout-field">
+                <label for="checkoutState">State *</label>
+                <div class="checkout-input-wrap">
+                  <input type="text" id="checkoutState" placeholder="e.g. Maharashtra, Karnataka" required autocomplete="address-level1">
+                  <span class="checkout-field-icon"><i class="fa-solid fa-map-pin"></i></span>
+                </div>
+              </div>
+
+              <div class="checkout-field">
+                <label for="checkoutPincode">PIN / Postal Code *</label>
+                <div class="checkout-input-wrap">
+                  <input type="text" id="checkoutPincode" placeholder="6-digit PIN" required pattern="[0-9]{6}" maxlength="6" autocomplete="postal-code">
+                  <span class="checkout-field-icon"><i class="fa-solid fa-barcode"></i></span>
+                </div>
+              </div>
+
+              <div class="checkout-field">
+                <label for="checkoutCountry">Country</label>
+                <div class="checkout-input-wrap">
+                  <input type="text" id="checkoutCountry" value="India" readonly class="input-readonly">
+                  <span class="checkout-field-icon"><i class="fa-solid fa-globe"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Payment Method -->
+          <div class="checkout-section">
+            <h4 class="checkout-section-title">
+              <i class="fa-solid fa-credit-card"></i> 3. Select Payment Method
+            </h4>
+            <div class="checkout-payment-options">
+              <label class="payment-option-card active">
+                <input type="radio" name="paymentMethod" value="UPI / Instant Pay" checked>
+                <div class="payment-card-content">
+                  <div class="payment-card-header">
+                    <span class="payment-badge"><i class="fa-solid fa-bolt"></i> Recommended</span>
+                    <i class="fa-solid fa-qrcode payment-icon"></i>
+                  </div>
+                  <strong>UPI / QR Instant Pay</strong>
+                  <span>GPay, PhonePe, Paytm, or NetBanking</span>
+                </div>
+              </label>
+
+              <label class="payment-option-card">
+                <input type="radio" name="paymentMethod" value="Credit / Debit Card">
+                <div class="payment-card-content">
+                  <div class="payment-card-header">
+                    <i class="fa-solid fa-shield-check"></i>
+                    <i class="fa-regular fa-credit-card payment-icon"></i>
+                  </div>
+                  <strong>Credit / Debit Card</strong>
+                  <span>Visa, MasterCard, Amex, RuPay</span>
+                </div>
+              </label>
+
+              <label class="payment-option-card">
+                <input type="radio" name="paymentMethod" value="Cash on Delivery">
+                <div class="payment-card-content">
+                  <div class="payment-card-header">
+                    <i class="fa-solid fa-truck"></i>
+                    <i class="fa-solid fa-money-bill-wave payment-icon"></i>
+                  </div>
+                  <strong>Cash on Delivery (COD)</strong>
+                  <span>Verified delivery with tamper-proof signature seal</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="checkout-submit-wrap">
+            <button type="submit" class="btn btn-gold checkout-submit-btn" id="confirmOrderBtn">
+              <span>Place Order & Proceed to Confirmation</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <p class="checkout-guarantee-note">
+              <i class="fa-solid fa-lock"></i> Your information is protected under strict bank-grade privacy standards.
+            </p>
+          </div>
+        </form>
+
+        <!-- Order Summary Sidebar inside Modal -->
+        <div class="checkout-summary-panel">
+          <div class="checkout-summary-header">
+            <h4>Acquisition Summary</h4>
+            <span class="checkout-summary-count" id="checkoutItemCount">0 items</span>
+          </div>
+
+          <div class="checkout-items-mini" id="checkoutMiniItems">
+            <!-- populated dynamically -->
+          </div>
+
+          <div class="checkout-pricing-table">
+            <div class="checkout-price-row">
+              <span>Jewelry Subtotal</span>
+              <span id="checkoutSubtotal">₹0</span>
+            </div>
+            <div class="checkout-price-row">
+              <span>Insured Express Shipping</span>
+              <span id="checkoutShipping" class="text-gold" style="color: var(--gold-primary);">Free</span>
+            </div>
+            <div class="checkout-price-row">
+              <span>Signature Vault Gift Box</span>
+              <span style="color: var(--gold-primary);">Complimentary</span>
+            </div>
+            <div class="checkout-price-divider"></div>
+            <div class="checkout-price-row grand-total">
+              <span>Total Payable</span>
+              <span class="text-gold-gradient" id="checkoutGrandTotal">₹0</span>
+            </div>
+          </div>
+
+          <div class="checkout-trust-badges">
+            <div class="trust-badge-item">
+              <i class="fa-solid fa-certificate"></i>
+              <div>
+                <strong>Authenticity Certified</strong>
+                <span>100% genuine gemstones & gold hallmarks</span>
+              </div>
+            </div>
+            <div class="trust-badge-item">
+              <i class="fa-solid fa-shield-halved"></i>
+              <div>
+                <strong>100% Insured Transit</strong>
+                <span>Guaranteed safe delivery to your doorstep</span>
+              </div>
+            </div>
+            <div class="trust-badge-item">
+              <i class="fa-solid fa-gem"></i>
+              <div>
+                <strong>Bespoke Concierge</strong>
+                <span>Direct WhatsApp tracking assistance</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast-notification" id="toast">
     <i class="fa-solid fa-circle-check" style="color: var(--gold-primary); font-size: 1.3rem;"></i>
@@ -384,6 +601,7 @@
           <h4>Client Services</h4>
           <ul class="footer-links">
             <li><a href="review.html"><i class="fa-solid fa-camera"></i> Share Your Review &amp; Selfie</a></li>
+            <li><a href="admin.html"><i class="fa-solid fa-shield-halved"></i> Admin Portal</a></li>
             <li><a href="#">Gemstone Care Guide</a></li>
             <li><a href="#">Insured Delivery</a></li>
             <li><a href="#">Authenticity Guarantee</a></li>
@@ -401,8 +619,9 @@
         </div>
       </div>
 
-      <div class="footer-bottom">
+      <div class="footer-bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <p>© 2026 rsauraantitarnish Haute Joaillerie. All rights reserved. Emerald & Gold Design System.</p>
+        <a href="admin.html" style="color: var(--gold-primary); text-decoration: none; font-size: 0.82rem; opacity: 0.85;"><i class="fa-solid fa-lock"></i> Staff / Admin Portal</a>
       </div>
     </div>
   </footer>

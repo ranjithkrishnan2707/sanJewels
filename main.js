@@ -182,81 +182,261 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Checkout Button Trigger
+  // ── Checkout Modal & Flow ──────────────────────────────────────────────
   const checkoutBtn = document.getElementById('checkoutBtn');
+  const checkoutModal = document.getElementById('checkoutModal');
+  const closeCheckoutModal = document.getElementById('closeCheckoutModal');
+  const checkoutForm = document.getElementById('checkoutForm');
+  const confirmOrderBtn = document.getElementById('confirmOrderBtn');
+
+  function openCheckout() {
+    if (shoppingCart.length === 0) {
+      showToast('Your shopping bag is currently empty.');
+      return;
+    }
+
+    // Close cart drawer
+    if (cartDrawer) cartDrawer.classList.remove('active');
+
+    // Pre-fill user data if already known
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('san_current_user')) || {};
+      if (currentUser.name && document.getElementById('checkoutName')) {
+        document.getElementById('checkoutName').value = currentUser.name;
+      }
+      if (currentUser.email && document.getElementById('checkoutEmail')) {
+        document.getElementById('checkoutEmail').value = currentUser.email;
+      }
+      if (currentUser.whatsapp && document.getElementById('checkoutPhone')) {
+        const cleanPhone = currentUser.whatsapp.replace(/^\+91\s*/, '').replace(/\D/g, '');
+        if (cleanPhone) document.getElementById('checkoutPhone').value = cleanPhone.slice(-10);
+      }
+      if (currentUser.location && document.getElementById('checkoutCity')) {
+        const parts = currentUser.location.split(',');
+        if (parts[0] && !document.getElementById('checkoutCity').value) {
+          document.getElementById('checkoutCity').value = parts[0].trim();
+        }
+        if (parts[1] && document.getElementById('checkoutState') && !document.getElementById('checkoutState').value) {
+          document.getElementById('checkoutState').value = parts[1].trim();
+        }
+      }
+    } catch (e) {}
+
+    // Populate Acquisition Summary in modal
+    updateCheckoutSummary();
+
+    // Show modal
+    if (checkoutModal) checkoutModal.classList.add('active');
+  }
+
+  function updateCheckoutSummary() {
+    const miniItems = document.getElementById('checkoutMiniItems');
+    const itemCountEl = document.getElementById('checkoutItemCount');
+    const subtotalEl = document.getElementById('checkoutSubtotal');
+    const shippingEl = document.getElementById('checkoutShipping');
+    const grandTotalEl = document.getElementById('checkoutGrandTotal');
+
+    const totalQty = shoppingCart.reduce((sum, item) => sum + item.quantity, 0);
+    const subtotal = shoppingCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const shipping = subtotal >= 2500 ? 0 : 199;
+    const grandTotal = subtotal + shipping;
+
+    if (itemCountEl) itemCountEl.textContent = `${totalQty} item${totalQty === 1 ? '' : 's'}`;
+    if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+    if (shippingEl) shippingEl.textContent = shipping === 0 ? 'Complimentary' : `₹${shipping.toLocaleString('en-IN')}`;
+    if (grandTotalEl) grandTotalEl.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
+
+    if (miniItems) {
+      miniItems.innerHTML = shoppingCart.map(item => `
+        <div class="checkout-item-row">
+          <div class="checkout-item-info">
+            <div class="checkout-item-badge">💎</div>
+            <div>
+              <div class="checkout-item-title">${item.name}</div>
+              <div class="checkout-item-sub">Qty: ${item.quantity} · ₹${item.price.toLocaleString('en-IN')} each</div>
+            </div>
+          </div>
+          <div class="checkout-item-amt">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+        </div>
+      `).join('');
+    }
+
+    if (confirmOrderBtn) {
+      confirmOrderBtn.innerHTML = `<span>Place Order &amp; Pay (₹${grandTotal.toLocaleString('en-IN')})</span> <i class="fa-solid fa-arrow-right"></i>`;
+    }
+  }
+
   if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', async () => {
+    checkoutBtn.addEventListener('click', openCheckout);
+  }
+
+  if (closeCheckoutModal) {
+    closeCheckoutModal.addEventListener('click', () => {
+      if (checkoutModal) checkoutModal.classList.remove('active');
+    });
+  }
+
+  // Close checkout modal on backdrop click
+  if (checkoutModal) {
+    checkoutModal.addEventListener('click', (e) => {
+      if (e.target === checkoutModal) checkoutModal.classList.remove('active');
+    });
+  }
+
+  // Payment radio styling
+  document.querySelectorAll('.payment-option-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.payment-option-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      const radio = card.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    });
+  });
+
+  // Handle Checkout Form Submission
+  if (checkoutForm) {
+    checkoutForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
       if (shoppingCart.length === 0) {
-        showToast('Your shopping bag is currently empty.');
+        showToast('Your shopping bag is empty.');
+        if (checkoutModal) checkoutModal.classList.remove('active');
         return;
       }
 
-      // Disable button to prevent double-clicks
-      checkoutBtn.disabled = true;
-      checkoutBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+      const name = document.getElementById('checkoutName').value.trim();
+      const phoneCode = document.getElementById('checkoutPhoneCode').value;
+      const phone = document.getElementById('checkoutPhone').value.trim();
+      const email = document.getElementById('checkoutEmail').value.trim();
+      const address = document.getElementById('checkoutAddress').value.trim();
+      const city = document.getElementById('checkoutCity').value.trim();
+      const state = document.getElementById('checkoutState').value.trim();
+      const pincode = document.getElementById('checkoutPincode').value.trim();
+
+      const paymentInput = document.querySelector('input[name="paymentMethod"]:checked');
+      const paymentMethod = paymentInput ? paymentInput.value : 'UPI / Instant Pay';
+
+      if (!name || !phone || !email || !address || !city || !state || !pincode) {
+        showToast('Please complete all required address and contact fields.');
+        return;
+      }
+
+      if (!/^\d{10}$/.test(phone)) {
+        showToast('Please enter a valid 10-digit mobile number.');
+        return;
+      }
+
+      if (!/^\d{6}$/.test(pincode)) {
+        showToast('Please enter a valid 6-digit postal PIN code.');
+        return;
+      }
+
+      // Disable button & show spinner
+      confirmOrderBtn.disabled = true;
+      confirmOrderBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Securing Your Acquisition...';
 
       try {
-        // Gather user info from VIP profile (if set)
-        const currentUser = JSON.parse(localStorage.getItem('san_current_user')) || {};
-
-        // Build order ID
         const orderId = 'RSA-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
-
-        // Compute totals
         const subtotal = shoppingCart.reduce((s, i) => s + i.price * i.quantity, 0);
-        const today    = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-        const estDate  = new Date();
+        const shipping = subtotal >= 2500 ? 0 : 199;
+        const total = subtotal + shipping;
+        const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+        const estDate = new Date();
         estDate.setDate(estDate.getDate() + 5);
         const estDelivery = estDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
-        // Build order object for sessionStorage → confirmation page
+        const fullPhone = `${phoneCode} ${phone}`;
+        const fullLocation = `${city}, ${state} - ${pincode}`;
+
         const orderData = {
-          id:               orderId,
-          customer:         currentUser.name || 'Valued Customer',
-          whatsapp:         currentUser.whatsapp || '',
-          location:         currentUser.location || 'India',
-          items:            shoppingCart.map(i => ({
-            name:     i.name,
-            price:    i.price,
-            qty:      i.quantity,
+          id: orderId,
+          customer: name,
+          phone: fullPhone,
+          email: email,
+          address: address,
+          city: city,
+          state: state,
+          pincode: pincode,
+          location: fullLocation,
+          items: shoppingCart.map(i => ({
+            name: i.name,
+            price: i.price,
+            qty: i.quantity,
             category: i.category || ''
           })),
-          amount:           subtotal,
-          date:             today,
+          amount: total,
+          subtotal: subtotal,
+          shipping: shipping,
+          date: today,
           estimatedDelivery: estDelivery,
-          paymentMethod:    'Paid Online',
-          status:           'processing'
+          paymentMethod: paymentMethod,
+          status: 'processing'
         };
 
-        // Persist to sessionStorage so confirmation page can read it
+        // Persist for confirmation page
         sessionStorage.setItem('rsaura_last_order', JSON.stringify(orderData));
 
-        // Save order to MongoDB (non-blocking — don't hold up navigation)
-        const dbPayload = {
-          id:       orderId,
-          customer: orderData.customer,
-          product:  shoppingCart.map(i => `${i.name} x${i.quantity}`).join(', '),
-          amount:   subtotal,
-          location: orderData.location,
-          date:     new Date().toISOString().split('T')[0],
-          status:   'processing'
-        };
-        API.createOrder(dbPayload).catch(err => console.warn('Order DB sync error:', err.message));
+        // Update local user profile
+        localStorage.setItem('san_current_user', JSON.stringify({
+          name: name,
+          whatsapp: fullPhone,
+          email: email,
+          location: `${city}, ${state}`
+        }));
 
-        // Clear cart
+        // DB Payload
+        const dbPayload = {
+          id: orderId,
+          customer: name,
+          phone: fullPhone,
+          email: email,
+          address: address,
+          city: city,
+          state: state,
+          pincode: pincode,
+          product: shoppingCart.map(i => `${i.name} x${i.quantity}`).join(', '),
+          amount: total,
+          location: fullLocation,
+          paymentMethod: paymentMethod,
+          items: orderData.items,
+          date: new Date().toISOString().split('T')[0],
+          status: 'processing'
+        };
+
+        // Sync to API non-blocking
+        API.createOrder(dbPayload).catch(err => console.warn('Order DB sync error:', err.message));
+        API.createCustomer({
+          name: name,
+          email: email,
+          whatsapp: fullPhone,
+          location: `${city}, ${state}`,
+          orders: 1,
+          spent: total,
+          since: today,
+          status: 'vip'
+        }).catch(err => console.warn('Customer DB sync error:', err.message));
+
+        // Also add to local admin cache so admin page reflects immediately
+        try {
+          const localOrders = JSON.parse(localStorage.getItem('san_admin_orders')) || [];
+          localOrders.unshift(dbPayload);
+          localStorage.setItem('san_admin_orders', JSON.stringify(localOrders));
+        } catch (e) {}
+
+        // Clear shopping bag
         shoppingCart = [];
         localStorage.removeItem('san_cart');
         updateCartUI();
-        cartDrawer.classList.remove('active');
+        if (checkoutModal) checkoutModal.classList.remove('active');
 
-        // Navigate to confirmation page
+        // Redirect to order confirmation page
         window.location.href = 'order-confirmation.html';
 
       } catch (err) {
         console.error('Checkout error:', err);
-        showToast('Something went wrong. Please try again.');
-        checkoutBtn.disabled = false;
-        checkoutBtn.innerHTML = 'Proceed to Secure Checkout <i class="fa-solid fa-shield"></i>';
+        showToast('Something went wrong during checkout. Please try again.');
+        confirmOrderBtn.disabled = false;
+        confirmOrderBtn.innerHTML = '<span>Place Order &amp; Proceed</span> <i class="fa-solid fa-arrow-right"></i>';
       }
     });
   }
