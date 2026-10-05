@@ -669,8 +669,12 @@
               required></textarea>
           </div>
           <div class="form-row modal-full-row">
-            <label>Image Path</label>
-            <input type="text" class="admin-input" id="pImage" placeholder="e.g. images/emerald_necklace.jpg">
+            <label>Product Image</label>
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <input type="file" class="admin-input" id="pImageFile" accept="image/*">
+              <input type="hidden" id="pImage">
+              <img id="pImagePreview" src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; display: none; border: 1px solid var(--ad-border);">
+            </div>
           </div>
         </div>
         <input type="hidden" id="pEditId">

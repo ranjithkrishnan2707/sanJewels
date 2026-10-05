@@ -229,6 +229,23 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProductsTable();
   });
 
+  // Product Image File Reader
+  const pImageFile = document.getElementById('pImageFile');
+  if (pImageFile) {
+    pImageFile.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('pImage').value = evt.target.result;
+          document.getElementById('pImagePreview').src = evt.target.result;
+          document.getElementById('pImagePreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
   // Orders status filter
   document.querySelectorAll('.order-status-card').forEach(card => {
     card.addEventListener('click', () => {
@@ -556,6 +573,9 @@ function openAddProductModal() {
   productModalTitle.textContent = 'Add New Product';
   productForm.reset();
   document.getElementById('pEditId').value = '';
+  document.getElementById('pImage').value = '';
+  document.getElementById('pImagePreview').src = '';
+  document.getElementById('pImagePreview').style.display = 'none';
   productModal.classList.add('active');
 }
 
@@ -572,6 +592,15 @@ function editProduct(id) {
   document.getElementById('pSpec').value = p.spec || '';
   document.getElementById('pDesc').value = p.description || '';
   document.getElementById('pImage').value = p.image || '';
+  
+  if (p.image) {
+    document.getElementById('pImagePreview').src = p.image;
+    document.getElementById('pImagePreview').style.display = 'block';
+  } else {
+    document.getElementById('pImagePreview').src = '';
+    document.getElementById('pImagePreview').style.display = 'none';
+  }
+  
   document.getElementById('pEditId').value = p.id;
   productModal.classList.add('active');
 }
