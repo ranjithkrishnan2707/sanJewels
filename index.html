@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>rsauraantitarnish | Royal Emeralds & Bespoke Fine Jewelry</title>
+  <title>RS Aura Anti-Tarnish | Premium Anti-Tarnish Jewels &amp; Waterproof Jewelry</title>
   <meta name="description"
-    content="Discover rsauraantitarnish - World-renowned luxury jewelers specializing in rare Colombian emeralds, certified solitaire diamonds, and bespoke handcrafted gold masterpieces.">
+    content="Discover RS Aura Anti-Tarnish - World-renowned luxury anti-tarnish jewel collection specializing in waterproof, sweatproof, and hypoallergenic anti-tarnish jewelry masterpieces.">
 
   <!-- Favicon & Stylesheet -->
   <link rel="stylesheet" href="style.css">
@@ -19,8 +19,7 @@
 
   <!-- Top Announcement Bar -->
   <div class="announcement-bar">
-    <span><i class="fa-solid fa-crown"></i> Complimentary Insured Express Delivery Across India on Orders Over
-      ₹2,500</span>
+    <span class="announcement-main"><i class="fa-solid fa-crown"></i> Complimentary Insured Delivery Over ₹2,500</span>
     <span class="desktop-only">•</span>
     <span class="desktop-only"><i class="fa-solid fa-gem"></i> Private Atelier & Concierge Appointments Available</span>
   </div>
@@ -29,9 +28,9 @@
   <nav class="navbar" id="navbar">
     <div class="container nav-container">
       <!-- Brand Logo -->
-      <a href="#" class="brand-logo">
+      <a href="#" class="brand-logo" aria-label="RS Aura Anti-Tarnish Home">
         <span class="logo-title text-gold-gradient">RS Aura Anti-Tarnish</span>
-        <span class="logo-subtitle"></span>
+        <span class="logo-subtitle">Haute Joaillerie</span>
       </a>
 
       <!-- Desktop Nav Links -->
@@ -39,8 +38,9 @@
         <li><a href="#hero" class="nav-link">Home</a></li>
         <li><a href="#collections" class="nav-link">Collections</a></li>
         <li><a href="#heritage" class="nav-link">Heritage</a></li>
-        <li><a href="review.html" class="nav-link" style="color: var(--gold-bright);"><i class="fa-solid fa-camera" style="margin-right: 4px;"></i> Review &amp; Selfie</a></li>
-        <li><a href="admin.html" class="nav-link" title="Admin Portal" style="opacity: 0.9;"><i class="fa-solid fa-shield-halved" style="margin-right: 4px;"></i> Admin</a></li>
+        <li><a href="review.html" class="nav-link" style="color: var(--gold-bright);"><i class="fa-solid fa-camera"
+              style="margin-right: 4px;"></i> Review &amp; Selfie</a></li>
+
       </ul>
 
       <!-- Nav Actions -->
@@ -71,11 +71,11 @@
         <!-- Hero Text -->
         <div class="hero-content">
           <div class="hero-tag">
-            <i class="fa-solid fa-sparkles"></i> 2026 Haute Joaillerie Collection
+            <i class="fa-solid fa-sparkles"></i> 2026 Anti-Tarnish Jewel Collection
           </div>
-          <h1>The Majesty of <br><span class="text-gold-gradient">Royal Emeralds</span></h1>
-          <p>Hand-selected Colombian emeralds framed in luminous 18K yellow gold and micro-pave diamonds. Handcrafted by
-            master artisans for connoisseurs of timeless elegance.</p>
+          <h1>The Brilliance of <br><span class="text-gold-gradient">Anti-Tarnish Jewels</span></h1>
+          <p>Premium anti-tarnish jewel masterpieces crafted with 100% waterproof, sweatproof, and hypoallergenic
+            endurance. Handcrafted for connoisseurs of timeless luxury and everlasting shine.</p>
 
           <div class="hero-ctas">
             <a href="#collections" class="btn btn-gold">
@@ -86,15 +86,15 @@
           <div class="hero-stats">
             <div class="stat-item">
               <h3>100%</h3>
-              <p>Certified Natural</p>
+              <p>Waterproof &amp; Tarnish-Free</p>
             </div>
             <div class="stat-item">
-              <h3>18K - 24K</h3>
-              <p>Ethical Solid Gold</p>
+              <h3>18K PVD</h3>
+              <p>Anti-Tarnish Jewel</p>
             </div>
             <div class="stat-item">
-              <h3>50+ Yrs</h3>
-              <p>Master Heritage</p>
+              <h3>Lifetime</h3>
+              <p>Shine Guarantee</p>
             </div>
           </div>
         </div>
@@ -105,6 +105,16 @@
             <div class="hero-image-inner">
               <img src="images/emerald_necklace.jpg" alt="rsauraantitarnish Royal Emerald Statement Necklace"
                 id="heroImage">
+              <script>
+                (function () {
+                  try {
+                    var savedHero = localStorage.getItem('san_hero_image');
+                    if (savedHero) {
+                      document.getElementById('heroImage').src = savedHero;
+                    }
+                  } catch (e) { }
+                })();
+              </script>
             </div>
             <div class="hero-badge-floating">
               <div class="icon"><i class="fa-solid fa-award"></i></div>
@@ -123,10 +133,10 @@
   <section class="section-padding" id="collections">
     <div class="container">
       <div class="section-title">
-        <span class="subtitle">Haute Joaillerie</span>
+        <span class="subtitle">Anti-Tarnish Haute Joaillerie</span>
         <h2>Curated Masterpieces</h2>
-        <p>Immerse yourself in our signature emerald and gold jewelry collection, designed to captivate and endure
-          through generations.</p>
+        <p>Immerse yourself in our signature anti-tarnish jewel collection, designed with waterproof durability to
+          captivate and endure through generations.</p>
         <div class="gold-divider"></div>
       </div>
 
@@ -136,8 +146,8 @@
         <button class="filter-btn" data-filter="emerald">Emerald Couture</button>
         <button class="filter-btn" data-filter="rings">Royal Rings</button>
         <button class="filter-btn" data-filter="earrings">High Earrings</button>
-        <button class="filter-btn" data-filter="bracelets">Bracelets & Cuffs</button>
-        <button class="filter-btn" data-filter="heritage">Gold Heritage</button>
+        <button class="filter-btn" data-filter="bracelets">Bracelets &amp; Cuffs</button>
+        <button class="filter-btn" data-filter="heritage">Anti-Tarnish Heritage</button>
       </div>
 
       <!-- Product Showcase Grid -->
@@ -155,7 +165,8 @@
       <div class="section-title">
         <span class="subtitle">Guaranteed Authenticity</span>
         <h2>The rs aura anti tarnish Standard</h2>
-        <p>Our commitment to ethical sourcing, certified gemological excellence, and lifelong patronage.</p>
+        <p>Our commitment to waterproof craftsmanship, certified anti-tarnish jewel excellence, and lifelong brilliance.
+        </p>
         <div class="gold-divider"></div>
       </div>
 
@@ -165,9 +176,9 @@
           <div class="icon-box">
             <i class="fa-solid fa-certificate"></i>
           </div>
-          <h3>GIA & IGI Certified</h3>
-          <p>Every single gemstone exceeding 0.5 carats arrives with full gemological certification detailing origin,
-            clarity, and laser registration.</p>
+          <h3>Certified Anti-Tarnish</h3>
+          <p>Every piece is crafted from premium medical-grade stainless steel with 18K PVD coating, tested 100%
+            waterproof, sweatproof, and hypoallergenic.</p>
         </div>
 
         <!-- Card 2 -->
@@ -176,8 +187,8 @@
             <i class="fa-solid fa-hands-holding-circle"></i>
           </div>
           <h3>Ethical Sourcing</h3>
-          <p>We work directly with certified Colombian & Zambian mines adhering to strict Kimberley Process standards
-            and sustainable eco-mining practices.</p>
+          <p>We work directly with certified ethical facilities adhering to strict sustainability standards and
+            eco-conscious anti-tarnish metallurgic practices.</p>
         </div>
 
         <!-- Card 3 -->
@@ -185,9 +196,9 @@
           <div class="icon-box">
             <i class="fa-solid fa-shield-halved"></i>
           </div>
-          <h3>Lifetime Warranty</h3>
-          <p>Enjoy complimentary annual gemstone prong inspection, ultrasonic steam cleaning, and solid gold restoration
-            services at any RS salon worldwide.</p>
+          <h3>Lifetime Anti-Tarnish Warranty</h3>
+          <p>Enjoy complimentary ultrasonic steam cleaning, anti-tarnish jewel inspection, and lasting shine restoration
+            services for life.</p>
         </div>
       </div>
     </div>
@@ -210,9 +221,8 @@
           <i class="fa-solid fa-star"></i>
           <i class="fa-solid fa-star"></i>
         </div>
-        <p class="testimonial-quote">"The deep emerald color of rsauraantitarnish' Colombian stones is unmatched
-          anywhere in
-          Geneva. The gold setting accentuates every facet with radiant regal light."</p>
+        <p class="testimonial-quote">"The lasting waterproof shine of rsauraantitarnish is unmatched anywhere. The
+          anti-tarnish jewel finish accentuates every facet with radiant, enduring brilliance that never fades."</p>
         <p class="testimonial-author">— Victoria Rothschild, High Jewelry Collector</p>
       </div>
     </div>
@@ -376,7 +386,8 @@
               <div class="checkout-field full-width">
                 <label for="checkoutName">Full Name *</label>
                 <div class="checkout-input-wrap">
-                  <input type="text" id="checkoutName" placeholder="e.g. Maharani Gayatri Devi" required autocomplete="name">
+                  <input type="text" id="checkoutName" placeholder="e.g. Maharani Gayatri Devi" required
+                    autocomplete="name">
                   <span class="checkout-field-icon"><i class="fa-solid fa-signature"></i></span>
                 </div>
               </div>
@@ -391,7 +402,8 @@
                     <option value="+971">🇦🇪 +971</option>
                     <option value="+65">🇸🇬 +65</option>
                   </select>
-                  <input type="tel" id="checkoutPhone" placeholder="10-digit mobile" required pattern="[0-9]{10}" maxlength="10" autocomplete="tel">
+                  <input type="tel" id="checkoutPhone" placeholder="10-digit mobile" required pattern="[0-9]{10}"
+                    maxlength="10" autocomplete="tel">
                 </div>
               </div>
 
@@ -414,7 +426,8 @@
               <div class="checkout-field full-width">
                 <label for="checkoutAddress">Street Address / Villa / Apartment / Landmark *</label>
                 <div class="checkout-input-wrap">
-                  <input type="text" id="checkoutAddress" placeholder="Flat/House No., Building Name, Street & Landmark" required autocomplete="street-address">
+                  <input type="text" id="checkoutAddress" placeholder="Flat/House No., Building Name, Street & Landmark"
+                    required autocomplete="street-address">
                   <span class="checkout-field-icon"><i class="fa-solid fa-house"></i></span>
                 </div>
               </div>
@@ -422,7 +435,8 @@
               <div class="checkout-field">
                 <label for="checkoutCity">City / Town *</label>
                 <div class="checkout-input-wrap">
-                  <input type="text" id="checkoutCity" placeholder="e.g. Mumbai, Bangalore, Delhi" required autocomplete="address-level2">
+                  <input type="text" id="checkoutCity" placeholder="e.g. Mumbai, Bangalore, Delhi" required
+                    autocomplete="address-level2">
                   <span class="checkout-field-icon"><i class="fa-solid fa-city"></i></span>
                 </div>
               </div>
@@ -430,7 +444,8 @@
               <div class="checkout-field">
                 <label for="checkoutState">State *</label>
                 <div class="checkout-input-wrap">
-                  <input type="text" id="checkoutState" placeholder="e.g. Maharashtra, Karnataka" required autocomplete="address-level1">
+                  <input type="text" id="checkoutState" placeholder="e.g. Maharashtra, Karnataka" required
+                    autocomplete="address-level1">
                   <span class="checkout-field-icon"><i class="fa-solid fa-map-pin"></i></span>
                 </div>
               </div>
@@ -438,7 +453,8 @@
               <div class="checkout-field">
                 <label for="checkoutPincode">PIN / Postal Code *</label>
                 <div class="checkout-input-wrap">
-                  <input type="text" id="checkoutPincode" placeholder="6-digit PIN" required pattern="[0-9]{6}" maxlength="6" autocomplete="postal-code">
+                  <input type="text" id="checkoutPincode" placeholder="6-digit PIN" required pattern="[0-9]{6}"
+                    maxlength="6" autocomplete="postal-code">
                   <span class="checkout-field-icon"><i class="fa-solid fa-barcode"></i></span>
                 </div>
               </div>
@@ -545,7 +561,7 @@
               <i class="fa-solid fa-certificate"></i>
               <div>
                 <strong>Authenticity Certified</strong>
-                <span>100% genuine gemstones & gold hallmarks</span>
+                <span>100% genuine anti-tarnish jewel certified quality</span>
               </div>
             </div>
             <div class="trust-badge-item">
@@ -583,9 +599,17 @@
             <span class="logo-title text-gold-gradient">rsauraantitarnish</span>
             <span class="logo-subtitle">HAUTE JOAILLERIE</span>
           </a>
-          <p style="font-size: 0.9rem; line-height: 1.6;">rsauraantitarnish is the pinnacle of luxury emerald
-            craftsmanship,
-            creating investment-grade high jewelry pieces steeped in royal heritage.</p>
+          <p style="font-size: 0.9rem; line-height: 1.6;">rsauraantitarnish is the pinnacle of luxury anti-tarnish jewel
+            craftsmanship, creating waterproof and sweatproof high jewelry pieces designed for everlasting shine.</p>
+          <div style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted); line-height: 1.8;">
+            <div><i class="fa-brands fa-whatsapp" style="color: var(--gold-primary);"></i> +91 89257 91077</div>
+            <div><a href="mailto:rsauraantitarnish@gmail.com"
+                style="color: var(--text-muted); text-decoration: none;"><i class="fa-regular fa-envelope"
+                  style="color: var(--gold-primary);"></i> rsauraantitarnish@gmail.com</a></div>
+            <div><a href="https://instagram.com/rs_aura_anti_tarnish" target="_blank"
+                style="color: var(--text-muted); text-decoration: none;"><i class="fa-brands fa-instagram"
+                  style="color: var(--gold-primary);"></i> @rs_aura_anti_tarnish</a></div>
+          </div>
         </div>
 
         <div class="footer-col">
@@ -593,7 +617,7 @@
           <ul class="footer-links">
             <li><a href="#collections">Emerald Couture</a></li>
             <li><a href="#heritage">Certified Solitaires</a></li>
-            <li><a href="#heritage">Heritage Gold</a></li>
+            <li><a href="#heritage">Anti-Tarnish Heritage</a></li>
           </ul>
         </div>
 
@@ -601,8 +625,7 @@
           <h4>Client Services</h4>
           <ul class="footer-links">
             <li><a href="review.html"><i class="fa-solid fa-camera"></i> Share Your Review &amp; Selfie</a></li>
-            <li><a href="admin.html"><i class="fa-solid fa-shield-halved"></i> Admin Portal</a></li>
-            <li><a href="#">Gemstone Care Guide</a></li>
+            <li><a href="#">Anti-Tarnish Jewel Care Guide</a></li>
             <li><a href="#">Insured Delivery</a></li>
             <li><a href="#">Authenticity Guarantee</a></li>
           </ul>
@@ -619,12 +642,165 @@
         </div>
       </div>
 
-      <div class="footer-bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-        <p>© 2026 rsauraantitarnish Haute Joaillerie. All rights reserved. Emerald & Gold Design System.</p>
-        <a href="admin.html" style="color: var(--gold-primary); text-decoration: none; font-size: 0.82rem; opacity: 0.85;"><i class="fa-solid fa-lock"></i> Staff / Admin Portal</a>
+      <div class="footer-bottom"
+        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <p>© 2026 rsauraantitarnish Haute Joaillerie. All rights reserved. Anti-Tarnish Jewel Luxury Collection.</p>
       </div>
     </div>
   </footer>
+
+  <!-- Live Search Overlay Modal -->
+  <div class="modal-overlay search-modal-overlay" id="searchModal">
+    <div class="modal-container search-modal-container">
+      <div class="search-modal-header">
+        <div class="search-input-wrap">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="search" id="searchInput" placeholder="Search rings, necklaces, emeralds..." autocomplete="off">
+          <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Clear search"
+            style="display: none;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <button class="modal-close-btn" id="closeSearchModal" aria-label="Close search">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="search-filter-chips">
+        <span class="chips-label">Popular:</span>
+        <button type="button" class="search-chip" data-query="all">All</button>
+        <button type="button" class="search-chip" data-query="emerald">Emerald</button>
+        <button type="button" class="search-chip" data-query="ring">Rings</button>
+        <button type="button" class="search-chip" data-query="earrings">Earrings</button>
+        <button type="button" class="search-chip" data-query="bracelet">Bracelets</button>
+        <button type="button" class="search-chip" data-query="waterproof">Waterproof</button>
+      </div>
+
+      <div class="search-results-container" id="searchResultsContainer">
+        <div class="search-placeholder-state" id="searchPlaceholder">
+          <i class="fa-solid fa-gem text-gold" style="font-size: 2rem; margin-bottom: 8px; opacity: 0.7;"></i>
+          <p>Discover our 100% waterproof anti-tarnish jewelry masterpieces.</p>
+        </div>
+        <div class="search-results-list" id="searchResultsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation Backdrop Overlay -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+
+  <!-- Luxury Mobile Slide-out Drawer -->
+  <aside class="mobile-drawer" id="mobileDrawer" aria-label="Mobile Navigation Menu">
+    <div class="mobile-drawer-header">
+      <div class="mobile-drawer-brand">
+        <span class="logo-title text-gold-gradient">RS Aura Anti-Tarnish</span>
+        <span class="logo-subtitle">Haute Joaillerie</span>
+      </div>
+      <button class="mobile-drawer-close" id="mobileDrawerClose" aria-label="Close menu">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="mobile-drawer-body">
+      <ul class="mobile-menu-links">
+        <li>
+          <a href="#hero" class="mobile-menu-item">
+            <span class="m-icon"><i class="fa-solid fa-house"></i></span>
+            <div class="m-text">
+              <strong>Home</strong>
+              <small>Enduring Luxury &amp; Brilliance</small>
+            </div>
+            <i class="fa-solid fa-chevron-right m-arrow"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#collections" class="mobile-menu-item">
+            <span class="m-icon"><i class="fa-solid fa-gem"></i></span>
+            <div class="m-text">
+              <strong>Curated Collections</strong>
+              <small>Anti-Tarnish Masterpieces</small>
+            </div>
+            <i class="fa-solid fa-chevron-right m-arrow"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#heritage" class="mobile-menu-item">
+            <span class="m-icon"><i class="fa-solid fa-award"></i></span>
+            <div class="m-text">
+              <strong>Heritage &amp; Quality</strong>
+              <small>100% Waterproof &amp; Hypoallergenic</small>
+            </div>
+            <i class="fa-solid fa-chevron-right m-arrow"></i>
+          </a>
+        </li>
+        <li>
+          <a href="review.html" class="mobile-menu-item highlight">
+            <span class="m-icon"><i class="fa-solid fa-camera"></i></span>
+            <div class="m-text">
+              <strong>Review &amp; Selfie Vault</strong>
+              <small>Share photo &amp; get exclusive rewards</small>
+            </div>
+            <span class="m-badge">New</span>
+          </a>
+        </li>
+        <li>
+          <a href="admin.html" class="mobile-menu-item">
+            <span class="m-icon"><i class="fa-solid fa-shield-halved"></i></span>
+            <div class="m-text">
+              <strong>Admin Portal</strong>
+              <small>Catalog &amp; Order Management</small>
+            </div>
+            <i class="fa-solid fa-chevron-right m-arrow"></i>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Mobile Quick Actions Card -->
+      <div class="mobile-drawer-perks">
+        <div class="drawer-perk-header">
+          <i class="fa-solid fa-crown text-gold"></i>
+          <span>VIP Concierge &amp; Atelier</span>
+        </div>
+        <p>Private consultation &amp; express insured dispatch assistance available 24/7.</p>
+        <a href="https://wa.me/918925791077?text=Hello%20RS%20Aura%20Anti-Tarnish%20Concierge,%20I%20would%20like%20assistance"
+          target="_blank" rel="noopener noreferrer" class="btn btn-gold btn-whatsapp-drawer">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp Concierge
+        </a>
+      </div>
+    </div>
+
+    <div class="mobile-drawer-footer">
+      <div><i class="fa-solid fa-phone"></i> +91 89257 91077</div>
+      <div><i class="fa-solid fa-shield-check"></i> Lifetime Anti-Tarnish Guarantee</div>
+    </div>
+  </aside>
+
+  <!-- Mobile Sticky Bottom Navigation Bar (Visible on mobile <= 768px) -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Bottom Navigation">
+    <a href="#hero" class="mobile-nav-btn active" id="mobNavHome">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#collections" class="mobile-nav-btn" id="mobNavShop">
+      <i class="fa-solid fa-gem"></i>
+      <span>Shop</span>
+    </a>
+    <button type="button" class="mobile-nav-btn" id="mobNavSearch" aria-label="Search Jewels">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span>Search</span>
+    </button>
+    <a href="review.html" class="mobile-nav-btn" id="mobNavReview">
+      <i class="fa-solid fa-camera"></i>
+      <span>Review</span>
+    </a>
+    <button type="button" class="mobile-nav-btn" id="mobNavCart" aria-label="Shopping Bag">
+      <div class="mob-icon-wrap">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <span class="mob-cart-badge" id="mobCartCount">0</span>
+      </div>
+      <span>Bag</span>
+    </button>
+  </nav>
 
   <!-- Product Database & Main JavaScript Engine -->
   <script src="products_data.js"></script>

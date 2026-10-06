@@ -3,25 +3,31 @@
    ========================================================================== */
 
 // 1. Curated Product Data – loaded from MongoDB Atlas via API
-// Falls back to localStorage cache / seed data if server is unreachable.
+// Falls back to localStorage cache if server is temporarily unreachable.
+// Seed data (products_data.js) is NEVER shown to end-users; DB is the source of truth.
 let storedAdminProducts = null;
 try {
-  storedAdminProducts = JSON.parse(localStorage.getItem('san_admin_products'));
+  const cached = JSON.parse(localStorage.getItem('san_admin_products'));
+  // Only use cache if it contains real DB products (has _id field, not seed data)
+  if (Array.isArray(cached) && cached.length > 0 && cached[0]._id) {
+    storedAdminProducts = cached;
+  } else {
+    // Clear stale/seed-polluted cache
+    localStorage.removeItem('san_admin_products');
+  }
 } catch (e) {
   storedAdminProducts = null;
 }
 
-const seedProducts = (typeof window !== 'undefined' && window.SAMPLE_PRODUCTS) ? window.SAMPLE_PRODUCTS : [];
-let PRODUCTS = storedAdminProducts && storedAdminProducts.length >= 50
-  ? storedAdminProducts
-  : seedProducts;
+// Start with cached DB products or empty list — never show seed data to users
+let PRODUCTS = storedAdminProducts || [];
 
-// Async: load fresh products from DB and re-render if different
+// Async: load fresh products from DB and re-render
 async function loadProductsFromDB() {
   try {
     const products = await API.getProducts();
-    if (Array.isArray(products) && products.length > 0) {
-      PRODUCTS = products;
+    if (Array.isArray(products)) {
+      PRODUCTS = products; // Use DB result even if empty (admin deleted all)
       localStorage.setItem('san_admin_products', JSON.stringify(PRODUCTS));
       renderProducts(); // refresh UI with live DB data
     }
@@ -36,7 +42,7 @@ let activeFilter = 'all';
 
 // Bespoke Configurator State
 let bespokeState = {
-  metal: '18K Yellow Gold',
+  metal: '18K Anti-Tarnish Jewel',
   metalFactor: 1.0,
   cut: 'Emerald Cut',
   cutMultiplier: 1.0,
@@ -81,7 +87,40 @@ const addBespokeBtn = document.getElementById('addBespokeBtn');
    Initialization & Event Listeners
    ========================================================================== */
 
+// Sync Hero Image from backend / localStorage
+async function syncHeroImage() {
+  const heroImg = document.getElementById('heroImage');
+  if (!heroImg) return;
+
+  // 1. Instant check from localStorage
+  const localHero = localStorage.getItem('san_hero_image');
+  if (localHero && heroImg.src !== localHero) {
+    heroImg.src = localHero;
+  }
+
+  // 2. Fresh check from backend / MongoDB Atlas
+  try {
+    if (typeof API !== 'undefined' && API.getSetting) {
+      const data = await API.getSetting('hero_image');
+      if (data && data.value) {
+        if (heroImg.src !== data.value) {
+          heroImg.src = data.value;
+        }
+        localStorage.setItem('san_hero_image', data.value);
+      } else if (data && data.value === null) {
+        localStorage.removeItem('san_hero_image');
+        if (!heroImg.src.includes('images/emerald_necklace.jpg')) {
+          heroImg.src = 'images/emerald_necklace.jpg';
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Could not sync hero image from server, using local fallback:', err);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  syncHeroImage();
   renderProducts();
   updateCartUI();
   initBespokeConfigurator();
@@ -110,56 +149,226 @@ document.addEventListener('DOMContentLoaded', () => {
   cartToggleBtn.addEventListener('click', () => cartDrawer.classList.add('active'));
   closeCartBtn.addEventListener('click', () => cartDrawer.classList.remove('active'));
 
-  // Mobile Navigation Toggle
+  // ── Mobile Navigation Drawer Toggle ───────────────────────────────────────
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-  const navLinks = document.querySelector('.nav-links');
-  if (mobileMenuBtn && navLinks) {
-    mobileMenuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      navLinks.classList.toggle('mobile-active');
+  const mobileDrawer = document.getElementById('mobileDrawer');
+  const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
+  const mobileDrawerClose = document.getElementById('mobileDrawerClose');
+
+  function openMobileDrawer() {
+    if (mobileDrawer) mobileDrawer.classList.add('active');
+    if (mobileNavBackdrop) mobileNavBackdrop.classList.add('active');
+    document.body.classList.add('menu-open');
+    if (mobileMenuBtn) {
       const icon = mobileMenuBtn.querySelector('i');
       if (icon) {
-        if (navLinks.classList.contains('mobile-active')) {
-          icon.classList.remove('fa-bars');
-          icon.classList.add('fa-xmark');
-        } else {
-          icon.classList.remove('fa-xmark');
-          icon.classList.add('fa-bars');
-        }
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-xmark');
       }
-    });
+    }
+  }
 
-    // Close mobile nav when clicking a nav link
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        navLinks.classList.remove('mobile-active');
-        const icon = mobileMenuBtn.querySelector('i');
-        if (icon) {
-          icon.classList.remove('fa-xmark');
-          icon.classList.add('fa-bars');
-        }
-      });
-    });
+  function closeMobileDrawer() {
+    if (mobileDrawer) mobileDrawer.classList.remove('active');
+    if (mobileNavBackdrop) mobileNavBackdrop.classList.remove('active');
+    document.body.classList.remove('menu-open');
+    if (mobileMenuBtn) {
+      const icon = mobileMenuBtn.querySelector('i');
+      if (icon) {
+        icon.classList.remove('fa-xmark');
+        icon.classList.add('fa-bars');
+      }
+    }
+  }
 
-    // Close when clicking outside
-    document.addEventListener('click', (e) => {
-      if (navLinks.classList.contains('mobile-active') && !navLinks.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-        navLinks.classList.remove('mobile-active');
-        const icon = mobileMenuBtn.querySelector('i');
-        if (icon) {
-          icon.classList.remove('fa-xmark');
-          icon.classList.add('fa-bars');
-        }
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (mobileDrawer && mobileDrawer.classList.contains('active')) {
+        closeMobileDrawer();
+      } else {
+        openMobileDrawer();
       }
     });
   }
 
+  if (mobileDrawerClose) {
+    mobileDrawerClose.addEventListener('click', closeMobileDrawer);
+  }
+
+  if (mobileNavBackdrop) {
+    mobileNavBackdrop.addEventListener('click', closeMobileDrawer);
+  }
+
+  // Close mobile drawer when clicking any link inside it
+  if (mobileDrawer) {
+    mobileDrawer.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMobileDrawer);
+    });
+  }
+
+  // ── Live Search Modal & Filtering ──────────────────────────────────────────
+  const searchBtn = document.getElementById('searchBtn');
+  const searchModal = document.getElementById('searchModal');
+  const closeSearchModal = document.getElementById('closeSearchModal');
+  const searchInput = document.getElementById('searchInput');
+  const searchClearBtn = document.getElementById('searchClearBtn');
+  const searchResultsList = document.getElementById('searchResultsList');
+  const searchPlaceholder = document.getElementById('searchPlaceholder');
+  const mobNavSearch = document.getElementById('mobNavSearch');
+
+  function openSearchModal() {
+    if (searchModal) {
+      searchModal.classList.add('active');
+      document.body.classList.add('search-open');
+      setTimeout(() => {
+        if (searchInput) {
+          searchInput.focus();
+          if (searchInput.value.trim().length > 0) {
+            executeSearch(searchInput.value.trim());
+          }
+        }
+      }, 100);
+    }
+  }
+
+  function closeSearchModalWindow() {
+    if (searchModal) {
+      searchModal.classList.remove('active');
+      document.body.classList.remove('search-open');
+    }
+  }
+
+  function executeSearch(query) {
+    const q = (query || '').toLowerCase().trim();
+    if (!searchResultsList) return;
+
+    if (!q) {
+      if (searchPlaceholder) searchPlaceholder.style.display = 'block';
+      searchResultsList.innerHTML = '';
+      if (searchClearBtn) searchClearBtn.style.display = 'none';
+      return;
+    }
+
+    if (searchClearBtn) searchClearBtn.style.display = 'flex';
+    if (searchPlaceholder) searchPlaceholder.style.display = 'none';
+
+    let matches = PRODUCTS;
+    if (q !== 'all') {
+      matches = PRODUCTS.filter(p => {
+        const name = (p.name || '').toLowerCase();
+        const cat = (p.categoryName || '').toLowerCase();
+        const catKey = (p.category || '').toLowerCase();
+        const spec = (p.spec || '').toLowerCase();
+        const desc = (p.description || '').toLowerCase();
+        return name.includes(q) || cat.includes(q) || catKey.includes(q) || spec.includes(q) || desc.includes(q);
+      });
+    }
+
+    if (matches.length === 0) {
+      searchResultsList.innerHTML = `
+        <div class="search-empty-state">
+          <i class="fa-solid fa-gem"></i>
+          <h4>No Jewels Found</h4>
+          <p>We couldn't find any pieces matching "${query}". Try searching for "Emerald", "Ring", or "Waterproof".</p>
+        </div>
+      `;
+      return;
+    }
+
+    searchResultsList.innerHTML = matches.map(item => `
+      <div class="search-result-item" onclick="openQuickView('${item.id}'); closeSearchModalWindow();">
+        <img src="${item.image}" alt="${item.name}" loading="lazy">
+        <div class="search-result-info">
+          <span class="search-result-cat">${item.categoryName || 'Masterpiece'}</span>
+          <h5>${item.name}</h5>
+          <div class="search-result-price">₹${Number(item.price).toLocaleString('en-IN')}</div>
+        </div>
+        <button type="button" class="search-result-add-btn" onclick="event.stopPropagation(); addToCart('${item.id}'); showToast('Added to bag');" title="Add to Bag">
+          <i class="fa-solid fa-bag-shopping"></i>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  if (searchBtn) searchBtn.addEventListener('click', openSearchModal);
+  if (mobNavSearch) mobNavSearch.addEventListener('click', openSearchModal);
+  if (closeSearchModal) closeSearchModal.addEventListener('click', closeSearchModalWindow);
+
+  if (searchInput) {
+    let debounceTimer;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        executeSearch(e.target.value);
+      }, 150);
+    });
+  }
+
+  if (searchClearBtn && searchInput) {
+    searchClearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      executeSearch('');
+      searchInput.focus();
+    });
+  }
+
+  // Search filter chips
+  document.querySelectorAll('.search-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const q = chip.getAttribute('data-query');
+      if (searchInput) {
+        searchInput.value = q === 'all' ? '' : q;
+      }
+      executeSearch(q);
+    });
+  });
+
+  // Shortcut key: Cmd/Ctrl + K opens search
+  window.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      openSearchModal();
+    }
+    if (e.key === 'Escape') {
+      closeSearchModalWindow();
+      closeMobileDrawer();
+    }
+  });
+
+  // ── Mobile Bottom Navigation Active State & Cart Sync ──────────────────────
+  const mobNavCart = document.getElementById('mobNavCart');
+  if (mobNavCart) {
+    mobNavCart.addEventListener('click', () => {
+      if (cartDrawer) cartDrawer.classList.add('active');
+    });
+  }
+
+  // Update active state in bottom nav on scroll
+  const bottomNavLinks = document.querySelectorAll('.mobile-bottom-nav .mobile-nav-btn');
+  window.addEventListener('scroll', () => {
+    const scrollPos = window.scrollY + 200;
+    const collectionsSection = document.getElementById('collections');
+    const heroSection = document.getElementById('hero');
+
+    if (collectionsSection && scrollPos >= collectionsSection.offsetTop) {
+      document.getElementById('mobNavShop')?.classList.add('active');
+      document.getElementById('mobNavHome')?.classList.remove('active');
+    } else {
+      document.getElementById('mobNavHome')?.classList.add('active');
+      document.getElementById('mobNavShop')?.classList.remove('active');
+    }
+  }, { passive: true });
+
   // Quick View Modal Close
-  closeQuickView.addEventListener('click', () => quickViewModal.classList.remove('active'));
+  if (closeQuickView) {
+    closeQuickView.addEventListener('click', () => quickViewModal.classList.remove('active'));
+  }
 
   // Close modals on backdrop click
   window.addEventListener('click', (e) => {
     if (e.target === quickViewModal) quickViewModal.classList.remove('active');
+    if (e.target === searchModal) closeSearchModalWindow();
     const vipModal = document.getElementById('vipWelcomeModal');
     if (e.target === vipModal) {
       vipModal.classList.remove('active');
@@ -451,31 +660,51 @@ function renderProducts() {
     ? PRODUCTS
     : PRODUCTS.filter(p => p.category === activeFilter);
 
+  if (filtered.length === 0) {
+    productGrid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: var(--text-muted);">
+        <i class="fa-solid fa-gem text-gold" style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.6;"></i>
+        <h3 style="color: #fff; margin-bottom: 8px;">No Jewels Found</h3>
+        <p>No masterpieces currently listed in this category. Please check another collection.</p>
+      </div>
+    `;
+    return;
+  }
+
   productGrid.innerHTML = filtered.map(item => `
-    <div class="product-card">
+    <div class="product-card" data-product-id="${item.id}" onclick="handleProductCardClick(event, '${item.id}')">
       <div class="product-img-wrapper">
-        <img src="${item.image}" alt="${item.name}">
-        <span class="product-tag">${item.tag}</span>
+        <img src="${item.image}" alt="${item.name}" loading="lazy">
+        <span class="product-tag">${item.tag || '18K Anti-Tarnish'}</span>
         <div class="product-actions-overlay">
-          <button class="quick-action-btn" onclick="openQuickView('${item.id}')" title="Quick View">
+          <button class="quick-action-btn" onclick="event.stopPropagation(); openQuickView('${item.id}')" title="Quick View" aria-label="Quick View">
             <i class="fa-regular fa-eye"></i>
           </button>
-          <button class="quick-action-btn" onclick="addToCart('${item.id}')" title="Add to Bag">
+          <button class="quick-action-btn" onclick="event.stopPropagation(); addToCart('${item.id}')" title="Add to Bag" aria-label="Add to Bag">
             <i class="fa-solid fa-bag-shopping"></i>
           </button>
         </div>
       </div>
       <div class="product-info">
-        <span class="product-category">${item.categoryName}</span>
-        <h3>${item.name}</h3>
-        <p class="product-spec">${item.spec}</p>
+        <span class="product-category">${item.categoryName || 'Haute Joaillerie'}</span>
+        <h3 title="${item.name}">${item.name}</h3>
+        <p class="product-spec">${item.spec || ''}</p>
         <div class="product-bottom">
-          <div class="product-price">₹${item.price.toLocaleString()}</div>
-          <button class="add-cart-btn" onclick="addToCart('${item.id}')">Add To Bag</button>
+          <div class="product-price">₹${Number(item.price).toLocaleString('en-IN')}</div>
+          <button class="add-cart-btn" onclick="event.stopPropagation(); addToCart('${item.id}')" aria-label="Add ${item.name} to bag">
+            <span class="add-btn-label">Add To Bag</span>
+            <i class="fa-solid fa-plus add-btn-icon-mob"></i>
+          </button>
         </div>
       </div>
     </div>
   `).join('');
+}
+
+function handleProductCardClick(e, id) {
+  // If user clicked inside a button, do nothing (already handled)
+  if (e.target.closest('button')) return;
+  openQuickView(id);
 }
 
 function openQuickView(id) {
@@ -486,7 +715,7 @@ function openQuickView(id) {
   modalImg.src = product.image;
   modalCategory.textContent = product.categoryName;
   modalTitle.textContent = product.name;
-  modalPrice.textContent = `₹${product.price.toLocaleString()}`;
+  modalPrice.textContent = `₹${Number(product.price).toLocaleString('en-IN')}`;
   modalDesc.textContent = product.description;
 
   modalAddCartBtn.onclick = () => {
@@ -548,11 +777,13 @@ function saveAndUpdateCart() {
 function updateCartUI() {
   // Update badge counter
   const totalCount = shoppingCart.reduce((sum, item) => sum + item.quantity, 0);
-  cartCount.textContent = totalCount;
+  if (cartCount) cartCount.textContent = totalCount;
+  const mobCartCount = document.getElementById('mobCartCount');
+  if (mobCartCount) mobCartCount.textContent = totalCount;
 
   // Update total subtotal
   const subtotal = shoppingCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  cartSubtotal.textContent = `₹${subtotal.toLocaleString()}`;
+  if (cartSubtotal) cartSubtotal.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
 
   // Render items
   if (shoppingCart.length === 0) {

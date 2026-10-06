@@ -88,6 +88,9 @@
         <li><a href="#" class="nav-item" data-page="newsletter" id="navNewsletter">
             <i class="fa-solid fa-envelope-open-text"></i> <span>Newsletter</span>
           </a></li>
+        <li><a href="#" class="nav-item" id="navHeroBanner" onclick="navigateTo('settings'); setTimeout(() => document.getElementById('heroImageSettingsCard')?.scrollIntoView({behavior:'smooth'}), 150);">
+            <i class="fa-solid fa-image"></i> <span>Hero Banner</span>
+          </a></li>
       </ul>
       <div class="nav-section-label">System</div>
       <ul>
@@ -318,7 +321,7 @@
             <option value="rings">Royal Rings</option>
             <option value="earrings">High Earrings</option>
             <option value="bracelets">Bracelets & Cuffs</option>
-            <option value="heritage">Gold Heritage</option>
+            <option value="heritage">Anti-Tarnish Heritage</option>
           </select>
         </div>
         <div class="table-wrapper">
@@ -580,9 +583,66 @@
           </form>
         </div>
 
+        <!-- Storefront Hero Image Management Card -->
+        <div class="card settings-card" id="heroImageSettingsCard">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ad-gold);"></i> Storefront Hero Banner &amp; Image</h3>
+            <span class="badge" id="heroImageBadge" style="font-size:0.75rem; padding: 4px 10px; border-radius: 20px; background: rgba(212,175,55,0.15); color: var(--ad-gold); border: 1px solid rgba(212,175,55,0.3);">Default Image</span>
+          </div>
+          <div class="settings-form">
+            <p style="color: var(--ad-text-muted); font-size: 0.88rem; margin-bottom: 16px; line-height: 1.5;">
+              Update the prominent showcase image displayed in the royal hero section on the homepage. You can upload an image directly from your device or paste a web URL.
+            </p>
+
+            <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap;">
+              <!-- Visual Hero Preview Box -->
+              <div style="position: relative; width: 170px; height: 170px; border-radius: 8px; overflow: hidden; border: 2px solid var(--ad-gold); background: #03140e; box-shadow: 0 4px 20px rgba(0,0,0,0.35); flex-shrink: 0;">
+                <img id="heroImagePreview" src="images/emerald_necklace.jpg" alt="Hero Preview" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); color: #fff; font-size: 0.72rem; padding: 4px 6px; text-align: center; letter-spacing: 0.5px;">
+                  Live Preview
+                </div>
+              </div>
+
+              <!-- Input & Action Controls -->
+              <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 14px;">
+                <div class="form-row" style="margin-bottom: 0;">
+                  <label style="font-weight: 600; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                    <i class="fa-solid fa-cloud-arrow-up" style="color: var(--ad-gold);"></i> Choose Image From Device:
+                  </label>
+                  <input type="file" class="admin-input" id="heroImageFile" accept="image/*" style="cursor: pointer; padding: 8px;">
+                </div>
+
+                <div class="form-row" style="margin-bottom: 0;">
+                  <label style="font-weight: 600; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                    <i class="fa-solid fa-link" style="color: var(--ad-gold);"></i> Or Image URL:
+                  </label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="url" class="admin-input" id="heroImageUrlInput" placeholder="https://example.com/necklace.jpg">
+                    <button type="button" class="btn-secondary" id="applyHeroUrlBtn" style="white-space: nowrap; padding: 0 14px;">Use URL</button>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 4px;">
+                  <button type="button" class="btn-primary" id="saveHeroImageBtn">
+                    <i class="fa-solid fa-floppy-disk"></i> Save &amp; Publish Hero Image
+                  </button>
+                  <button type="button" class="btn-secondary" id="resetHeroImageBtn" style="color: #ef4444; border-color: rgba(239,68,68,0.3);">
+                    <i class="fa-solid fa-rotate-left"></i> Reset to Default
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="heroImageStatusMsg" style="font-size: 0.82rem; color: var(--ad-text-muted); padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid var(--ad-gold);">
+              <i class="fa-solid fa-circle-info" style="color: var(--ad-gold); margin-right: 4px;"></i>
+              <span id="heroStatusText">Default Colombian Royal Emerald Necklace is currently active.</span>
+            </div>
+          </div>
+        </div>
+
         <div class="card settings-card">
           <div class="card-header">
-            <h3><i class="fa-solid fa-palette"></i> Theme & Display</h3>
+            <h3><i class="fa-solid fa-palette"></i> Theme &amp; Display</h3>
           </div>
           <div class="settings-form">
             <div class="form-row toggle-row">
@@ -643,7 +703,7 @@
               <option value="rings">Royal Rings</option>
               <option value="earrings">High Earrings</option>
               <option value="bracelets">Bracelets & Cuffs</option>
-              <option value="heritage">Gold Heritage</option>
+              <option value="heritage">Anti-Tarnish Heritage</option>
             </select>
           </div>
           <div class="form-row">
@@ -661,7 +721,7 @@
           <div class="form-row modal-full-row">
             <label>Specification</label>
             <input type="text" class="admin-input" id="pSpec"
-              placeholder="e.g. 24.8 ct Colombian Emerald & 18K Solid Gold">
+              placeholder="e.g. 18K Anti-Tarnish Jewel &amp; Waterproof Stainless Steel">
           </div>
           <div class="form-row modal-full-row">
             <label>Description *</label>
@@ -680,7 +740,7 @@
         <input type="hidden" id="pEditId">
         <div class="modal-actions">
           <button type="button" class="btn-secondary" id="cancelProductModal">Cancel</button>
-          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Product</button>
+          <button type="submit" class="btn-primary" id="saveProductBtn"><i class="fa-solid fa-floppy-disk"></i> Save Product</button>
         </div>
       </form>
     </div>

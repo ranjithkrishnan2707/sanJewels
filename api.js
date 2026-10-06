@@ -113,6 +113,41 @@ const API = {
     });
     return res.json();
   },
+
+  /* ── Settings / Theme Display ────────────────────────────────── */
+  async getSetting(key) {
+    try {
+      const res = await fetch(`${API_BASE}/api/settings/${encodeURIComponent(key)}`);
+      return res.json();
+    } catch (e) {
+      console.warn('API.getSetting error:', e);
+      return null;
+    }
+  },
+  async saveSetting(key, value) {
+    try {
+      const res = await fetch(`${API_BASE}/api/settings/${encodeURIComponent(key)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value }),
+      });
+      return res.json();
+    } catch (e) {
+      console.warn('API.saveSetting error:', e);
+      return null;
+    }
+  },
+  async deleteSetting(key) {
+    try {
+      const res = await fetch(`${API_BASE}/api/settings/${encodeURIComponent(key)}`, {
+        method: 'DELETE',
+      });
+      return res.json();
+    } catch (e) {
+      console.warn('API.deleteSetting error:', e);
+      return null;
+    }
+  },
 };
 
 // Make globally available

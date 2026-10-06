@@ -10,10 +10,21 @@ const ADMIN_CREDS = { username: 'admin', password: 'admin123' };
 // ============================================================
 // DATA – loaded from MongoDB Atlas via REST API
 // localStorage used only as a fast fallback cache.
+// Seed data is NEVER used — DB is the source of truth.
 // ============================================================
 
-const seedProducts = (typeof window !== 'undefined' && window.SAMPLE_PRODUCTS) ? window.SAMPLE_PRODUCTS : [];
-let adminProducts  = JSON.parse(localStorage.getItem('san_admin_products'))  || seedProducts;
+// Only use localStorage cache if it contains real DB products (has _id field)
+let _cachedProducts = null;
+try {
+  const cached = JSON.parse(localStorage.getItem('san_admin_products'));
+  if (Array.isArray(cached) && cached.length > 0 && cached[0]._id) {
+    _cachedProducts = cached;
+  } else {
+    localStorage.removeItem('san_admin_products');
+  }
+} catch (e) { _cachedProducts = null; }
+
+let adminProducts  = _cachedProducts || [];
 let adminOrders    = JSON.parse(localStorage.getItem('san_admin_orders'))    || [];
 let adminCustomers = JSON.parse(localStorage.getItem('san_admin_customers')) || [];
 let adminAppointments = JSON.parse(localStorage.getItem('san_admin_appts'))  || [];
@@ -29,7 +40,7 @@ async function loadAllDataFromDB() {
       API.getAppointments(),
       API.getNewsletter(),
     ]);
-    if (Array.isArray(products)     && products.length)     { adminProducts     = products;     localStorage.setItem('san_admin_products',  JSON.stringify(adminProducts));     }
+    if (Array.isArray(products))     { adminProducts     = products;     localStorage.setItem('san_admin_products',  JSON.stringify(adminProducts));     }
     if (Array.isArray(orders)       && orders.length)       { adminOrders       = orders;       localStorage.setItem('san_admin_orders',    JSON.stringify(adminOrders));       }
     if (Array.isArray(customers)    && customers.length)    { adminCustomers    = customers;    localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers));    }
     if (Array.isArray(appointments) && appointments.length) { adminAppointments = appointments; localStorage.setItem('san_admin_appts',     JSON.stringify(adminAppointments)); }
@@ -72,7 +83,7 @@ const categoryData = [
   { label: 'Royal Rings', pct: 25, color: '#d4af37' },
   { label: 'High Earrings', pct: 20, color: '#8b5cf6' },
   { label: 'Bracelets & Cuffs', pct: 15, color: '#06b6d4' },
-  { label: 'Gold Heritage', pct: 10, color: '#f59e0b' },
+  { label: 'Anti-Tarnish Heritage', pct: 10, color: '#f59e0b' },
 ];
 
 // Regional data
@@ -191,6 +202,29 @@ document.addEventListener('DOMContentLoaded', () => {
   cancelProductModal.addEventListener('click', closeProductModalFn);
   productForm.addEventListener('submit', saveProduct);
 
+  const saveProductBtn = document.getElementById('saveProductBtn');
+  if (saveProductBtn) {
+    saveProductBtn.addEventListener('click', (e) => {
+      if (!productForm.checkValidity()) {
+        productForm.reportValidity();
+      }
+    });
+  }
+
+  // Backdrop click to close product modal
+  if (productModal) {
+    productModal.addEventListener('click', (e) => {
+      if (e.target === productModal) closeProductModalFn();
+    });
+  }
+
+  // Escape key to close product modal
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && productModal && productModal.classList.contains('active')) {
+      closeProductModalFn();
+    }
+  });
+
   // Confirm modal controls
   confirmCancelBtn.addEventListener('click', closeConfirmFn);
   closeConfirmModal.addEventListener('click', closeConfirmFn);
@@ -229,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProductsTable();
   });
 
-  // Product Image File Reader
+  // Product Image File Reader with Auto-Compression
   const pImageFile = document.getElementById('pImageFile');
   if (pImageFile) {
     pImageFile.addEventListener('change', function(e) {
@@ -237,14 +271,181 @@ document.addEventListener('DOMContentLoaded', () => {
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-          document.getElementById('pImage').value = evt.target.result;
-          document.getElementById('pImagePreview').src = evt.target.result;
-          document.getElementById('pImagePreview').style.display = 'block';
+          const img = new Image();
+          img.onload = function() {
+            const maxDim = 800;
+            let width = img.width;
+            let height = img.height;
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const optimized = canvas.toDataURL('image/jpeg', 0.82);
+            document.getElementById('pImage').value = optimized;
+            const preview = document.getElementById('pImagePreview');
+            preview.src = optimized;
+            preview.style.display = 'block';
+          };
+          img.src = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
     });
   }
+
+  // ── Hero Image Customizer ──────────────────────────────────────────
+  function initHeroImageManager() {
+    const heroImageFile     = document.getElementById('heroImageFile');
+    const heroImageUrlInput = document.getElementById('heroImageUrlInput');
+    const applyHeroUrlBtn   = document.getElementById('applyHeroUrlBtn');
+    const saveHeroImageBtn  = document.getElementById('saveHeroImageBtn');
+    const resetHeroImageBtn = document.getElementById('resetHeroImageBtn');
+    const heroImagePreview  = document.getElementById('heroImagePreview');
+    const heroImageBadge    = document.getElementById('heroImageBadge');
+    const heroStatusText    = document.getElementById('heroStatusText');
+
+    if (!heroImagePreview) return;
+
+    const defaultHeroSrc = 'images/emerald_necklace.jpg';
+
+    function setHeroUIState(imageUrl, isCustom) {
+      if (heroImagePreview) heroImagePreview.src = imageUrl || defaultHeroSrc;
+      if (heroImageBadge) {
+        if (isCustom) {
+          heroImageBadge.textContent = 'Custom Hero Active';
+          heroImageBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+          heroImageBadge.style.color = '#10b981';
+          heroImageBadge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+        } else {
+          heroImageBadge.textContent = 'Default Image';
+          heroImageBadge.style.background = 'rgba(212,175,55,0.15)';
+          heroImageBadge.style.color = 'var(--ad-gold)';
+          heroImageBadge.style.borderColor = 'rgba(212,175,55,0.3)';
+        }
+      }
+      if (heroStatusText) {
+        heroStatusText.textContent = isCustom
+          ? 'Custom Hero Image is currently published and live on the storefront.'
+          : 'Default Colombian Royal Emerald Necklace is currently active.';
+      }
+    }
+
+    // 1. Initial Load: Check localStorage and sync with backend API
+    const localHero = localStorage.getItem('san_hero_image');
+    if (localHero) {
+      setHeroUIState(localHero, true);
+      if (heroImageUrlInput && !localHero.startsWith('data:')) {
+        heroImageUrlInput.value = localHero;
+      }
+    } else {
+      setHeroUIState(defaultHeroSrc, false);
+    }
+
+    // Fetch from backend API (MongoDB / Server)
+    if (typeof API !== 'undefined' && API.getSetting) {
+      API.getSetting('hero_image').then(data => {
+        if (data && data.value) {
+          localStorage.setItem('san_hero_image', data.value);
+          setHeroUIState(data.value, true);
+          if (heroImageUrlInput && !data.value.startsWith('data:')) {
+            heroImageUrlInput.value = data.value;
+          }
+        } else if (data && data.value === null && localHero) {
+          localStorage.removeItem('san_hero_image');
+          setHeroUIState(defaultHeroSrc, false);
+        }
+      }).catch(err => console.warn('Could not fetch hero image setting:', err));
+    }
+
+    // 2. Upload from Device
+    if (heroImageFile) {
+      heroImageFile.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async function(evt) {
+            const base64Image = evt.target.result;
+            setHeroUIState(base64Image, true);
+            localStorage.setItem('san_hero_image', base64Image);
+            if (typeof API !== 'undefined' && API.saveSetting) {
+              await API.saveSetting('hero_image', base64Image);
+            }
+            showToast('Hero image updated successfully from device! Published to storefront.');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // 3. Apply via URL
+    if (applyHeroUrlBtn && heroImageUrlInput) {
+      applyHeroUrlBtn.addEventListener('click', async function() {
+        const url = heroImageUrlInput.value.trim();
+        if (!url) {
+          showToast('Please enter a valid image URL.');
+          return;
+        }
+        setHeroUIState(url, true);
+        localStorage.setItem('san_hero_image', url);
+        if (typeof API !== 'undefined' && API.saveSetting) {
+          await API.saveSetting('hero_image', url);
+        }
+        showToast('Hero image URL applied and published to storefront!');
+      });
+    }
+
+    // 4. Save & Publish Button
+    if (saveHeroImageBtn) {
+      saveHeroImageBtn.addEventListener('click', async function() {
+        const urlVal = heroImageUrlInput ? heroImageUrlInput.value.trim() : '';
+        const currentSrc = heroImagePreview ? heroImagePreview.src : '';
+
+        if (urlVal) {
+          setHeroUIState(urlVal, true);
+          localStorage.setItem('san_hero_image', urlVal);
+          if (typeof API !== 'undefined' && API.saveSetting) {
+            await API.saveSetting('hero_image', urlVal);
+          }
+          showToast('Hero image saved & published successfully!');
+        } else if (currentSrc && !currentSrc.includes(defaultHeroSrc)) {
+          localStorage.setItem('san_hero_image', currentSrc);
+          if (typeof API !== 'undefined' && API.saveSetting) {
+            await API.saveSetting('hero_image', currentSrc);
+          }
+          showToast('Hero image published to storefront!');
+        } else {
+          showToast('Please select an image file or enter an image URL first.');
+        }
+      });
+    }
+
+    // 5. Reset to Default Button
+    if (resetHeroImageBtn) {
+      resetHeroImageBtn.addEventListener('click', async function() {
+        if (confirm('Are you sure you want to reset the hero image to the default Royal Emerald Necklace?')) {
+          localStorage.removeItem('san_hero_image');
+          if (typeof API !== 'undefined' && API.deleteSetting) {
+            await API.deleteSetting('hero_image');
+          }
+          if (heroImageFile) heroImageFile.value = '';
+          if (heroImageUrlInput) heroImageUrlInput.value = '';
+          setHeroUIState(defaultHeroSrc, false);
+          showToast('Hero image reset to default successfully!');
+        }
+      });
+    }
+  }
+  initHeroImageManager();
 
   // Orders status filter
   document.querySelectorAll('.order-status-card').forEach(card => {
@@ -523,7 +724,7 @@ function renderRecentOrders() {
 // ============================================================
 function renderProductsTable() {
   const tbody = document.getElementById('productsTableBody');
-  const catMap = { emerald: 'EMERALD COUTURE', rings: 'ROYAL RINGS', earrings: 'HIGH EARRINGS', bracelets: 'BRACELETS & CUFFS', heritage: 'GOLD HERITAGE' };
+  const catMap = { emerald: 'EMERALD COUTURE', rings: 'ROYAL RINGS', earrings: 'HIGH EARRINGS', bracelets: 'BRACELETS & CUFFS', heritage: 'ANTI-TARNISH HERITAGE' };
 
   const filtered = adminProducts.filter(p => {
     const matchesCat = productFilterCat === 'all' || p.category === productFilterCat;
@@ -606,48 +807,111 @@ function editProduct(id) {
 }
 
 function closeProductModalFn() {
-  productModal.classList.remove('active');
-  productForm.reset();
+  if (productModal) productModal.classList.remove('active');
+  if (productForm) productForm.reset();
   editingProductId = null;
+  const pEditId = document.getElementById('pEditId');
+  if (pEditId) pEditId.value = '';
+  const pImage = document.getElementById('pImage');
+  if (pImage) pImage.value = '';
+  const pImageFile = document.getElementById('pImageFile');
+  if (pImageFile) pImageFile.value = '';
+  const pImagePreview = document.getElementById('pImagePreview');
+  if (pImagePreview) {
+    pImagePreview.src = '';
+    pImagePreview.style.display = 'none';
+  }
 }
 
-function saveProduct(e) {
-  e.preventDefault();
-  const catMap = { emerald: 'EMERALD COUTURE', rings: 'ROYAL RINGS', earrings: 'HIGH EARRINGS', bracelets: 'BRACELETS & CUFFS', heritage: 'GOLD HERITAGE' };
-  const cat = document.getElementById('pCategory').value;
-  const updated = {
-    id: editingProductId || `prod-${Date.now()}`,
-    name: document.getElementById('pName').value.trim(),
-    category: cat,
-    categoryName: catMap[cat] || cat.toUpperCase(),
-    price: parseInt(document.getElementById('pPrice').value),
-    stock: parseInt(document.getElementById('pStock').value) || 0,
-    tag: document.getElementById('pTag').value.trim(),
-    spec: document.getElementById('pSpec').value.trim(),
-    description: document.getElementById('pDesc').value.trim(),
-    image: document.getElementById('pImage').value.trim() || 'images/emerald_necklace.jpg',
-  };
+async function saveProduct(e) {
+  if (e) e.preventDefault();
 
-  if (editingProductId) {
-    const idx = adminProducts.findIndex(p => p.id === editingProductId);
-    if (idx !== -1) adminProducts[idx] = updated;
-    // Persist to DB
-    API.updateProduct(editingProductId, updated)
-      .then(() => showAdminToast('Product updated successfully.'))
-      .catch(() => showAdminToast('Product updated locally (DB sync failed).', 'fa-exclamation-triangle'));
-  } else {
-    adminProducts.push(updated);
-    // Persist to DB
-    API.saveProduct(updated)
-      .then(() => showAdminToast('Product added to the collection.'))
-      .catch(() => showAdminToast('Product added locally (DB sync failed).', 'fa-exclamation-triangle'));
+  const nameInput = document.getElementById('pName');
+  const catInput = document.getElementById('pCategory');
+  const priceInput = document.getElementById('pPrice');
+
+  const pName = nameInput ? nameInput.value.trim() : '';
+  const cat = catInput ? catInput.value : 'emerald';
+  const priceVal = priceInput ? priceInput.value.trim() : '';
+  const pPrice = parseInt(priceVal, 10);
+
+  if (!pName) {
+    if (nameInput) nameInput.focus();
+    showAdminToast('Please enter a product name.', 'fa-exclamation-circle');
+    return;
   }
 
-  localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
+  if (isNaN(pPrice) || pPrice < 0) {
+    if (priceInput) priceInput.focus();
+    showAdminToast('Please enter a valid price.', 'fa-exclamation-circle');
+    return;
+  }
+
+  const catMap = {
+    emerald: 'EMERALD COUTURE',
+    rings: 'ROYAL RINGS',
+    earrings: 'HIGH EARRINGS',
+    bracelets: 'BRACELETS & CUFFS',
+    heritage: 'ANTI-TARNISH HERITAGE'
+  };
+
+  const tagInput = document.getElementById('pTag');
+  const specInput = document.getElementById('pSpec');
+  const descInput = document.getElementById('pDesc');
+  const imageInput = document.getElementById('pImage');
+  const stockInput = document.getElementById('pStock');
+
+  const updated = {
+    id: editingProductId || `prod-${Date.now()}`,
+    name: pName,
+    category: cat,
+    categoryName: catMap[cat] || cat.toUpperCase(),
+    price: pPrice,
+    stock: stockInput ? (parseInt(stockInput.value, 10) || 0) : 10,
+    tag: tagInput ? tagInput.value.trim() : '',
+    spec: specInput ? specInput.value.trim() : '',
+    description: descInput ? descInput.value.trim() : '',
+    image: (imageInput && imageInput.value.trim()) ? imageInput.value.trim() : 'images/emerald_necklace.jpg',
+  };
+
+  const isEditing = Boolean(editingProductId);
+  const targetId = editingProductId;
+
+  if (isEditing) {
+    const idx = adminProducts.findIndex(p => p.id === targetId);
+    if (idx !== -1) adminProducts[idx] = updated;
+  } else {
+    adminProducts.unshift(updated);
+  }
+
+  // 1. Close the modal card immediately so user sees instant response
   closeProductModalFn();
+
+  // 2. Refresh UI tables and stats immediately
   renderProductsTable();
   renderTopProducts();
   updateDashboardStats();
+
+  // 3. Show confirmation toast
+  showAdminToast(isEditing ? 'Product updated successfully.' : 'Product saved & added to catalog.');
+
+  // 4. Safely update localStorage cache (with quota handling)
+  try {
+    localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
+  } catch (storageErr) {
+    console.warn('Local storage write warning:', storageErr);
+  }
+
+  // 5. Persist to MongoDB backend
+  try {
+    if (isEditing) {
+      await API.updateProduct(targetId, updated);
+    } else {
+      await API.saveProduct(updated);
+    }
+  } catch (apiErr) {
+    console.warn('Backend DB sync error:', apiErr);
+  }
 }
 
 function deleteProduct(id) {

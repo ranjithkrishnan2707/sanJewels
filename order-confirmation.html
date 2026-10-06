@@ -779,16 +779,41 @@
     }
 
     @media (max-width: 480px) {
+      .oc-navbar {
+        padding: 10px 14px;
+      }
+
+      .oc-navbar .logo-title {
+        font-size: 1.05rem;
+      }
+
+      .oc-navbar .logo-subtitle {
+        font-size: 0.52rem;
+      }
+
+      .oc-back-btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+
       .oc-main {
-        padding: 28px 14px 60px;
+        padding: 24px 12px 60px;
       }
 
       .oc-hero {
-        padding: 36px 14px 28px;
+        padding: 30px 12px 24px;
+      }
+
+      .oc-hero-title {
+        font-size: 1.85rem;
+      }
+
+      .oc-hero-sub {
+        font-size: 0.88rem;
       }
 
       .oc-card {
-        padding: 18px;
+        padding: 16px 14px;
       }
 
       .oc-order-id-banner {
@@ -915,10 +940,14 @@
     <div class="oc-support-strip">
       <i class="fa-solid fa-headset" style="color: var(--gold-primary);"></i>
       Need help? Contact our Concierge &mdash;
-      <a href="https://wa.me/919791249814?text=Hi%2C+I+need+help+with+my+order" target="_blank">
+      <a href="https://wa.me/918925791077?text=Hi%2C+I+need+help+with+my+order" target="_blank">
         <i class="fa-brands fa-whatsapp"></i> WhatsApp
       </a>
-      or call <a href="tel:+919791249814">+91 97912 49814</a>
+      or call <a href="tel:+918925791077">+91 89257 91077</a>
+      <div style="margin-top: 8px; font-size: 0.9rem;">
+        <a href="mailto:rsauraantitarnish@gmail.com" style="margin-right: 15px; color: var(--gold-light); text-decoration: none;"><i class="fa-regular fa-envelope"></i> rsauraantitarnish@gmail.com</a>
+        <a href="https://instagram.com/rs_aura_anti_tarnish" target="_blank" style="color: var(--gold-light); text-decoration: none;"><i class="fa-brands fa-instagram"></i> @rs_aura_anti_tarnish</a>
+      </div>
     </div>
 
     <!-- CTAs -->
@@ -939,7 +968,7 @@
   </footer>
 
   <!-- WhatsApp floating -->
-  <a class="oc-wa-float" href="https://wa.me/919791249814?text=Hi%2C+I+need+help+with+my+order" target="_blank"
+  <a class="oc-wa-float" href="https://wa.me/918925791077?text=Hi%2C+I+need+help+with+my+order" target="_blank"
     title="Chat on WhatsApp">
     <i class="fa-brands fa-whatsapp"></i>
   </a>
@@ -972,7 +1001,7 @@
       return {
         id: 'RSA-2026-' + String(Math.floor(Math.random() * 90000) + 10000),
         customer: 'Valued Customer',
-        phone: '+91 97912 49814',
+        phone: '+91 89257 91077',
         email: 'client@rsaura.com',
         address: 'Villa 14, Royal Palm Avenue',
         city: 'Mumbai',
@@ -981,7 +1010,7 @@
         amount: 4999,
         items: [
           { name: 'Emerald Bloom Ring', qty: 1, price: 2499, category: 'Ring' },
-          { name: 'Gold Cascade Necklace', qty: 1, price: 2500, category: 'Necklace' },
+          { name: 'Anti-Tarnish Cascade Necklace', qty: 1, price: 2500, category: 'Necklace' },
         ],
         location: 'Mumbai, Maharashtra - 400050',
         date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),

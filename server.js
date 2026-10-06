@@ -90,11 +90,18 @@ const newsletterSchema = new mongoose.Schema({
   status: { type: String, default: 'active' },
 }, { timestamps: true });
 
+const settingSchema = new mongoose.Schema({
+  key:   { type: String, required: true, unique: true },
+  value: { type: String, required: true },
+}, { timestamps: true });
+
 const Product     = mongoose.model('Product',     productSchema);
 const Order       = mongoose.model('Order',       orderSchema);
 const Customer    = mongoose.model('Customer',    customerSchema);
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 const Newsletter  = mongoose.model('Newsletter',  newsletterSchema);
+const Setting     = mongoose.model('Setting',     settingSchema);
+const localSettingsCache = {};
 
 // ── Seed helper (runs once if DB is empty) ───────────────────────────────────
 async function seedIfEmpty() {
@@ -260,6 +267,55 @@ app.get('/api/qr', async (req, res) => {
     });
     res.json({ success: true, qr: qrDataUrl, url: targetUrl });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ---------- SETTINGS (HERO IMAGE & STORE PREFERENCES) ---------- */
+app.get('/api/settings/:key', async (req, res) => {
+  try {
+    const key = req.params.key;
+    if (mongoose.connection.readyState === 1) {
+      const setting = await Setting.findOne({ key }).lean();
+      if (setting) {
+        localSettingsCache[key] = setting.value;
+        return res.json({ success: true, key, value: setting.value });
+      }
+    }
+    return res.json({ success: true, key, value: localSettingsCache[key] || null });
+  } catch (e) {
+    res.status(500).json({ error: e.message, value: localSettingsCache[req.params.key] || null });
+  }
+});
+
+app.post('/api/settings/:key', async (req, res) => {
+  try {
+    const key = req.params.key;
+    const { value } = req.body;
+    localSettingsCache[key] = value;
+    if (mongoose.connection.readyState === 1) {
+      const setting = await Setting.findOneAndUpdate(
+        { key },
+        { key, value },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+      return res.json({ success: true, setting });
+    }
+    res.json({ success: true, setting: { key, value } });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/settings/:key', async (req, res) => {
+  try {
+    const key = req.params.key;
+    delete localSettingsCache[key];
+    if (mongoose.connection.readyState === 1) {
+      await Setting.findOneAndDelete({ key });
+    }
+    res.json({ success: true, message: `Setting ${key} cleared` });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
