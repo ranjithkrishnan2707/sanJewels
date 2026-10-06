@@ -877,40 +877,40 @@ async function saveProduct(e) {
   const isEditing = Boolean(editingProductId);
   const targetId = editingProductId;
 
-  if (isEditing) {
-    const idx = adminProducts.findIndex(p => p.id === targetId);
-    if (idx !== -1) adminProducts[idx] = updated;
-  } else {
-    adminProducts.unshift(updated);
-  }
-
-  // 1. Close the modal card immediately so user sees instant response
-  closeProductModalFn();
-
-  // 2. Refresh UI tables and stats immediately
-  renderProductsTable();
-  renderTopProducts();
-  updateDashboardStats();
-
-  // 3. Show confirmation toast
-  showAdminToast(isEditing ? 'Product updated successfully.' : 'Product saved & added to catalog.');
-
-  // 4. Safely update localStorage cache (with quota handling)
+  // Persist first so a failed request is not presented as a saved catalog item.
   try {
-    localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
-  } catch (storageErr) {
-    console.warn('Local storage write warning:', storageErr);
-  }
-
-  // 5. Persist to MongoDB backend
-  try {
+    let result;
     if (isEditing) {
-      await API.updateProduct(targetId, updated);
+      result = await API.updateProduct(targetId, updated);
     } else {
-      await API.saveProduct(updated);
+      result = await API.saveProduct(updated);
     }
+    if (!result.success || !result.product) {
+      throw new Error('The server did not confirm the product save.');
+    }
+    const savedProduct = result.product;
+
+    if (isEditing) {
+      const idx = adminProducts.findIndex(p => p.id === targetId);
+      if (idx !== -1) adminProducts[idx] = savedProduct;
+    } else {
+      adminProducts.unshift(savedProduct);
+    }
+
+    try {
+      localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
+    } catch (storageErr) {
+      console.warn('Local storage write warning:', storageErr);
+    }
+
+    closeProductModalFn();
+    renderProductsTable();
+    renderTopProducts();
+    updateDashboardStats();
+    showAdminToast(isEditing ? 'Product updated successfully.' : 'Product saved & added to catalog.');
   } catch (apiErr) {
-    console.warn('Backend DB sync error:', apiErr);
+    console.error('Backend DB sync error:', apiErr);
+    showAdminToast(`Product could not be saved: ${apiErr.message}`, 'fa-exclamation-circle');
   }
 }
 

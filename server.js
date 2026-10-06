@@ -129,7 +129,7 @@ mongoose.connection.once('open', seedIfEmpty);
 /* ---------- PRODUCTS ---------- */
 app.get('/api/products', async (req, res) => {
   try {
-    const products = await Product.find({}, '-_id -__v -createdAt -updatedAt').lean();
+    const products = await Product.find({}, '-__v -createdAt -updatedAt').lean();
     res.json(products);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

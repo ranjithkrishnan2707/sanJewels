@@ -5,12 +5,20 @@
 
 const API_BASE = window.location.origin; // same server serves the site
 
+async function readProductResponse(res) {
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || `Product request failed (${res.status})`);
+  }
+  return data;
+}
+
 const API = {
 
   /* ── Products ─────────────────────────────────────────────────── */
   async getProducts() {
     const res = await fetch(`${API_BASE}/api/products`);
-    return res.json();
+    return readProductResponse(res);
   },
   async saveProduct(product) {
     // POST = upsert by id
@@ -19,7 +27,7 @@ const API = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(product),
     });
-    return res.json();
+    return readProductResponse(res);
   },
   async updateProduct(id, data) {
     const res = await fetch(`${API_BASE}/api/products/${encodeURIComponent(id)}`, {
@@ -27,13 +35,13 @@ const API = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    return res.json();
+    return readProductResponse(res);
   },
   async deleteProduct(id) {
     const res = await fetch(`${API_BASE}/api/products/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
-    return res.json();
+    return readProductResponse(res);
   },
 
   /* ── Orders ───────────────────────────────────────────────────── */
