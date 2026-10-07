@@ -916,15 +916,27 @@ async function saveProduct(e) {
 
 function deleteProduct(id) {
   const p = adminProducts.find(x => x.id === id);
-  confirmAction(`Delete "${p ? p.name : id}"? This cannot be undone.`, () => {
-    adminProducts = adminProducts.filter(x => x.id !== id);
-    localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
-    // Persist deletion to DB
-    API.deleteProduct(id).catch(err => console.warn('DB delete failed:', err.message));
-    renderProductsTable();
-    renderTopProducts();
-    updateDashboardStats();
-    showAdminToast('Product deleted from collection.');
+  confirmAction(`Delete "${p ? p.name : id}"? This cannot be undone.`, async () => {
+    try {
+      const result = await API.deleteProduct(id);
+      if (!result.success) {
+        throw new Error('The server did not confirm the product deletion.');
+      }
+
+      adminProducts = adminProducts.filter(x => x.id !== id);
+      try {
+        localStorage.setItem('san_admin_products', JSON.stringify(adminProducts));
+      } catch (storageErr) {
+        console.warn('Local storage write warning:', storageErr);
+      }
+      renderProductsTable();
+      renderTopProducts();
+      updateDashboardStats();
+      showAdminToast('Product deleted from collection.');
+    } catch (apiErr) {
+      console.error('Backend DB delete error:', apiErr);
+      showAdminToast(`Product could not be deleted: ${apiErr.message}`, 'fa-exclamation-circle');
+    }
   });
 }
 
