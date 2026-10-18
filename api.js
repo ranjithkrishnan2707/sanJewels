@@ -43,6 +43,23 @@ const API = {
     });
     return readProductResponse(res);
   },
+  async getCategories() {
+    const res = await fetch(`${API_BASE}/api/categories`);
+    const categories = await res.json();
+    if (!res.ok) throw new Error(categories.error || `Category request failed (${res.status})`);
+    if (!Array.isArray(categories)) throw new Error('The server returned invalid product categories.');
+    return categories;
+  },
+  async addCategory(name) {
+    const res = await fetch(`${API_BASE}/api/categories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Category request failed (${res.status})`);
+    return data;
+  },
 
   /* ── Orders ───────────────────────────────────────────────────── */
   async getOrders() {

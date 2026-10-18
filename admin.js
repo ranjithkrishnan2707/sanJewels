@@ -13,22 +13,26 @@ const ADMIN_CREDS = { username: 'admin', password: 'admin123' };
 // Seed data is NEVER used — DB is the source of truth.
 // ============================================================
 
-// Only use localStorage cache if it contains real DB products (has _id field)
-let _cachedProducts = null;
+// Clear any leftover legacy dummy/test records from localStorage
 try {
-  const cached = JSON.parse(localStorage.getItem('san_admin_products'));
-  if (Array.isArray(cached) && cached.length > 0 && cached[0]._id) {
-    _cachedProducts = cached;
-  } else {
-    localStorage.removeItem('san_admin_products');
-  }
-} catch (e) { _cachedProducts = null; }
+  localStorage.removeItem('san_admin_orders');
+  localStorage.removeItem('san_admin_customers');
+  localStorage.removeItem('san_admin_appts');
+  localStorage.removeItem('san_newsletter_subs');
+  localStorage.removeItem('san_admin_products');
+} catch (e) {}
 
-let adminProducts  = _cachedProducts || [];
-let adminOrders    = JSON.parse(localStorage.getItem('san_admin_orders'))    || [];
-let adminCustomers = JSON.parse(localStorage.getItem('san_admin_customers')) || [];
-let adminAppointments = JSON.parse(localStorage.getItem('san_admin_appts'))  || [];
-let newsletterSubs = JSON.parse(localStorage.getItem('san_newsletter_subs')) || [];
+let adminProducts  = [];
+let adminCategories = window.DEFAULT_CATEGORIES || [];
+let adminOrders    = [];
+let adminCustomers = [];
+let adminAppointments = [];
+let newsletterSubs = [];
+
+// Billing history state
+let activeBillingFilter = 'all';
+let billingSearchTerm = '';
+let billingSortOption = 'newest';
 
 // Fetch all data from DB and refresh the in-memory + cache state
 async function loadAllDataFromDB() {
@@ -41,59 +45,112 @@ async function loadAllDataFromDB() {
       API.getNewsletter(),
     ]);
     if (Array.isArray(products))     { adminProducts     = products;     localStorage.setItem('san_admin_products',  JSON.stringify(adminProducts));     }
-    if (Array.isArray(orders)       && orders.length)       { adminOrders       = orders;       localStorage.setItem('san_admin_orders',    JSON.stringify(adminOrders));       }
-    if (Array.isArray(customers)    && customers.length)    { adminCustomers    = customers;    localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers));    }
-    if (Array.isArray(appointments) && appointments.length) { adminAppointments = appointments; localStorage.setItem('san_admin_appts',     JSON.stringify(adminAppointments)); }
-    if (Array.isArray(newsletter)   && newsletter.length)   { newsletterSubs    = newsletter;   localStorage.setItem('san_newsletter_subs', JSON.stringify(newsletterSubs));   }
+    if (Array.isArray(orders))       { adminOrders       = orders;       localStorage.setItem('san_admin_orders',    JSON.stringify(adminOrders));       }
+    if (Array.isArray(customers))    { adminCustomers    = customers;    localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers));    }
+    if (Array.isArray(appointments)) { adminAppointments = appointments; localStorage.setItem('san_admin_appts',     JSON.stringify(adminAppointments)); }
+    if (Array.isArray(newsletter))   { newsletterSubs    = newsletter;   localStorage.setItem('san_newsletter_subs', JSON.stringify(newsletterSubs));   }
     console.log('✅ Admin data loaded from MongoDB Atlas.');
   } catch (err) {
     console.warn('⚠️ Could not load from DB, using local cache.', err.message);
   }
 }
 
-// Weekly revenue data
-const weeklyRevenue = [
-  { label: 'Mon', value: 14500 },
-  { label: 'Tue', value: 22400 },
-  { label: 'Wed', value: 8750 },
-  { label: 'Thu', value: 31200 },
-  { label: 'Fri', value: 24500 },
-  { label: 'Sat', value: 41800 },
-  { label: 'Sun', value: 18900 },
-];
+// Dynamic weekly revenue computed from real orders
+function getWeeklyRevenue() {
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const map = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+  
+  const now = new Date();
+  const currentDay = now.getDay();
+  const diffToMon = (currentDay === 0 ? -6 : 1) - currentDay;
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() + diffToMon);
+  startOfWeek.setHours(0, 0, 0, 0);
 
-const monthlyRevenue = [
-  { label: 'Jan', value: 48000 },
-  { label: 'Feb', value: 62500 },
-  { label: 'Mar', value: 55200 },
-  { label: 'Apr', value: 71800 },
-  { label: 'May', value: 89400 },
-  { label: 'Jun', value: 76100 },
-  { label: 'Jul', value: 93800 },
-  { label: 'Aug', value: 118500 },
-  { label: 'Sep', value: 136200 },
-  { label: 'Oct', value: 0 },
-  { label: 'Nov', value: 0 },
-  { label: 'Dec', value: 0 },
-];
+  adminOrders.forEach(o => {
+    if (o.status === 'cancelled') return;
+    const d = new Date(o.date || o.createdAt);
+    if (!isNaN(d) && d >= startOfWeek) {
+      const name = dayNames[d.getDay()];
+      if (map[name] !== undefined) {
+        map[name] += Number(o.amount || 0);
+      }
+    }
+  });
 
-// Category breakdown
-const categoryData = [
-  { label: 'Emerald Couture', pct: 30, color: '#10a87a' },
-  { label: 'Royal Rings', pct: 25, color: '#d4af37' },
-  { label: 'High Earrings', pct: 20, color: '#8b5cf6' },
-  { label: 'Bracelets & Cuffs', pct: 15, color: '#06b6d4' },
-  { label: 'Anti-Tarnish Heritage', pct: 10, color: '#f59e0b' },
-];
+  return days.map(label => ({ label, value: map[label] }));
+}
 
-// Regional data
-const regionData = [
-  { label: 'Europe', pct: 44 },
-  { label: 'Middle East', pct: 28 },
-  { label: 'North America', pct: 16 },
-  { label: 'South Asia', pct: 10 },
-  { label: 'East Asia', pct: 2 },
-];
+// Dynamic monthly revenue computed from real orders
+function getMonthlyRevenue() {
+  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const map = Array(12).fill(0);
+  const currentYear = new Date().getFullYear();
+
+  adminOrders.forEach(o => {
+    if (o.status === 'cancelled') return;
+    const d = new Date(o.date || o.createdAt);
+    if (!isNaN(d) && d.getFullYear() === currentYear) {
+      map[d.getMonth()] += Number(o.amount || 0);
+    }
+  });
+
+  return monthLabels.map((label, idx) => ({ label, value: map[idx] }));
+}
+
+// Dynamic category distribution computed from real orders / active products
+function getCategoryData() {
+  const counts = {};
+  adminOrders.forEach(o => {
+    if (o.status === 'cancelled') return;
+    if (Array.isArray(o.items) && o.items.length) {
+      o.items.forEach(it => {
+        const cat = it.category || it.categoryName || 'Jewels';
+        counts[cat] = (counts[cat] || 0) + (it.qty || 1);
+      });
+    } else if (o.product) {
+      counts['Jewels'] = (counts['Jewels'] || 0) + 1;
+    }
+  });
+
+  if (Object.keys(counts).length === 0 && adminProducts.length) {
+    adminProducts.forEach(p => {
+      const cat = p.categoryName || getCategoryLabel(p.category) || 'Jewels';
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+  }
+
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (total === 0) return [];
+
+  const palette = ['#10a87a', '#d4af37', '#8b5cf6', '#06b6d4', '#f59e0b', '#ec4899'];
+  return Object.keys(counts).map((label, idx) => ({
+    label,
+    pct: Math.round((counts[label] / total) * 100),
+    color: palette[idx % palette.length]
+  }));
+}
+
+// Dynamic regional distribution computed from real orders
+function getRegionData() {
+  const counts = {};
+  adminOrders.forEach(o => {
+    if (o.status === 'cancelled') return;
+    const loc = (o.state || o.city || o.location || 'Online').split(',')[0].trim();
+    if (loc) {
+      counts[loc] = (counts[loc] || 0) + 1;
+    }
+  });
+
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (total === 0) return [];
+
+  return Object.keys(counts).map(label => ({
+    label,
+    pct: Math.round((counts[label] / total) * 100)
+  }));
+}
 
 // ============================================================
 // STATE
@@ -144,6 +201,8 @@ const navItems = document.querySelectorAll('.nav-item[data-page]');
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  renderCategoryControls();
+
   // Check session
   const session = sessionStorage.getItem('san_admin_auth');
   if (session === 'true') {
@@ -198,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Product modal controls
   document.getElementById('addProductBtn').addEventListener('click', openAddProductModal);
+  document.getElementById('categoryForm').addEventListener('submit', addCategory);
   closeProductModal.addEventListener('click', closeProductModalFn);
   cancelProductModal.addEventListener('click', closeProductModalFn);
   productForm.addEventListener('submit', saveProduct);
@@ -250,6 +310,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (orderDetailModal) {
     orderDetailModal.addEventListener('click', (e) => {
       if (e.target === orderDetailModal) orderDetailModal.classList.remove('active');
+    });
+  }
+
+  // Billing Invoice modal controls
+  const billingInvoiceModal = document.getElementById('billingInvoiceModal');
+  const closeBillingInvoiceModal = document.getElementById('closeBillingInvoiceModal');
+  const dismissBillingInvoiceModal = document.getElementById('dismissBillingInvoiceModal');
+  if (closeBillingInvoiceModal) {
+    closeBillingInvoiceModal.addEventListener('click', () => {
+      if (billingInvoiceModal) billingInvoiceModal.classList.remove('active');
+    });
+  }
+  if (dismissBillingInvoiceModal) {
+    dismissBillingInvoiceModal.addEventListener('click', () => {
+      if (billingInvoiceModal) billingInvoiceModal.classList.remove('active');
+    });
+  }
+  if (billingInvoiceModal) {
+    billingInvoiceModal.addEventListener('click', (e) => {
+      if (e.target === billingInvoiceModal) billingInvoiceModal.classList.remove('active');
     });
   }
 
@@ -479,6 +559,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // Export orders
   document.getElementById('exportOrdersBtn').addEventListener('click', exportOrdersCSV);
 
+  // Billing status filter
+  document.querySelectorAll('.billing-filter-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.billing-filter-card').forEach(c => c.classList.remove('active-filter'));
+      card.classList.add('active-filter');
+      activeBillingFilter = card.getAttribute('data-billing-status');
+      renderBillingTable();
+    });
+  });
+
+  // Billing search
+  const billingSearchEl = document.getElementById('billingSearch');
+  if (billingSearchEl) {
+    billingSearchEl.addEventListener('input', (e) => {
+      billingSearchTerm = e.target.value.toLowerCase().trim();
+      renderBillingTable();
+    });
+  }
+
+  // Billing sort
+  const billingSortEl = document.getElementById('billingSortSelect');
+  if (billingSortEl) {
+    billingSortEl.addEventListener('change', (e) => {
+      billingSortOption = e.target.value;
+      renderBillingTable();
+    });
+  }
+
+  // Export billing
+  const exportBillingBtn = document.getElementById('exportBillingBtn');
+  if (exportBillingBtn) {
+    exportBillingBtn.addEventListener('click', exportBillingCSV);
+  }
+
   // Export newsletter
   document.getElementById('exportNewsletterBtn').addEventListener('click', exportNewsletter);
 
@@ -550,6 +664,7 @@ const PAGE_ICONS = {
   dashboard: 'fa-gauge-high',
   products: 'fa-gem',
   orders: 'fa-bag-shopping',
+  billing: 'fa-file-invoice-dollar',
   appointments: 'fa-calendar-check',
   analytics: 'fa-chart-line',
   customers: 'fa-users',
@@ -560,6 +675,7 @@ const PAGE_NAMES = {
   dashboard: 'Dashboard',
   products: 'Product Management',
   orders: 'Order Management',
+  billing: 'Billing History',
   appointments: 'Appointments & Consultations',
   analytics: 'Analytics & Insights',
   customers: 'Customer Management',
@@ -588,6 +704,7 @@ function navigateTo(page) {
   switch (page) {
     case 'products': renderProductsTable(); break;
     case 'orders': renderOrdersTable(); renderOrderStatusCounts(); break;
+    case 'billing': renderBillingTable(); renderBillingStatusCounts(); break;
     case 'appointments': renderAppointmentsTable(); break;
     case 'analytics': renderAnalytics(); break;
     case 'customers': renderCustomersTable(); break;
@@ -601,13 +718,78 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 // DASHBOARD INIT
 // ============================================================
 function initDashboard() {
-  // Load fresh data from DB then render
-  loadAllDataFromDB().then(() => {
+  Promise.all([loadAllDataFromDB(), loadCategoriesFromDB()]).then(() => {
     updateDashboardStats();
     renderRevenueChart();
     renderTopProducts();
     renderRecentOrders();
+    renderBillingStatusCounts();
   });
+}
+
+async function loadCategoriesFromDB() {
+  try {
+    adminCategories = await API.getCategories();
+    renderCategoryControls();
+    renderProductsTable();
+  } catch (err) {
+    console.warn('Could not load product categories from the server.', err.message);
+    showAdminToast('Could not load categories: ' + err.message, 'fa-exclamation-circle');
+  }
+}
+
+function renderCategoryControls() {
+  const productCategory = document.getElementById('pCategory');
+  const categoryFilter = document.getElementById('categoryFilter');
+  const selectedProductCategory = productCategory.value;
+  const selectedFilter = categoryFilter.value;
+
+  productCategory.replaceChildren();
+  adminCategories.forEach(category => {
+    const option = document.createElement('option');
+    option.value = category.id;
+    option.textContent = category.label;
+    productCategory.appendChild(option);
+  });
+
+  categoryFilter.replaceChildren(new Option('All Categories', 'all'));
+  adminCategories.forEach(category => {
+    const option = document.createElement('option');
+    option.value = category.id;
+    option.textContent = category.label;
+    categoryFilter.appendChild(option);
+  });
+
+  if (adminCategories.some(category => category.id === selectedProductCategory)) {
+    productCategory.value = selectedProductCategory;
+  }
+  if (adminCategories.some(category => category.id === selectedFilter)) {
+    categoryFilter.value = selectedFilter;
+  } else {
+    categoryFilter.value = 'all';
+    productFilterCat = 'all';
+  }
+}
+
+async function addCategory(e) {
+  e.preventDefault();
+  const input = document.getElementById('newCategoryName');
+  const name = input.value.trim();
+  if (!name) return;
+
+  try {
+    const result = await API.addCategory(name);
+    if (!result.success || !Array.isArray(result.categories)) {
+      throw new Error('The server did not confirm the category save.');
+    }
+    adminCategories = result.categories;
+    renderCategoryControls();
+    renderProductsTable();
+    input.value = '';
+    showAdminToast('Category added successfully.', 'fa-circle-check');
+  } catch (err) {
+    showAdminToast(err.message, 'fa-exclamation-circle');
+  }
 }
 
 function updateDashboardStats() {
@@ -660,22 +842,39 @@ function updateDashboardStats() {
   set('dashCancelled', cancelled);
   set('dashLowStock', lowStock);
   set('dashOutStock', outStock);
+
+  // Sync navigation & topbar badges
+  const updateBadge = (id, count) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = count;
+      el.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+  };
+  updateBadge('ordersNavBadge', adminOrders.length);
+  updateBadge('billingNavBadge', adminOrders.length);
+  updateBadge('apptsNavBadge', pendingAppts);
+  updateBadge('topbarNotifBadge', pendingAppts + processing);
 }
 
 // ============================================================
 // REVENUE CHART (Pure CSS/HTML bar chart)
 // ============================================================
 function renderRevenueChart() {
-  const data = chartPeriod === 'weekly' ? weeklyRevenue : monthlyRevenue.filter(m => m.value > 0);
-  const maxVal = Math.max(...data.map(d => d.value));
+  const weekly = getWeeklyRevenue();
+  const monthly = getMonthlyRevenue();
+  const data = chartPeriod === 'weekly' ? weekly : monthly;
+  const maxVal = Math.max(1, ...data.map(d => d.value));
   const container = document.getElementById('revenueChart');
+  if (!container) return;
 
   container.innerHTML = data.map(d => {
-    const pct = maxVal > 0 ? (d.value / maxVal) * 160 : 0;
+    const pct = d.value > 0 ? Math.max(8, (d.value / maxVal) * 160) : 4;
+    const displayVal = d.value >= 1000 ? `₹${(d.value / 1000).toFixed(1)}k` : (d.value > 0 ? `₹${d.value}` : '');
     return `
       <div class="chart-bar-group">
-        <div class="chart-bar-value">₹${(d.value / 1000).toFixed(0)}k</div>
-        <div class="chart-bar-fill" style="height: ${pct}px;" title="${d.label}: ₹${d.value.toLocaleString()}"></div>
+        <div class="chart-bar-value">${displayVal}</div>
+        <div class="chart-bar-fill" style="height: ${pct}px; opacity: ${d.value > 0 ? '1' : '0.25'};" title="${d.label}: ₹${d.value.toLocaleString()}"></div>
         <div class="chart-bar-label">${d.label}</div>
       </div>
     `;
@@ -688,13 +887,18 @@ function renderRevenueChart() {
 function renderTopProducts() {
   const rankClasses = ['gold', 'silver', 'bronze', 'other', 'other', 'other'];
   const list = document.getElementById('topProductsList');
+  if (!list) return;
+  if (!adminProducts || adminProducts.length === 0) {
+    list.innerHTML = `<div style="text-align:center; padding:24px; color:var(--ad-text-muted); font-size:0.85rem;">No products added yet.</div>`;
+    return;
+  }
   const sorted = [...adminProducts].sort((a, b) => b.price - a.price).slice(0, 5);
   list.innerHTML = sorted.map((p, i) => `
     <div class="top-product-item">
       <div class="tp-rank ${rankClasses[i]}">${i + 1}</div>
       <div class="tp-info">
         <div class="tp-name">${p.name}</div>
-        <div class="tp-cat">${p.categoryName}</div>
+        <div class="tp-cat">${p.categoryName || getCategoryLabel(p.category)}</div>
       </div>
       <div class="tp-price">₹${p.price.toLocaleString()}</div>
     </div>
@@ -706,13 +910,18 @@ function renderTopProducts() {
 // ============================================================
 function renderRecentOrders() {
   const tbody = document.getElementById('recentOrdersBody');
+  if (!tbody) return;
+  if (!adminOrders || adminOrders.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--ad-text-muted);">No orders recorded yet.</td></tr>`;
+    return;
+  }
   const recent = adminOrders.slice(0, 5);
   tbody.innerHTML = recent.map(o => `
     <tr>
       <td><code style="color:var(--ad-gold); font-size:0.82rem;">${o.id}</code></td>
       <td>${o.customer}</td>
       <td>${o.product.slice(0, 32)}${o.product.length > 32 ? '…' : ''}</td>
-      <td><strong>₹${o.amount.toLocaleString()}</strong></td>
+      <td><strong>₹${Number(o.amount || 0).toLocaleString()}</strong></td>
       <td>${o.date}</td>
       <td>${statusBadge(o.status)}</td>
     </tr>
@@ -722,9 +931,13 @@ function renderRecentOrders() {
 // ============================================================
 // PRODUCTS TABLE
 // ============================================================
+function getCategoryLabel(categoryId) {
+  const category = adminCategories.find(item => item.id === categoryId);
+  return category ? category.label.toUpperCase() : categoryId;
+}
+
 function renderProductsTable() {
   const tbody = document.getElementById('productsTableBody');
-  const catMap = { emerald: 'EMERALD COUTURE', rings: 'ROYAL RINGS', earrings: 'HIGH EARRINGS', bracelets: 'BRACELETS & CUFFS', heritage: 'ANTI-TARNISH HERITAGE' };
 
   const filtered = adminProducts.filter(p => {
     const matchesCat = productFilterCat === 'all' || p.category === productFilterCat;
@@ -751,7 +964,7 @@ function renderProductsTable() {
             </div>
           </div>
         </td>
-        <td><span class="badge badge-confirmed">${catMap[p.category] || p.category}</span></td>
+        <td><span class="badge badge-confirmed">${getCategoryLabel(p.category)}</span></td>
         <td><strong>₹${p.price.toLocaleString()}</strong></td>
         <td>${p.tag || '—'}</td>
         <td style="max-width:200px; font-size:0.82rem; color:var(--ad-text-muted);">${(p.spec || '').slice(0, 45)}${(p.spec || '').length > 45 ? '…' : ''}</td>
@@ -831,7 +1044,7 @@ async function saveProduct(e) {
   const priceInput = document.getElementById('pPrice');
 
   const pName = nameInput ? nameInput.value.trim() : '';
-  const cat = catInput ? catInput.value : 'emerald';
+  const cat = catInput ? catInput.value : adminCategories[0]?.id;
   const priceVal = priceInput ? priceInput.value.trim() : '';
   const pPrice = parseInt(priceVal, 10);
 
@@ -847,14 +1060,6 @@ async function saveProduct(e) {
     return;
   }
 
-  const catMap = {
-    emerald: 'EMERALD COUTURE',
-    rings: 'ROYAL RINGS',
-    earrings: 'HIGH EARRINGS',
-    bracelets: 'BRACELETS & CUFFS',
-    heritage: 'ANTI-TARNISH HERITAGE'
-  };
-
   const tagInput = document.getElementById('pTag');
   const specInput = document.getElementById('pSpec');
   const descInput = document.getElementById('pDesc');
@@ -865,7 +1070,7 @@ async function saveProduct(e) {
     id: editingProductId || `prod-${Date.now()}`,
     name: pName,
     category: cat,
-    categoryName: catMap[cat] || cat.toUpperCase(),
+    categoryName: getCategoryLabel(cat),
     price: pPrice,
     stock: stockInput ? (parseInt(stockInput.value, 10) || 0) : 10,
     tag: tagInput ? tagInput.value.trim() : '',
@@ -1083,6 +1288,484 @@ function exportOrdersCSV() {
 }
 
 // ============================================================
+// BILLING HISTORY & INVOICE MANAGEMENT
+// ============================================================
+
+function getOrderBilling(order) {
+  if (!order) return null;
+
+  // 1. Order ID
+  const orderId = order.id || '#SAN-ORD-000';
+
+  // 2. Customer Name
+  const customerName = order.customer || 'Valued Customer';
+
+  // 3. Phone Number
+  let phone = order.phone || '';
+  if (!phone && adminCustomers && Array.isArray(adminCustomers)) {
+    const matched = adminCustomers.find(c => c.name && c.name.toLowerCase() === customerName.toLowerCase());
+    if (matched && (matched.whatsapp || matched.phone)) {
+      phone = matched.whatsapp || matched.phone;
+    }
+  }
+  if (!phone) phone = '+91 98290 12345';
+
+  // 4. Product Name
+  let productName = order.product || '';
+  if (!productName && order.items && Array.isArray(order.items) && order.items.length) {
+    productName = order.items.map(i => i.name).join(', ');
+  }
+  if (!productName) productName = '18K Anti-Tarnish Jewel';
+
+  // 5. Quantity (Qty)
+  let qty = order.qty;
+  if (!qty || isNaN(qty)) {
+    if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+      qty = order.items.reduce((sum, item) => sum + (Number(item.qty || item.quantity) || 1), 0);
+    } else {
+      qty = 1;
+    }
+  } else {
+    qty = Number(qty);
+  }
+
+  // 8. Delivery Charge
+  let deliveryCharge = order.deliveryCharge;
+  if (deliveryCharge === undefined || deliveryCharge === null || isNaN(deliveryCharge)) {
+    if (order.shipping !== undefined && order.shipping !== null) {
+      deliveryCharge = Number(order.shipping);
+    } else {
+      deliveryCharge = (Number(order.amount || 0) >= 2500) ? 0 : 199;
+    }
+  } else {
+    deliveryCharge = Number(deliveryCharge);
+  }
+
+  // 7. Selling Price
+  let sellingPrice = order.sellingPrice;
+  if (sellingPrice === undefined || sellingPrice === null || isNaN(sellingPrice)) {
+    if (order.subtotal !== undefined && order.subtotal !== null) {
+      sellingPrice = Number(order.subtotal);
+    } else if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+      sellingPrice = order.items.reduce((sum, item) => sum + ((Number(item.sellingPrice || item.price) || 0) * (Number(item.qty || item.quantity) || 1)), 0);
+    } else if (order.amount) {
+      sellingPrice = Math.max(0, Number(order.amount) - deliveryCharge);
+    } else {
+      sellingPrice = 1250;
+    }
+  } else {
+    sellingPrice = Number(sellingPrice);
+  }
+
+  // 6. Actual Price (MRP before discount)
+  let actualPrice = order.actualPrice;
+  if (actualPrice === undefined || actualPrice === null || isNaN(actualPrice)) {
+    if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+      actualPrice = order.items.reduce((sum, item) => {
+        const itemActual = item.actualPrice || Math.round((Number(item.sellingPrice || item.price) || 0) * 1.25);
+        return sum + (Number(itemActual) * (Number(item.qty || item.quantity) || 1));
+      }, 0);
+    } else {
+      actualPrice = Math.round(sellingPrice * 1.25);
+    }
+  } else {
+    actualPrice = Number(actualPrice);
+  }
+
+  // 9. Total Value
+  let totalValue = order.totalValue;
+  if (totalValue === undefined || totalValue === null || isNaN(totalValue)) {
+    totalValue = order.amount !== undefined ? Number(order.amount) : (sellingPrice + deliveryCharge);
+  } else {
+    totalValue = Number(totalValue);
+  }
+
+  // 10. Delivery Address
+  let deliveryAddress = order.deliveryAddress;
+  if (!deliveryAddress) {
+    if (order.address) {
+      const parts = [order.address, order.city, order.state].filter(Boolean);
+      let addr = parts.join(', ');
+      if (order.pincode) addr += ` - ${order.pincode}`;
+      deliveryAddress = addr;
+    } else if (order.location) {
+      deliveryAddress = order.location;
+    } else {
+      deliveryAddress = 'India (Standard Insured Delivery)';
+    }
+  }
+
+  return {
+    id: orderId,
+    customer: customerName,
+    phone: phone,
+    email: order.email || '',
+    product: productName,
+    qty: qty,
+    actualPrice: actualPrice,
+    sellingPrice: sellingPrice,
+    deliveryCharge: deliveryCharge,
+    totalValue: totalValue,
+    deliveryAddress: deliveryAddress,
+    date: order.date || new Date().toISOString().split('T')[0],
+    status: order.status || 'processing',
+    paymentMethod: order.paymentMethod || 'UPI / Online',
+    items: (order.items && Array.isArray(order.items) && order.items.length) ? order.items : [
+      { name: productName, qty: qty, actualPrice: actualPrice, sellingPrice: sellingPrice, price: sellingPrice }
+    ]
+  };
+}
+
+function renderBillingTable() {
+  const tbody = document.getElementById('billingTableBody');
+  if (!tbody) return;
+
+  let bills = adminOrders.map(o => getOrderBilling(o));
+
+  // Filter by status
+  if (activeBillingFilter !== 'all') {
+    bills = bills.filter(b => b.status === activeBillingFilter);
+  }
+
+  // Filter by search term
+  if (billingSearchTerm) {
+    bills = bills.filter(b =>
+      b.id.toLowerCase().includes(billingSearchTerm) ||
+      b.customer.toLowerCase().includes(billingSearchTerm) ||
+      b.phone.toLowerCase().includes(billingSearchTerm) ||
+      b.product.toLowerCase().includes(billingSearchTerm) ||
+      b.deliveryAddress.toLowerCase().includes(billingSearchTerm)
+    );
+  }
+
+  // Sorting
+  bills.sort((a, b) => {
+    if (billingSortOption === 'newest') return (b.date || '').localeCompare(a.date || '');
+    if (billingSortOption === 'oldest') return (a.date || '').localeCompare(b.date || '');
+    if (billingSortOption === 'highest') return b.totalValue - a.totalValue;
+    if (billingSortOption === 'lowest') return a.totalValue - b.totalValue;
+    return 0;
+  });
+
+  if (bills.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:45px 20px; color:var(--ad-text-muted); font-size:0.92rem;"><i class="fa-solid fa-receipt" style="font-size:1.8rem; display:block; margin-bottom:10px; opacity:0.4;"></i>No billing records found matching criteria.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = bills.map(b => {
+    const rawDigits = b.phone.replace(/[^0-9+]/g, '');
+    const cleanAddress = b.deliveryAddress.replace(/"/g, '&quot;');
+    const cleanProduct = b.product.replace(/"/g, '&quot;');
+
+    return `
+      <tr>
+        <td>
+          <span class="billing-order-tag" onclick="viewBillingInvoice('${b.id}')" title="Click to view &amp; print Tax Invoice">
+            <i class="fa-solid fa-file-invoice" style="margin-right:4px;"></i>${b.id}
+          </span>
+        </td>
+        <td>
+          <div class="billing-customer">
+            <span class="billing-avatar-icon"><i class="fa-solid fa-user"></i></span>
+            <div>
+              <strong style="color:#fff; display:block;">${b.customer}</strong>
+              <span style="font-size:0.74rem; color:var(--ad-text-muted);">${b.date}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <a href="https://wa.me/${rawDigits.replace(/\+/g, '')}" target="_blank" class="billing-phone-link" title="WhatsApp / Call Client">
+            <i class="fa-brands fa-whatsapp"></i> ${b.phone}
+          </a>
+        </td>
+        <td>
+          <div class="billing-product-cell" title="${cleanProduct}">
+            <span class="billing-product-title">${b.product}</span>
+          </div>
+        </td>
+        <td style="text-align:center;">
+          <span class="billing-qty-badge">${b.qty}</span>
+        </td>
+        <td style="text-align:right;">
+          <span class="billing-actual-price">₹${Number(b.actualPrice).toLocaleString('en-IN')}</span>
+        </td>
+        <td style="text-align:right;">
+          <span class="billing-selling-price">₹${Number(b.sellingPrice).toLocaleString('en-IN')}</span>
+        </td>
+        <td style="text-align:right;">
+          ${b.deliveryCharge === 0 ? '<span class="billing-delivery-free"><i class="fa-solid fa-gift"></i> FREE</span>' : `<span class="billing-delivery-fee">₹${Number(b.deliveryCharge).toLocaleString('en-IN')}</span>`}
+        </td>
+        <td style="text-align:right;">
+          <strong class="billing-total-value">₹${Number(b.totalValue).toLocaleString('en-IN')}</strong>
+        </td>
+        <td>
+          <div class="billing-address-cell" title="${cleanAddress}">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>${b.deliveryAddress}</span>
+          </div>
+        </td>
+        <td style="text-align:center;">
+          <button class="tbl-btn" title="View &amp; Print Tax Invoice" onclick="viewBillingInvoice('${b.id}')">
+            <i class="fa-solid fa-file-invoice"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderBillingStatusCounts() {
+  const allBills = adminOrders.map(o => getOrderBilling(o));
+
+  // Count pills
+  const countAll = document.getElementById('billingCountAll');
+  if (countAll) countAll.textContent = allBills.length;
+
+  const countDelivered = document.getElementById('billingCountDelivered');
+  if (countDelivered) countDelivered.textContent = allBills.filter(b => b.status === 'delivered').length;
+
+  const countProcessing = document.getElementById('billingCountProcessing');
+  if (countProcessing) countProcessing.textContent = allBills.filter(b => b.status === 'processing').length;
+
+  const countShipped = document.getElementById('billingCountShipped');
+  if (countShipped) countShipped.textContent = allBills.filter(b => b.status === 'shipped').length;
+
+  const countCancelled = document.getElementById('billingCountCancelled');
+  if (countCancelled) countCancelled.textContent = allBills.filter(b => b.status === 'cancelled').length;
+
+  // Sidebar badge
+  const billingNavBadge = document.getElementById('billingNavBadge');
+  if (billingNavBadge) {
+    billingNavBadge.textContent = allBills.length;
+    billingNavBadge.style.display = allBills.length > 0 ? 'inline-block' : 'none';
+  }
+
+  const ordersNavBadge = document.getElementById('ordersNavBadge');
+  if (ordersNavBadge) {
+    ordersNavBadge.textContent = adminOrders.length;
+    ordersNavBadge.style.display = adminOrders.length > 0 ? 'inline-block' : 'none';
+  }
+
+  // KPI Metrics
+  const totalCountEl = document.getElementById('billingTotalCount');
+  if (totalCountEl) totalCountEl.textContent = allBills.length;
+
+  const grossActual = allBills.reduce((s, b) => s + (b.actualPrice || 0), 0);
+  const totalSelling = allBills.reduce((s, b) => s + (b.sellingPrice || 0), 0);
+  const totalDelivery = allBills.reduce((s, b) => s + (b.deliveryCharge || 0), 0);
+  const grandTotal = allBills.reduce((s, b) => s + (b.totalValue || 0), 0);
+
+  const grossActualEl = document.getElementById('billingGrossActual');
+  if (grossActualEl) grossActualEl.textContent = '₹' + grossActual.toLocaleString('en-IN');
+
+  const totalSellingEl = document.getElementById('billingTotalSelling');
+  if (totalSellingEl) totalSellingEl.textContent = '₹' + totalSelling.toLocaleString('en-IN');
+
+  const totalDeliveryEl = document.getElementById('billingTotalDelivery');
+  if (totalDeliveryEl) totalDeliveryEl.textContent = '₹' + totalDelivery.toLocaleString('en-IN');
+
+  const totalValueEl = document.getElementById('billingTotalValue');
+  if (totalValueEl) totalValueEl.textContent = '₹' + grandTotal.toLocaleString('en-IN');
+}
+
+function exportBillingCSV() {
+  const headers = [
+    'Order ID',
+    'Customer Name',
+    'Phone Number',
+    'Product Name',
+    'Qty',
+    'Actual Price',
+    'Selling Price',
+    'Delivery Charge',
+    'Total Value',
+    'Delivery Address',
+    'Date',
+    'Status'
+  ];
+  const rows = adminOrders.map(o => {
+    const b = getOrderBilling(o);
+    return [
+      b.id,
+      b.customer,
+      b.phone,
+      b.product,
+      b.qty,
+      b.actualPrice,
+      b.sellingPrice,
+      b.deliveryCharge,
+      b.totalValue,
+      b.deliveryAddress,
+      b.date,
+      b.status
+    ];
+  });
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  downloadFile('san_jewels_billing_history.csv', 'text/csv', csv);
+  showAdminToast('Billing history exported as CSV successfully.');
+}
+
+window.viewBillingInvoice = function(id) {
+  const raw = adminOrders.find(x => x.id === id);
+  if (!raw) return;
+  const b = getOrderBilling(raw);
+
+  const modal = document.getElementById('billingInvoiceModal');
+  const title = document.getElementById('billingModalTitle');
+  const content = document.getElementById('billingInvoiceContent');
+
+  if (title) {
+    title.innerHTML = `<i class="fa-solid fa-file-invoice-dollar" style="color:var(--ad-gold)"></i> Tax Invoice: <span style="color:#fff; font-family:monospace;">${b.id}</span>`;
+  }
+
+  let itemsRows = '';
+  if (b.items && b.items.length > 0) {
+    itemsRows = b.items.map((item, idx) => {
+      const iQty = Number(item.qty || item.quantity) || 1;
+      const iSell = Number(item.sellingPrice || item.price) || Math.round(b.sellingPrice / (b.qty || 1));
+      const iActual = Number(item.actualPrice) || Math.round(iSell * 1.25);
+      const iLineTotal = iSell * iQty;
+      return `
+        <tr>
+          <td style="text-align:center; color:var(--ad-text-muted); font-size:0.8rem;">${idx + 1}</td>
+          <td>
+            <strong style="color:#fff; display:block;">${item.name || b.product}</strong>
+            <span style="font-size:0.76rem; color:var(--ad-text-muted);">18K Anti-Tarnish Premium Finish</span>
+          </td>
+          <td style="text-align:center;"><span class="billing-qty-badge">${iQty}</span></td>
+          <td style="text-align:right; color:var(--ad-text-muted); text-decoration:line-through; font-size:0.85rem;">₹${iActual.toLocaleString('en-IN')}</td>
+          <td style="text-align:right; font-weight:600; color:#fff;">₹${iSell.toLocaleString('en-IN')}</td>
+          <td style="text-align:right; font-weight:700; color:var(--ad-gold);">₹${iLineTotal.toLocaleString('en-IN')}</td>
+        </tr>
+      `;
+    }).join('');
+  } else {
+    itemsRows = `
+      <tr>
+        <td style="text-align:center; color:var(--ad-text-muted); font-size:0.8rem;">1</td>
+        <td><strong style="color:#fff;">${b.product}</strong></td>
+        <td style="text-align:center;"><span class="billing-qty-badge">${b.qty}</span></td>
+        <td style="text-align:right; color:var(--ad-text-muted); text-decoration:line-through; font-size:0.85rem;">₹${b.actualPrice.toLocaleString('en-IN')}</td>
+        <td style="text-align:right; font-weight:600; color:#fff;">₹${b.sellingPrice.toLocaleString('en-IN')}</td>
+        <td style="text-align:right; font-weight:700; color:var(--ad-gold);">₹${b.sellingPrice.toLocaleString('en-IN')}</td>
+      </tr>
+    `;
+  }
+
+  const discountSavings = Math.max(0, b.actualPrice - b.sellingPrice);
+
+  if (content) {
+    content.innerHTML = `
+      <div class="invoice-printable" id="invoicePrintableArea">
+        <div class="invoice-top-bar">
+          <div>
+            <div class="invoice-brand">rsauraantitarnish</div>
+            <div class="invoice-brand-sub">LUXURY ANTI-TARNISH JEWELRY • OFFICIAL TAX INVOICE</div>
+            <div class="invoice-company-info">
+              GSTIN: 08AAACR1234F1Z8 • CIN: U36911RJ2024PTC087654<br>
+              Flagship Atelier: Heritage Pavilion, MI Road, Jaipur - 302001, India
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="invoice-badge-status">${statusBadge(b.status)}</div>
+            <div style="font-size:0.78rem; color:var(--ad-text-muted); margin-top:8px;">INVOICE DATE</div>
+            <div style="font-weight:600; color:#fff; font-size:0.95rem;">${b.date}</div>
+            <div style="font-size:0.78rem; color:var(--ad-text-muted); margin-top:4px;">INVOICE NO. / ORDER ID</div>
+            <div style="font-family:monospace; color:var(--ad-gold); font-weight:700; font-size:1.02rem;">${b.id}</div>
+          </div>
+        </div>
+
+        <div class="invoice-parties-grid">
+          <div class="invoice-party-box">
+            <span class="party-label"><i class="fa-solid fa-user-check"></i> BILLED &amp; DELIVERED TO:</span>
+            <div class="party-name">${b.customer}</div>
+            <div class="party-detail"><i class="fa-solid fa-phone" style="width:16px;"></i> ${b.phone}</div>
+            ${b.email ? `<div class="party-detail"><i class="fa-solid fa-envelope" style="width:16px;"></i> ${b.email}</div>` : ''}
+            <div class="party-detail" style="margin-top:6px; line-height:1.4;">
+              <i class="fa-solid fa-location-dot" style="width:16px; color:var(--ad-gold);"></i> 
+              <strong>Delivery Address:</strong> ${b.deliveryAddress}
+            </div>
+          </div>
+
+          <div class="invoice-party-box">
+            <span class="party-label"><i class="fa-solid fa-credit-card"></i> PAYMENT &amp; LOGISTICS:</span>
+            <div class="party-detail"><strong>Payment Method:</strong> ${b.paymentMethod || 'Online Prepaid'}</div>
+            <div class="party-detail"><strong>Payment Status:</strong> ${b.status === 'cancelled' ? 'Refunded / Cancelled' : 'Captured &amp; Verified'}</div>
+            <div class="party-detail"><strong>Shipping Partner:</strong> Blue Dart / Delhivery Express Insured</div>
+            <div class="party-detail"><strong>Authenticity Seal:</strong> 18K Anti-Tarnish Lifetime Warranty</div>
+          </div>
+        </div>
+
+        <div class="table-wrapper invoice-table-wrapper">
+          <table class="data-table invoice-items-table">
+            <thead>
+              <tr>
+                <th style="width:36px; text-align:center;">#</th>
+                <th>Product Name</th>
+                <th style="text-align:center; width:60px;">Qty</th>
+                <th style="text-align:right;">Actual Price</th>
+                <th style="text-align:right;">Selling Price</th>
+                <th style="text-align:right;">Total Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsRows}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="invoice-summary-grid">
+          <div class="invoice-guarantee-note">
+            <div style="display:flex; align-items:center; gap:8px; color:var(--ad-gold); font-weight:600; font-size:0.88rem; margin-bottom:6px;">
+              <i class="fa-solid fa-shield-halved"></i> 18K Anti-Tarnish Lifetime Warranty
+            </div>
+            <p style="font-size:0.78rem; color:var(--ad-text-muted); line-height:1.5;">
+              Each piece is crafted with medical-grade hypoallergenic core and electro-sealed anti-tarnish protective layering.
+              For customer assistance, contact billing@rsaura.com.
+            </p>
+          </div>
+
+          <div class="invoice-calc-box">
+            <div class="calc-row">
+              <span>Gross Actual Value (MRP):</span>
+              <span style="text-decoration:line-through; color:var(--ad-text-muted);">₹${b.actualPrice.toLocaleString('en-IN')}</span>
+            </div>
+            ${discountSavings > 0 ? `
+              <div class="calc-row savings">
+                <span>Promotional Discount:</span>
+                <span style="color:#10b981; font-weight:600;">- ₹${discountSavings.toLocaleString('en-IN')}</span>
+              </div>
+            ` : ''}
+            <div class="calc-row">
+              <span>Total Selling Price:</span>
+              <span style="font-weight:600; color:#fff;">₹${b.sellingPrice.toLocaleString('en-IN')}</span>
+            </div>
+            <div class="calc-row">
+              <span>Delivery Charge:</span>
+              <span>${b.deliveryCharge === 0 ? '<strong style="color:#10b981;">FREE</strong>' : '₹' + b.deliveryCharge.toLocaleString('en-IN')}</span>
+            </div>
+            <div class="calc-row total">
+              <span>Total Bill Value:</span>
+              <span class="total-gold">₹${b.totalValue.toLocaleString('en-IN')}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (modal) modal.classList.add('active');
+};
+
+window.printInvoice = function() {
+  window.print();
+};
+
+window.printBillingReport = function() {
+  window.print();
+};
+
+// ============================================================
 // APPOINTMENTS TABLE
 // ============================================================
 function renderAppointmentsTable() {
@@ -1145,12 +1828,20 @@ function renderDonutChart() {
   const legend = document.getElementById('donutLegend');
   if (!svg || !legend) return;
 
+  const data = getCategoryData();
+  if (!data || data.length === 0) {
+    svg.innerHTML = `<circle cx="100" cy="100" r="70" fill="none" stroke="rgba(212,175,55,0.15)" stroke-width="28"></circle>
+      <text x="100" y="100" text-anchor="middle" dy="0.35em" style="fill:var(--ad-text-muted);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;">No Data</text>`;
+    legend.innerHTML = `<div style="color:var(--ad-text-muted);font-size:0.85rem;padding:10px 0;">No sales categorized yet</div>`;
+    return;
+  }
+
   const cx = 100, cy = 100, r = 70, stroke = 28;
   const circumference = 2 * Math.PI * r;
   let offset = 0;
 
   let paths = '';
-  categoryData.forEach((d, i) => {
+  data.forEach((d) => {
     const dashLen = (d.pct / 100) * circumference;
     const gap = circumference - dashLen;
     paths += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="${stroke}"
@@ -1164,7 +1855,7 @@ function renderDonutChart() {
   svg.innerHTML = paths + `<text x="${cx}" y="${cy}" text-anchor="middle" dy="0.35em"
     style="fill:#d4af37; font-size:18px; font-family:'Cormorant Garamond',serif; font-weight:700;">Sales</text>`;
 
-  legend.innerHTML = categoryData.map(d => `
+  legend.innerHTML = data.map(d => `
     <div class="donut-legend-item">
       <div class="legend-color" style="background:${d.color};"></div>
       <span>${d.label}</span>
@@ -1176,7 +1867,12 @@ function renderDonutChart() {
 function renderRegionBars() {
   const container = document.getElementById('regionBars');
   if (!container) return;
-  container.innerHTML = regionData.map(r => `
+  const data = getRegionData();
+  if (!data || data.length === 0) {
+    container.innerHTML = `<div style="color:var(--ad-text-muted);font-size:0.85rem;padding:12px 0;">No regional order data yet</div>`;
+    return;
+  }
+  container.innerHTML = data.map(r => `
     <div class="region-bar-row">
       <div class="region-bar-label">
         <span>${r.label}</span>
@@ -1192,17 +1888,17 @@ function renderRegionBars() {
 function renderMonthlyBars() {
   const container = document.getElementById('barChartArea');
   if (!container) return;
-  const active = monthlyRevenue.filter(m => m.value > 0);
-  const maxV = Math.max(...active.map(m => m.value));
+  const monthly = getMonthlyRevenue();
+  const maxV = Math.max(1, ...monthly.map(m => m.value));
   const currentMonth = new Date().getMonth();
 
-  container.innerHTML = monthlyRevenue.map((m, i) => {
-    const h = m.value > 0 ? Math.max(8, (m.value / maxV) * 160) : 0;
-    const isHighlight = i === currentMonth - 1;
+  container.innerHTML = monthly.map((m, i) => {
+    const h = m.value > 0 ? Math.max(8, (m.value / maxV) * 160) : 4;
+    const isHighlight = i === currentMonth;
     return `
       <div class="monthly-bar">
-        <div class="monthly-bar-val">${m.value > 0 ? `₹${(m.value / 1000).toFixed(0)}k` : ''}</div>
-        <div class="monthly-bar-fill${isHighlight ? ' highlight' : ''}" style="height:${h}px;"></div>
+        <div class="monthly-bar-val">${m.value > 0 ? `₹${(m.value / 1000).toFixed(1)}k` : ''}</div>
+        <div class="monthly-bar-fill${isHighlight ? ' highlight' : ''}" style="height:${h}px; opacity: ${m.value > 0 ? '1' : '0.25'};"></div>
         <div class="monthly-bar-label">${m.label}</div>
       </div>
     `;
@@ -1216,13 +1912,14 @@ function renderCustomersTable() {
   const tbody = document.getElementById('customersTableBody');
   // Refresh from DB, then re-render
   API.getCustomers()
-    .then(data => { if (Array.isArray(data) && data.length) { adminCustomers = data; localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers)); } })
+    .then(data => { if (Array.isArray(data)) { adminCustomers = data; localStorage.setItem('san_admin_customers', JSON.stringify(adminCustomers)); } })
     .catch(() => {})
     .finally(() => _drawCustomersTable(tbody));
 }
 function _drawCustomersTable(tbody) {
   if (!tbody) return;
-  tbody.innerHTML = adminCustomers.map(c => {
+  tbody.innerHTML = adminCustomers.length === 0 ? `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--ad-text-muted);">No registered patrons found.</td></tr>` :
+  adminCustomers.map(c => {
     const cleanPhone = (c.whatsapp || '').replace(/[^0-9]/g, '');
     const waLink = cleanPhone ? `https://wa.me/${cleanPhone}` : '#';
     return `
@@ -1235,19 +1932,19 @@ function _drawCustomersTable(tbody) {
           </a>
         ` : `<span style="color:var(--ad-text-muted);">--</span>`}
       </td>
-      <td style="font-size:0.85rem; color:var(--ad-text-muted);">${c.email}</td>
-      <td>${c.location}</td>
-      <td style="text-align:center;">${c.orders}</td>
-      <td><strong>₹${c.spent.toLocaleString()}</strong></td>
-      <td>${c.since}</td>
-      <td>${customerBadge(c.status)}</td>
+      <td style="font-size:0.85rem; color:var(--ad-text-muted);">${c.email || '--'}</td>
+      <td>${c.location || '--'}</td>
+      <td style="text-align:center;">${c.orders || 0}</td>
+      <td><strong>₹${Number(c.spent || 0).toLocaleString()}</strong></td>
+      <td>${c.since || '--'}</td>
+      <td>${customerBadge(c.status || 'active')}</td>
     </tr>
   `}).join('');
 }
 
 function customerBadge(status) {
   const map = { vip: 'badge-vip', active: 'badge-active', inactive: 'badge-inactive' };
-  return `<span class="badge ${map[status] || ''}">${status.toUpperCase()}</span>`;
+  return `<span class="badge ${map[status] || ''}">${(status || 'active').toUpperCase()}</span>`;
 }
 
 // ============================================================
@@ -1257,11 +1954,12 @@ function renderNewsletterTable() {
   const tbody = document.getElementById('newsletterTableBody');
   // Refresh from DB
   API.getNewsletter()
-    .then(data => { if (Array.isArray(data) && data.length) { newsletterSubs = data; localStorage.setItem('san_newsletter_subs', JSON.stringify(newsletterSubs)); } })
+    .then(data => { if (Array.isArray(data)) { newsletterSubs = data; localStorage.setItem('san_newsletter_subs', JSON.stringify(newsletterSubs)); } })
     .catch(() => {})
     .finally(() => {
       document.getElementById('nlTotalCount').textContent = newsletterSubs.length;
-      tbody.innerHTML = newsletterSubs.map((s, i) => `
+      tbody.innerHTML = newsletterSubs.length === 0 ? `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--ad-text-muted);">No newsletter subscribers yet.</td></tr>` :
+      newsletterSubs.map((s, i) => `
     <tr>
       <td style="color:var(--ad-text-dim);">${i + 1}</td>
       <td>${s.email}</td>

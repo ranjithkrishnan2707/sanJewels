@@ -70,11 +70,15 @@
           </a></li>
         <li><a href="#" class="nav-item" data-page="orders" id="navOrders">
             <i class="fa-solid fa-bag-shopping"></i> <span>Orders</span>
-            <span class="nav-badge">5</span>
+            <span class="nav-badge" id="ordersNavBadge" style="display:none;">0</span>
+          </a></li>
+        <li><a href="#" class="nav-item" data-page="billing" id="navBilling">
+            <i class="fa-solid fa-file-invoice-dollar"></i> <span>Billing History</span>
+            <span class="nav-badge accent" id="billingNavBadge" style="display:none;">0</span>
           </a></li>
         <li><a href="#" class="nav-item" data-page="appointments" id="navAppointments">
             <i class="fa-regular fa-calendar-check"></i> <span>Appointments</span>
-            <span class="nav-badge accent">3</span>
+            <span class="nav-badge accent" id="apptsNavBadge" style="display:none;">0</span>
           </a></li>
       </ul>
       <div class="nav-section-label">Content</div>
@@ -135,7 +139,7 @@
         </div>
         <button class="topbar-icon-btn" title="Notifications" id="notifBtn">
           <i class="fa-solid fa-bell"></i>
-          <span class="topbar-badge">7</span>
+          <span class="topbar-badge" id="topbarNotifBadge" style="display:none;">0</span>
         </button>
         <a href="index.html" class="topbar-store-link" style="text-decoration: none;" title="Go to storefront">
           <span class="live-dot"></span> Live Store <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.72rem; margin-left: 4px;"></i>
@@ -310,6 +314,13 @@
         </button>
       </div>
       <div class="card">
+        <form id="categoryForm" class="table-toolbar" style="justify-content: flex-start; gap: 12px;">
+          <input type="text" class="admin-input" id="newCategoryName" placeholder="New category name"
+            maxlength="60" required style="max-width: 320px;">
+          <button class="btn-primary" id="addCategoryBtn" type="submit">
+            <i class="fa-solid fa-plus"></i> Add Category
+          </button>
+        </form>
         <div class="table-toolbar">
           <div class="table-search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -317,11 +328,6 @@
           </div>
           <select id="categoryFilter" class="admin-select">
             <option value="all">All Categories</option>
-            <option value="emerald">Emerald Couture</option>
-            <option value="rings">Royal Rings</option>
-            <option value="earrings">High Earrings</option>
-            <option value="bracelets">Bracelets & Cuffs</option>
-            <option value="heritage">Anti-Tarnish Heritage</option>
           </select>
         </div>
         <div class="table-wrapper">
@@ -395,6 +401,148 @@
               </tr>
             </thead>
             <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BILLING HISTORY PAGE -->
+    <div class="page" id="pageBilling">
+      <div class="page-header">
+        <div>
+          <h1>Billing History &amp; Invoices</h1>
+          <p style="color: var(--ad-text-muted); font-size: 0.88rem; margin-top: 4px;">
+            Comprehensive billing ledger with order breakdowns, pricing, delivery charges, and invoice records.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn-primary" id="exportBillingBtn">
+            <i class="fa-solid fa-file-csv"></i> Export Billing CSV
+          </button>
+          <button class="btn-secondary" id="printBillingSummaryBtn" onclick="printBillingReport()">
+            <i class="fa-solid fa-print"></i> Print Ledger
+          </button>
+        </div>
+      </div>
+
+      <!-- Billing Overview Metrics -->
+      <div class="stats-grid billing-stats-grid" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, #d4af37, #aa7c11);">
+            <i class="fa-solid fa-file-invoice"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-label">Total Invoices</span>
+            <div class="stat-value" id="billingTotalCount">0</div>
+            <div class="stat-change positive"><i class="fa-solid fa-receipt"></i> Active Records</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, #64748b, #334155);">
+            <i class="fa-solid fa-tag"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-label">Gross Actual Value (MRP)</span>
+            <div class="stat-value" id="billingGrossActual">₹0</div>
+            <div class="stat-change neutral"><i class="fa-solid fa-calculator"></i> Before Discounts</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, #10a87a, #0d523d);">
+            <i class="fa-solid fa-money-bill-wave"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-label">Total Selling Value</span>
+            <div class="stat-value" id="billingTotalSelling">₹0</div>
+            <div class="stat-change positive"><i class="fa-solid fa-arrow-trend-up"></i> Net Merchandise</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, #06b6d4, #0e7490);">
+            <i class="fa-solid fa-truck-fast"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-label">Total Delivery Charges</span>
+            <div class="stat-value" id="billingTotalDelivery">₹0</div>
+            <div class="stat-change neutral"><i class="fa-solid fa-box"></i> Shipping Collected</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, #f59e0b, #b45309);">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-label">Grand Total Value</span>
+            <div class="stat-value" id="billingTotalValue" style="color: var(--ad-gold);">₹0</div>
+            <div class="stat-change positive"><i class="fa-solid fa-check-double"></i> Total Billed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Billing Filter Pills -->
+      <div class="orders-status-bar billing-status-bar">
+        <div class="order-status-card active-filter billing-filter-card" data-billing-status="all">
+          <span class="status-num" id="billingCountAll">0</span>
+          <span class="status-lbl">All Bills</span>
+        </div>
+        <div class="order-status-card billing-filter-card" data-billing-status="delivered">
+          <span class="status-num" id="billingCountDelivered">0</span>
+          <span class="status-lbl">Delivered / Paid</span>
+        </div>
+        <div class="order-status-card billing-filter-card" data-billing-status="processing">
+          <span class="status-num" id="billingCountProcessing">0</span>
+          <span class="status-lbl">Processing</span>
+        </div>
+        <div class="order-status-card billing-filter-card" data-billing-status="shipped">
+          <span class="status-num" id="billingCountShipped">0</span>
+          <span class="status-lbl">Shipped</span>
+        </div>
+        <div class="order-status-card billing-filter-card" data-billing-status="cancelled">
+          <span class="status-num" id="billingCountCancelled">0</span>
+          <span class="status-lbl">Cancelled / Refunded</span>
+        </div>
+      </div>
+
+      <!-- Main Billing Table Card -->
+      <div class="card">
+        <div class="table-toolbar" style="display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+          <div class="table-search" style="flex:1; min-width:280px;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search by Order ID, customer, phone, product, address..." id="billingSearch">
+          </div>
+          <div class="table-filter-group" style="display:flex; gap:10px; align-items:center;">
+            <label style="font-size:0.82rem; color:var(--ad-text-muted);">Sort by:</label>
+            <select id="billingSortSelect" class="admin-select" style="padding:7px 12px; font-size:0.84rem; background:rgba(255,255,255,0.05); border:1px solid var(--ad-border); color:var(--ad-text); border-radius:6px; cursor:pointer;">
+              <option value="newest">Newest Date</option>
+              <option value="oldest">Oldest Date</option>
+              <option value="highest">Highest Total Value</option>
+              <option value="lowest">Lowest Total Value</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="data-table billing-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer Name</th>
+                <th>Phone Number</th>
+                <th>Product Name</th>
+                <th style="text-align:center;">Qty</th>
+                <th style="text-align:right;">Actual Price</th>
+                <th style="text-align:right;">Selling Price</th>
+                <th style="text-align:right;">Delivery Charge</th>
+                <th style="text-align:right;">Total Value</th>
+                <th>Delivery Address</th>
+                <th style="text-align:center;">Invoice</th>
+              </tr>
+            </thead>
+            <tbody id="billingTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -699,11 +847,6 @@
           <div class="form-row">
             <label>Category *</label>
             <select class="admin-input" id="pCategory" required>
-              <option value="emerald">Emerald Couture</option>
-              <option value="rings">Royal Rings</option>
-              <option value="earrings">High Earrings</option>
-              <option value="bracelets">Bracelets & Cuffs</option>
-              <option value="heritage">Anti-Tarnish Heritage</option>
             </select>
           </div>
           <div class="form-row">
@@ -783,7 +926,25 @@
     </div>
   </div>
 
+  <!-- BILLING TAX INVOICE MODAL -->
+  <div class="admin-modal-overlay" id="billingInvoiceModal">
+    <div class="admin-modal" style="max-width: 780px;">
+      <div class="admin-modal-header" style="border-bottom: 1px solid var(--ad-border); padding-bottom: 14px;">
+        <h3 id="billingModalTitle"><i class="fa-solid fa-file-invoice-dollar" style="color: var(--ad-gold);"></i> Tax Invoice &amp; Billing Statement</h3>
+        <button class="modal-x-btn" id="closeBillingInvoiceModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="billingInvoiceContent" style="padding: 16px 0; max-height: 75vh; overflow-y: auto;">
+        <!-- Filled dynamically by JS -->
+      </div>
+      <div class="modal-actions" style="border-top: 1px solid var(--ad-border); padding-top: 14px; display: flex; justify-content: flex-end; gap: 12px;">
+        <button type="button" class="btn-secondary" id="dismissBillingInvoiceModal">Close</button>
+        <button type="button" class="btn-primary" id="printSingleInvoiceBtn" onclick="printInvoice()"><i class="fa-solid fa-print"></i> Print Invoice</button>
+      </div>
+    </div>
+  </div>
+
   <script src="products_data.js"></script>
+  <script src="categories_data.js"></script>
   <script src="api.js"></script>
   <script src="admin.js"></script>
 </body>

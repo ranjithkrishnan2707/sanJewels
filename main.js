@@ -8,37 +8,97 @@
 let storedAdminProducts = null;
 try {
   const cached = JSON.parse(localStorage.getItem('san_admin_products'));
-  // Only use cache if it contains real DB products (has _id field, not seed data)
   if (Array.isArray(cached) && cached.length > 0 && cached[0]._id) {
     storedAdminProducts = cached;
   } else {
-    // Clear stale/seed-polluted cache
     localStorage.removeItem('san_admin_products');
   }
 } catch (e) {
   storedAdminProducts = null;
 }
 
-// Start with cached DB products or empty list — never show seed data to users
-let PRODUCTS = storedAdminProducts || [];
+// Start with cached products or fallback sample products so the UI is immediately interactive
+let PRODUCTS = storedAdminProducts || (typeof SAMPLE_PRODUCTS !== 'undefined' ? SAMPLE_PRODUCTS : []);
 
 // Async: load fresh products from DB and re-render
+// Shimmer skeleton shown while DB fetch is in progress if no products in cache
+function showProductsLoading() {
+  if (!productGrid) return;
+  if (PRODUCTS && PRODUCTS.length > 0) return; // Keep existing items visible while refreshing
+  const skeletonCard = `
+    <div class="product-card skeleton-card" aria-hidden="true" style="pointer-events:none;">
+      <div class="product-img-wrapper" style="background:rgba(255,255,255,0.04);border-radius:12px 12px 0 0;overflow:hidden;">
+        <div class="skeleton-shimmer" style="width:100%;height:260px;"></div>
+      </div>
+      <div class="product-info" style="padding:16px;">
+        <div class="skeleton-shimmer" style="height:12px;width:50%;border-radius:6px;margin-bottom:10px;"></div>
+        <div class="skeleton-shimmer" style="height:18px;width:80%;border-radius:6px;margin-bottom:8px;"></div>
+        <div class="skeleton-shimmer" style="height:12px;width:65%;border-radius:6px;margin-bottom:16px;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="skeleton-shimmer" style="height:20px;width:30%;border-radius:6px;"></div>
+          <div class="skeleton-shimmer" style="height:36px;width:36%;border-radius:8px;"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  productGrid.innerHTML = skeletonCard.repeat(6);
+}
+
 async function loadProductsFromDB() {
   try {
     const products = await API.getProducts();
-    if (Array.isArray(products)) {
-      PRODUCTS = products; // Use DB result even if empty (admin deleted all)
+    if (Array.isArray(products) && products.length > 0) {
+      PRODUCTS = products;
       localStorage.setItem('san_admin_products', JSON.stringify(PRODUCTS));
-      renderProducts(); // refresh UI with live DB data
+    } else if (Array.isArray(products) && products.length === 0) {
+      if ((!PRODUCTS || PRODUCTS.length === 0) && typeof SAMPLE_PRODUCTS !== 'undefined') {
+        PRODUCTS = SAMPLE_PRODUCTS;
+      }
     }
   } catch (err) {
-    console.warn('Could not load products from DB, using local cache.', err.message);
+    console.warn('Could not load products from DB, using fallback.', err.message);
+    if ((!PRODUCTS || PRODUCTS.length === 0) && typeof SAMPLE_PRODUCTS !== 'undefined') {
+      PRODUCTS = SAMPLE_PRODUCTS;
+    }
+  } finally {
+    renderProducts();
   }
 }
 
-// State Management
-let shoppingCart = JSON.parse(localStorage.getItem('san_cart')) || [];
+// State Management: Clean & sanitize shopping cart on initialization
+let shoppingCart = [];
+try {
+  const rawCart = JSON.parse(localStorage.getItem('san_cart'));
+  if (Array.isArray(rawCart)) {
+    shoppingCart = rawCart
+      .filter(item => item && (item.name || item.id || item._id))
+      .map((item, idx) => ({
+        id: String(item.id || item._id || `cart-item-${idx}`),
+        name: item.name || 'Anti-Tarnish Jewel Piece',
+        price: Number(item.price) || 0,
+        image: item.image || 'images/emerald_necklace.jpg',
+        quantity: Math.max(1, parseInt(item.quantity, 10) || 1)
+      }));
+  }
+} catch (e) {
+  shoppingCart = [];
+}
 let activeFilter = 'all';
+
+// Cart Drawer Open/Close Helpers
+function openCart() {
+  if (cartDrawer) cartDrawer.classList.add('active');
+  const cartOverlay = document.getElementById('cartOverlay');
+  if (cartOverlay) cartOverlay.classList.add('active');
+}
+
+function closeCart() {
+  if (cartDrawer) cartDrawer.classList.remove('active');
+  const cartOverlay = document.getElementById('cartOverlay');
+  if (cartOverlay) cartOverlay.classList.remove('active');
+}
+window.openCart = openCart;
+window.closeCart = closeCart;
 
 // Bespoke Configurator State
 let bespokeState = {
@@ -52,7 +112,7 @@ let bespokeState = {
 
 // DOM Elements
 const productGrid = document.getElementById('productGrid');
-const filterBtns = document.querySelectorAll('.filter-btn');
+const filterTabs = document.querySelector('.filter-tabs');
 const cartDrawer = document.getElementById('cartDrawer');
 const cartToggleBtn = document.getElementById('cartToggleBtn');
 const closeCartBtn = document.getElementById('closeCartBtn');
@@ -121,10 +181,11 @@ async function syncHeroImage() {
 
 document.addEventListener('DOMContentLoaded', () => {
   syncHeroImage();
-  renderProducts();
+  showProductsLoading(); // show skeleton while DB loads
   updateCartUI();
   initBespokeConfigurator();
   loadProductsFromDB(); // async: refresh products from MongoDB
+  loadCategoriesFromDB();
 
   // Sticky Navbar Scroll Listener
   window.addEventListener('scroll', () => {
@@ -136,18 +197,46 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Filter Buttons Event
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      activeFilter = e.target.getAttribute('data-filter');
-      renderProducts();
-    });
+  filterTabs.addEventListener('click', (e) => {
+    const button = e.target.closest('.filter-btn');
+    if (!button || !filterTabs.contains(button)) return;
+    filterTabs.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    activeFilter = button.dataset.filter;
+    renderProducts();
   });
 
   // Cart Drawer Toggle
-  cartToggleBtn.addEventListener('click', () => cartDrawer.classList.add('active'));
-  closeCartBtn.addEventListener('click', () => cartDrawer.classList.remove('active'));
+  if (cartToggleBtn) cartToggleBtn.addEventListener('click', openCart);
+  if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);
+  const cartOverlay = document.getElementById('cartOverlay');
+  if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
+
+  // Prevent clicks inside the cart drawer from bubbling to the document
+  if (cartDrawer) {
+    cartDrawer.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  // Close cart drawer when clicking on the page backdrop outside the drawer
+  document.addEventListener('click', (e) => {
+    if (cartDrawer && cartDrawer.classList.contains('active')) {
+      if (e.composedPath && e.composedPath().includes(cartDrawer)) return;
+      if (cartDrawer.contains(e.target)) return;
+      if (
+        (cartToggleBtn && (cartToggleBtn === e.target || cartToggleBtn.contains(e.target))) ||
+        e.target.closest('#mobNavCart') ||
+        e.target.closest('.add-cart-btn') ||
+        e.target.closest('.quick-action-btn') ||
+        e.target.closest('#modalAddCartBtn') ||
+        e.target.closest('#cartOverlay')
+      ) {
+        return;
+      }
+      closeCart();
+    }
+  });
 
   // ── Mobile Navigation Drawer Toggle ───────────────────────────────────────
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -238,6 +327,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('search-open');
     }
   }
+  // Expose both globally so any inline onclick attribute can call them safely
+  window.openSearchModal = openSearchModal;
+  window.closeSearchModalWindow = closeSearchModalWindow;
 
   function executeSearch(query) {
     const q = (query || '').toLowerCase().trim();
@@ -276,19 +368,22 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    searchResultsList.innerHTML = matches.map(item => `
-      <div class="search-result-item" onclick="openQuickView('${item.id}'); closeSearchModalWindow();">
+    searchResultsList.innerHTML = matches.map(item => {
+      const itemId = String(item.id || item._id);
+      return `
+      <div class="search-result-item" onclick="openQuickView('${itemId}'); closeSearchModalWindow();">
         <img src="${item.image}" alt="${item.name}" loading="lazy">
         <div class="search-result-info">
           <span class="search-result-cat">${item.categoryName || 'Masterpiece'}</span>
           <h5>${item.name}</h5>
           <div class="search-result-price">₹${Number(item.price).toLocaleString('en-IN')}</div>
         </div>
-        <button type="button" class="search-result-add-btn" onclick="event.stopPropagation(); addToCart('${item.id}'); showToast('Added to bag');" title="Add to Bag">
+        <button type="button" class="search-result-add-btn" onclick="event.stopPropagation(); addToCart('${itemId}');" title="Add to Bag" aria-label="Add to Bag">
           <i class="fa-solid fa-bag-shopping"></i>
         </button>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   if (searchBtn) searchBtn.addEventListener('click', openSearchModal);
@@ -339,9 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Mobile Bottom Navigation Active State & Cart Sync ──────────────────────
   const mobNavCart = document.getElementById('mobNavCart');
   if (mobNavCart) {
-    mobNavCart.addEventListener('click', () => {
-      if (cartDrawer) cartDrawer.classList.add('active');
-    });
+    mobNavCart.addEventListener('click', openCart);
   }
 
   // Update active state in bottom nav on scroll
@@ -557,6 +650,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const fullPhone = `${phoneCode} ${phone}`;
         const fullLocation = `${city}, ${state} - ${pincode}`;
 
+        const totalQty = shoppingCart.reduce((s, i) => s + (i.quantity || 1), 0);
+        const actualPriceTotal = shoppingCart.reduce((s, i) => s + (i.actualPrice || Math.round((i.price || 0) * 1.25)) * (i.quantity || 1), 0);
+        const fullDeliveryAddress = `${address}, ${city}, ${state} - ${pincode}`;
+
         const orderData = {
           id: orderId,
           customer: name,
@@ -567,9 +664,17 @@ document.addEventListener('DOMContentLoaded', () => {
           state: state,
           pincode: pincode,
           location: fullLocation,
+          deliveryAddress: fullDeliveryAddress,
+          qty: totalQty,
+          actualPrice: actualPriceTotal,
+          sellingPrice: subtotal,
+          deliveryCharge: shipping,
+          totalValue: total,
           items: shoppingCart.map(i => ({
             name: i.name,
             price: i.price,
+            sellingPrice: i.price,
+            actualPrice: i.actualPrice || Math.round((i.price || 0) * 1.25),
             qty: i.quantity,
             category: i.category || ''
           })),
@@ -603,7 +708,13 @@ document.addEventListener('DOMContentLoaded', () => {
           city: city,
           state: state,
           pincode: pincode,
+          deliveryAddress: fullDeliveryAddress,
           product: shoppingCart.map(i => `${i.name} x${i.quantity}`).join(', '),
+          qty: totalQty,
+          actualPrice: actualPriceTotal,
+          sellingPrice: subtotal,
+          deliveryCharge: shipping,
+          totalValue: total,
           amount: total,
           location: fullLocation,
           paymentMethod: paymentMethod,
@@ -655,10 +766,71 @@ document.addEventListener('DOMContentLoaded', () => {
    Product Rendering & Quick View Logic
    ========================================================================== */
 
+async function loadCategoriesFromDB() {
+  try {
+    const categories = await API.getCategories();
+    filterTabs.replaceChildren();
+
+    const allButton = document.createElement('button');
+    allButton.type = 'button';
+    allButton.className = 'filter-btn';
+    allButton.dataset.filter = 'all';
+    allButton.textContent = 'All Masterpieces';
+    filterTabs.appendChild(allButton);
+
+    categories.forEach(category => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'filter-btn';
+      button.dataset.filter = category.id;
+      button.textContent = category.label;
+      filterTabs.appendChild(button);
+    });
+
+    if (activeFilter !== 'all' && !categories.some(category => category.id === activeFilter)) {
+      activeFilter = 'all';
+    }
+    const selectedButton = Array.from(filterTabs.querySelectorAll('.filter-btn'))
+      .find(button => button.dataset.filter === activeFilter);
+    if (selectedButton) selectedButton.classList.add('active');
+    renderProducts();
+  } catch (err) {
+    console.warn('Could not load product categories from the server.', err.message);
+  }
+}
+
+function normalizeCategory(cat) {
+  if (!cat) return '';
+  return String(cat).toLowerCase().trim().replace(/['"’]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+function setCategoryFilter(categoryKey) {
+  activeFilter = categoryKey || 'all';
+  if (filterTabs) {
+    const buttons = filterTabs.querySelectorAll('.filter-btn');
+    buttons.forEach(btn => {
+      if (btn.dataset.filter === activeFilter) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
+  renderProducts();
+}
+window.setCategoryFilter = setCategoryFilter;
+
 function renderProducts() {
+  const normFilter = normalizeCategory(activeFilter);
   const filtered = activeFilter === 'all'
     ? PRODUCTS
-    : PRODUCTS.filter(p => p.category === activeFilter);
+    : PRODUCTS.filter(p => {
+        const catSlug = normalizeCategory(p.category);
+        const catNameSlug = normalizeCategory(p.categoryName);
+        return catSlug === normFilter || catNameSlug === normFilter || p.category === activeFilter;
+      });
+
+  if (!productGrid) return;
 
   if (filtered.length === 0) {
     productGrid.innerHTML = `
@@ -671,16 +843,18 @@ function renderProducts() {
     return;
   }
 
-  productGrid.innerHTML = filtered.map(item => `
-    <div class="product-card" data-product-id="${item.id}" onclick="handleProductCardClick(event, '${item.id}')">
+  productGrid.innerHTML = filtered.map(item => {
+    const itemId = String(item.id || item._id);
+    return `
+    <div class="product-card" data-product-id="${itemId}" onclick="handleProductCardClick(event, '${itemId}')">
       <div class="product-img-wrapper">
         <img src="${item.image}" alt="${item.name}" loading="lazy">
         <span class="product-tag">${item.tag || '18K Anti-Tarnish'}</span>
         <div class="product-actions-overlay">
-          <button class="quick-action-btn" onclick="event.stopPropagation(); openQuickView('${item.id}')" title="Quick View" aria-label="Quick View">
+          <button type="button" class="quick-action-btn" onclick="event.stopPropagation(); openQuickView('${itemId}')" title="Quick View" aria-label="Quick View">
             <i class="fa-regular fa-eye"></i>
           </button>
-          <button class="quick-action-btn" onclick="event.stopPropagation(); addToCart('${item.id}')" title="Add to Bag" aria-label="Add to Bag">
+          <button type="button" class="quick-action-btn" onclick="event.stopPropagation(); addToCart('${itemId}')" title="Add to Bag" aria-label="Add to Bag">
             <i class="fa-solid fa-bag-shopping"></i>
           </button>
         </div>
@@ -691,14 +865,15 @@ function renderProducts() {
         <p class="product-spec">${item.spec || ''}</p>
         <div class="product-bottom">
           <div class="product-price">₹${Number(item.price).toLocaleString('en-IN')}</div>
-          <button class="add-cart-btn" onclick="event.stopPropagation(); addToCart('${item.id}')" aria-label="Add ${item.name} to bag">
+          <button type="button" class="add-cart-btn" onclick="event.stopPropagation(); addToCart('${itemId}')" aria-label="Add ${item.name} to bag">
             <span class="add-btn-label">Add To Bag</span>
             <i class="fa-solid fa-plus add-btn-icon-mob"></i>
           </button>
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function handleProductCardClick(e, id) {
@@ -708,22 +883,27 @@ function handleProductCardClick(e, id) {
 }
 
 function openQuickView(id) {
-  const product = PRODUCTS.find(p => p.id === id);
+  const targetId = String(id);
+  const product = PRODUCTS.find(p => String(p.id) === targetId || String(p._id) === targetId);
   if (!product) return;
 
+  const productId = String(product.id || product._id || targetId);
   currentModalProduct = product;
-  modalImg.src = product.image;
-  modalCategory.textContent = product.categoryName;
-  modalTitle.textContent = product.name;
-  modalPrice.textContent = `₹${Number(product.price).toLocaleString('en-IN')}`;
-  modalDesc.textContent = product.description;
+  if (modalImg) modalImg.src = product.image;
+  if (modalCategory) modalCategory.textContent = product.categoryName || 'HAUTE JOAILLERIE';
+  if (modalTitle) modalTitle.textContent = product.name;
+  if (modalPrice) modalPrice.textContent = `₹${Number(product.price).toLocaleString('en-IN')}`;
+  if (modalDesc) modalDesc.textContent = product.description || '';
 
-  modalAddCartBtn.onclick = () => {
-    addToCart(product.id);
-    quickViewModal.classList.remove('active');
-  };
+  if (modalAddCartBtn) {
+    modalAddCartBtn.onclick = (e) => {
+      if (e) e.stopPropagation();
+      addToCart(productId);
+      if (quickViewModal) quickViewModal.classList.remove('active');
+    };
+  }
 
-  quickViewModal.classList.add('active');
+  if (quickViewModal) quickViewModal.classList.add('active');
 }
 
 /* ==========================================================================
@@ -731,40 +911,49 @@ function openQuickView(id) {
    ========================================================================== */
 
 function addToCart(id) {
-  const product = PRODUCTS.find(p => p.id === id);
-  if (!product) return;
+  if (!id) return;
+  const targetId = String(id);
+  const product = PRODUCTS.find(p => String(p.id) === targetId || String(p._id) === targetId);
+  if (!product) {
+    showToast('Product not found. Please refresh the page.');
+    return;
+  }
 
-  const existing = shoppingCart.find(i => i.id === id);
+  const productId = String(product.id || product._id || targetId);
+  const existing = shoppingCart.find(i => String(i.id) === productId);
   if (existing) {
     existing.quantity += 1;
   } else {
     shoppingCart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
+      id: productId,
+      name: product.name || 'Anti-Tarnish Jewel Piece',
+      price: Number(product.price) || 0,
+      image: product.image || 'images/emerald_necklace.jpg',
       quantity: 1
     });
   }
 
   saveAndUpdateCart();
+  openCart();
   showToast(`Added "${product.name}" to your bag.`);
 }
 
 function updateCartQuantity(id, change) {
-  const item = shoppingCart.find(i => i.id === id);
+  const targetId = String(id);
+  const item = shoppingCart.find(i => String(i.id) === targetId);
   if (!item) return;
 
   item.quantity += change;
   if (item.quantity <= 0) {
-    shoppingCart = shoppingCart.filter(i => i.id !== id);
+    shoppingCart = shoppingCart.filter(i => String(i.id) !== targetId);
   }
 
   saveAndUpdateCart();
 }
 
 function removeFromCart(id) {
-  shoppingCart = shoppingCart.filter(i => i.id !== id);
+  const targetId = String(id);
+  shoppingCart = shoppingCart.filter(i => String(i.id) !== targetId);
   saveAndUpdateCart();
   showToast('Item removed from your bag.');
 }
@@ -775,7 +964,7 @@ function saveAndUpdateCart() {
 }
 
 function updateCartUI() {
-  // Update badge counter
+  // Update badge counters
   const totalCount = shoppingCart.reduce((sum, item) => sum + item.quantity, 0);
   if (cartCount) cartCount.textContent = totalCount;
   const mobCartCount = document.getElementById('mobCartCount');
@@ -786,6 +975,8 @@ function updateCartUI() {
   if (cartSubtotal) cartSubtotal.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
 
   // Render items
+  if (!cartBody) return;
+
   if (shoppingCart.length === 0) {
     cartBody.innerHTML = `
       <div style="text-align: center; padding: 60px 0; color: var(--text-muted);">
@@ -802,14 +993,14 @@ function updateCartUI() {
       <img src="${item.image}" alt="${item.name}">
       <div class="cart-item-details">
         <h4>${item.name}</h4>
-        <div class="item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
+        <div class="item-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
         <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
-          <div style="display: flex; align-items: center; border: 1px solid rgba(212,175,55,0.3); border-radius: 4px;">
-            <button onclick="updateCartQuantity('${item.id}', -1)" style="background: none; border: none; color: #fff; padding: 2px 8px; cursor: pointer;">-</button>
-            <span style="font-size: 0.85rem; padding: 0 4px;">${item.quantity}</span>
-            <button onclick="updateCartQuantity('${item.id}', 1)" style="background: none; border: none; color: #fff; padding: 2px 8px; cursor: pointer;">+</button>
+          <div style="display: flex; align-items: center; border: 1px solid rgba(212,175,55,0.3); border-radius: 4px; overflow: hidden;">
+            <button type="button" class="cart-qty-btn" onclick="event.stopPropagation(); updateCartQuantity('${item.id}', -1)" aria-label="Decrease quantity">-</button>
+            <span style="font-size: 0.85rem; padding: 0 8px; min-width: 20px; text-align: center;">${item.quantity}</span>
+            <button type="button" class="cart-qty-btn" onclick="event.stopPropagation(); updateCartQuantity('${item.id}', 1)" aria-label="Increase quantity">+</button>
           </div>
-          <button onclick="removeFromCart('${item.id}')" style="background: none; border: none; color: #ff6b6b; font-size: 0.75rem; cursor: pointer;">Remove</button>
+          <button type="button" class="cart-remove-btn" onclick="event.stopPropagation(); removeFromCart('${item.id}')" aria-label="Remove item">Remove</button>
         </div>
       </div>
     </div>
@@ -900,10 +1091,13 @@ function calculateBespokePrice() {
    ========================================================================== */
 
 function showToast(message) {
+  if (!toast || !toastMsg) return; // guard: toast elements may not exist on all pages
+  if (showToast._timer) clearTimeout(showToast._timer); // cancel any running dismiss timer
   toastMsg.textContent = message;
   toast.classList.add('active');
-  setTimeout(() => {
+  showToast._timer = setTimeout(() => {
     toast.classList.remove('active');
+    showToast._timer = null;
   }, 3500);
 }
 
@@ -1016,3 +1210,18 @@ function initVipOnboarding() {
 
 // Call onboarding initialization
 initVipOnboarding();
+
+// Expose all interactive functions globally for inline HTML attributes
+window.PRODUCTS = PRODUCTS;
+window.getShoppingCart = () => shoppingCart;
+window.addToCart = addToCart;
+window.removeFromCart = removeFromCart;
+window.updateCartQuantity = updateCartQuantity;
+window.openQuickView = openQuickView;
+window.renderProducts = renderProducts;
+window.showToast = showToast;
+window.openCart = openCart;
+window.closeCart = closeCart;
+window.setCategoryFilter = setCategoryFilter;
+if (typeof openSearchModal !== 'undefined') window.openSearchModal = openSearchModal;
+if (typeof closeSearchModalWindow !== 'undefined') window.closeSearchModalWindow = closeSearchModalWindow;

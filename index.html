@@ -143,11 +143,6 @@
       <!-- Filter Buttons -->
       <div class="filter-tabs">
         <button class="filter-btn active" data-filter="all">All Masterpieces</button>
-        <button class="filter-btn" data-filter="emerald">Emerald Couture</button>
-        <button class="filter-btn" data-filter="rings">Royal Rings</button>
-        <button class="filter-btn" data-filter="earrings">High Earrings</button>
-        <button class="filter-btn" data-filter="bracelets">Bracelets &amp; Cuffs</button>
-        <button class="filter-btn" data-filter="heritage">Anti-Tarnish Heritage</button>
       </div>
 
       <!-- Product Showcase Grid -->
@@ -204,29 +199,6 @@
     </div>
   </section>
 
-  <!-- Celebrity & Royalty Testimonials -->
-  <section class="section-padding" style="background: rgba(4, 24, 17, 0.5);">
-    <div class="container">
-      <div class="section-title">
-        <span class="subtitle">Patron Stories</span>
-        <h2>Elegance Celebrated</h2>
-        <div class="gold-divider"></div>
-      </div>
-
-      <div class="testimonial-card">
-        <div class="testimonial-stars">
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-        </div>
-        <p class="testimonial-quote">"The lasting waterproof shine of rsauraantitarnish is unmatched anywhere. The
-          anti-tarnish jewel finish accentuates every facet with radiant, enduring brilliance that never fades."</p>
-        <p class="testimonial-author">— Victoria Rothschild, High Jewelry Collector</p>
-      </div>
-    </div>
-  </section>
 
   <!-- Quick View Product Modal -->
   <div class="modal-overlay" id="quickViewModal">
@@ -335,6 +307,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Cart Backdrop Overlay -->
+  <div class="cart-overlay" id="cartOverlay"></div>
 
   <!-- Slide-Over Shopping Cart Drawer -->
   <div class="cart-drawer" id="cartDrawer">
@@ -602,7 +577,7 @@
           <p style="font-size: 0.9rem; line-height: 1.6;">rsauraantitarnish is the pinnacle of luxury anti-tarnish jewel
             craftsmanship, creating waterproof and sweatproof high jewelry pieces designed for everlasting shine.</p>
           <div style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted); line-height: 1.8;">
-            <div><i class="fa-brands fa-whatsapp" style="color: var(--gold-primary);"></i> +91 89257 91077</div>
+            <div><i class="fa-brands fa-whatsapp" style="color: var(--gold-primary);"></i> +9187544 91559</div>
             <div><a href="mailto:rsauraantitarnish@gmail.com"
                 style="color: var(--text-muted); text-decoration: none;"><i class="fa-regular fa-envelope"
                   style="color: var(--gold-primary);"></i> rsauraantitarnish@gmail.com</a></div>
@@ -615,9 +590,11 @@
         <div class="footer-col">
           <h4>Explore</h4>
           <ul class="footer-links">
-            <li><a href="#collections">Emerald Couture</a></li>
-            <li><a href="#heritage">Certified Solitaires</a></li>
-            <li><a href="#heritage">Anti-Tarnish Heritage</a></li>
+            <li><a href="#collections" onclick="setCategoryFilter('anti-tarnish-chain')">Anti-Tarnish Chain</a></li>
+            <li><a href="#collections" onclick="setCategoryFilter('rings')">Rings</a></li>
+            <li><a href="#collections" onclick="setCategoryFilter('mens-chain')">Men's Chain</a></li>
+            <li><a href="#collections" onclick="setCategoryFilter('bangle')">Bangle</a></li>
+            <li><a href="#collections" onclick="setCategoryFilter('fancy-items')">Fancy Items</a></li>
           </ul>
         </div>
 
@@ -770,7 +747,7 @@
     </div>
 
     <div class="mobile-drawer-footer">
-      <div><i class="fa-solid fa-phone"></i> +91 89257 91077</div>
+      <div><i class="fa-solid fa-phone"></i> +9187544 91559</div>
       <div><i class="fa-solid fa-shield-check"></i> Lifetime Anti-Tarnish Guarantee</div>
     </div>
   </aside>
@@ -804,6 +781,7 @@
 
   <!-- Product Database & Main JavaScript Engine -->
   <script src="products_data.js"></script>
+  <script src="categories_data.js"></script>
   <script src="api.js"></script>
   <script src="main.js"></script>
 </body>
